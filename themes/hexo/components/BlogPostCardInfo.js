@@ -6,11 +6,6 @@ import { formatDateFmt } from '@/lib/utils/formatDate'
 import SmartLink from '@/components/SmartLink'
 import TagItemMini from './TagItemMini'
 
-/**
- * 博客列表的文字内容
- * @param {*} param0
- * @returns
- */
 export const BlogPostCardInfo = ({
   post,
   showPreview,
@@ -19,11 +14,10 @@ export const BlogPostCardInfo = ({
 }) => {
   return (
     <article
-      className={`flex flex-col justify-between lg:p-6 p-4 lg:px-8 px-6 ${showPageCover && !showPreview ? 'md:w-7/12 w-full md:max-h-60' : 'w-full'}`}>
+      className={`flex flex-col justify-between lg:p-6 p-4 lg:px-8 px-6 ${showPageCover && !showPreview ? 'md:flex-1 w-full md:max-h-60' : 'w-full'}`}>
       <div>
         <header>
           <h2>
-            {/* 标题 */}
             <SmartLink
               href={post?.href}
               passHref
@@ -37,7 +31,6 @@ export const BlogPostCardInfo = ({
             </SmartLink>
           </h2>
 
-          {/* 分类 */}
           {post?.category && (
             <div
               className={`flex mt-2 items-center ${
@@ -59,14 +52,12 @@ export const BlogPostCardInfo = ({
           )}
         </header>
 
-        {/* 摘要 */}
         {(!showPreview || showSummary) && !post.results && (
           <main className='line-clamp-2 replace my-3 text-gray-700  dark:text-gray-300 text-md font-normal'>
             {post.summary}
           </main>
         )}
 
-        {/* 搜索结果 */}
         {post.results && (
           <p className='line-clamp-2 mt-4 text-gray-700 dark:text-gray-300 text-sm font-light'>
             {post.results.map((r, index) => (
@@ -75,7 +66,6 @@ export const BlogPostCardInfo = ({
           </p>
         )}
 
-        {/* 预览 */}
         {showPreview && (
           <div className='overflow-ellipsis truncate'>
             <NotionPage post={post} />
@@ -84,15 +74,13 @@ export const BlogPostCardInfo = ({
       </div>
 
       <div>
-        {/* 日期标签 */}
         <div className='text-gray-400 justify-between flex'>
-          {/* 日期 */}
           <SmartLink
             href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
             passHref
             className='font-light menu-link cursor-pointer text-sm leading-4 mr-3'>
             <i className='far fa-calendar-alt mr-1' />
-            {post?.publishDay || post.lastEditedDay}
+            {post?.publishDay || post.date}
           </SmartLink>
 
           <div className='md:flex-nowrap flex-wrap md:justify-start inline-block'>
