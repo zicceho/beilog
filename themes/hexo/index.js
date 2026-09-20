@@ -41,6 +41,7 @@ const AlgoliaSearchModal = dynamic(
   { ssr: false }
 )
 
+// 主题全局状态
 const ThemeGlobalHexo = createContext()
 export const useHexoGlobal = () => useContext(ThemeGlobalHexo)
 
@@ -106,7 +107,6 @@ const LayoutBase = props => {
           {headerSlot}
         </Transition>
 
-        {/* 关键改动：统一由 main 来控制顶部间距，左右两边就会永久平齐 */}
         <main
           id='wrapper'
           className={`${
@@ -217,7 +217,7 @@ const LayoutArchive = props => {
   return (
     <div className='pt-0'>
       <Card className='w-full'>
-        <div className='mb-10 pb-20 bg-white md:p-12 p-3 min-h-full dark:bg-hexo-black-gray'>
+        <div className='mb-10 pb-20 bg-white md:px-12 md:pt-6 md:pb-12 p-3 min-h-full dark:bg-hexo-black-gray'>
           {Object.keys(archivePosts).map(archiveTitle => (
             <BlogPostArchive
               key={archiveTitle}
