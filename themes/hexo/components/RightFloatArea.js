@@ -10,6 +10,10 @@ import ButtonJumpToTop from './ButtonJumpToTop'
  */
 export default function RightFloatArea({ floatSlot }) {
   const [showFloatButton, switchShow] = useState(false)
+  
+  // 新增：控制音频图标显示状态
+  const [hasAudio, setHasAudio] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   const scrollListener = useCallback(() => {
     const targetRef =
@@ -51,6 +55,23 @@ export default function RightFloatArea({ floatSlot }) {
     return () => window.removeEventListener('scroll', throttledScroll)
   }, [scrollListener])
 
+  // 新增：监听全局音频状态
+  useEffect(() => {
+    const handleAudioState = (e) => {
+      const { playing, currentSrc } = e.detail
+      setHasAudio(!!currentSrc) // 如果有音频链接，就标记为 true
+      setIsPlaying(playing)
+    }
+    window.addEventListener('audio-play-state-change', handleAudioState)
+    return () =>
+      window.removeEventListener('audio-play-state-change', handleAudioState)
+  }, [])
+
+  // 新增：点击耳机图标展开全局播放器
+  const handleExpandAudio = () => {
+    window.dispatchEvent(new CustomEvent('expand-global-audio'))
+  }
+
   return (
     <div
       className={
@@ -60,7 +81,19 @@ export default function RightFloatArea({ floatSlot }) {
       <div
         className={'justify-center flex flex-col items-center cursor-pointer'}>
         <ButtonDarkModeFloat />
-        {floatSlot}
+        
+        {/* 这里是修改的核心：如果有音频，第三个位置就变成耳机图标；否则保持原来的随机逛逛 */}
+        {hasAudio ? (
+          <div
+            onClick={handleExpandAudio}
+            className='w-10 h-10 flex justify-center items-center hover:bg-indigo-600 transition-colors'
+            title='展开播放器'>
+            <i className={`fas fa-headphones-alt ${isPlaying ? 'animate-pulse' : ''}`} />
+          </div>
+        ) : (
+          floatSlot
+        )}
+        
         <ButtonJumpToTop />
       </div>
     </div>
