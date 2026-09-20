@@ -30,7 +30,7 @@ export default function AudioPlayer({ src, cover, title, href, category }) {
   }
 
   return (
-    <div className='notion-audio-player-wrapper my-4 p-3 border dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center gap-4 transition-shadow hover:shadow-md'>
+    <div className='notion-audio-player-wrapper my-4 mb-6 p-3 border dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center gap-4 transition-shadow hover:shadow-md'>
       <div className='relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 group cursor-pointer' onClick={handleClick}>
         {cover ? (
           <img src={cover} alt='封面' className='w-full h-full object-cover' />
@@ -39,10 +39,10 @@ export default function AudioPlayer({ src, cover, title, href, category }) {
             <i className='fas fa-music text-2xl' />
           </div>
         )}
-        {/* 玻璃质感圆底 + 居中三角形 */}
+        {/* 透明圆环样式 + 完美居中三角形 */}
         <div className='absolute inset-0 bg-black/20 flex items-center justify-center'>
-          <div className='w-12 h-12 rounded-full bg-white/60 backdrop-blur-md flex items-center justify-center shadow-lg'>
-            <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-xl text-gray-800 ${!isPlaying ? 'translate-x-[2px]' : ''}`} />
+          <div className='w-12 h-12 rounded-full border border-white/70 bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg'>
+            <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-xl text-white ${!isPlaying ? 'translate-x-[2px]' : ''}`} />
           </div>
         </div>
       </div>
@@ -51,7 +51,6 @@ export default function AudioPlayer({ src, cover, title, href, category }) {
         <div className='font-bold text-base text-gray-800 dark:text-gray-100 truncate'>
           {title || '本期节目'}
         </div>
-        {/* 这里换成栏目名 */}
         <div className='text-xs text-gray-500 mt-1.5'>{category || '念安酒馆'}</div>
       </div>
     </div>
