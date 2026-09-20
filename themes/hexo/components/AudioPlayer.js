@@ -39,7 +39,6 @@ export default function AudioPlayer({ src, cover, title, href, category }) {
             <i className='fas fa-music text-2xl' />
           </div>
         )}
-        {/* 透明圆环样式 + 完美居中三角形 */}
         <div className='absolute inset-0 bg-black/20 flex items-center justify-center'>
           <div className='w-12 h-12 rounded-full border border-white/70 bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg'>
             <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-xl text-white ${!isPlaying ? 'translate-x-[2px]' : ''}`} />
