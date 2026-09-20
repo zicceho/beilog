@@ -25,20 +25,12 @@ export default function GlobalAudioPlayer() {
   const [speedIndex, setSpeedIndex] = useState(0)
   const [dragging, setDragging] = useState(false)
   const [visible, setVisible] = useState(false)
-  const [minimized, setMinimized] = useState(false)
-  const [hasManuallyExpanded, setHasManuallyExpanded] = useState(false)
 
-  // 音量悬浮防抖计时器
-  const volumeTimeoutRef = useRef(null)
-
-  // 监听文章内触发播放
   useEffect(() => {
     const handlePlayGlobal = (e) => {
       const { src, cover, title, href, category } = e.detail
       setAudioData({ src, cover, title, href, category })
       setVisible(true)
-      setMinimized(false)
-      setHasManuallyExpanded(false) // 每次重新播放，重置手动展开标记，触发自动折叠
       setTimeout(() => {
         if (audioRef.current) {
           audioRef.current.src = src
@@ -56,10 +48,12 @@ export default function GlobalAudioPlayer() {
       }
     }
 
-    // 响应右侧工具栏耳机图标的展开请求
     const handleExpand = () => {
-      setMinimized(false)
-      setHasManuallyExpanded(true) // 一旦手动展开过，就不再自动折叠
+      if (!audioData?.src) {
+        alert('请先点击文章内的播放按钮开始收听')
+        return
+      }
+      setVisible(true)
     }
 
     window.addEventListener('play-global-audio', handlePlayGlobal)
@@ -70,20 +64,8 @@ export default function GlobalAudioPlayer() {
       window.removeEventListener('pause-global-audio', handlePauseGlobal)
       window.removeEventListener('expand-global-audio', handleExpand)
     }
-  }, [volume, muted])
+  }, [volume, muted, audioData?.src])
 
-  // 自动折叠逻辑：首次播放且未手动展开时，5秒后自动折叠
-  useEffect(() => {
-    let autoCollapseTimer = null
-    if (playing && !hasManuallyExpanded && !minimized) {
-      autoCollapseTimer = setTimeout(() => {
-        setMinimized(true)
-      }, 5000) // 悬停5秒后自动折叠
-    }
-    return () => clearTimeout(autoCollapseTimer)
-  }, [playing, hasManuallyExpanded, minimized])
-
-  // 广播播放状态，供右侧工具栏耳机图标展示动画
   useEffect(() => {
     window.dispatchEvent(
       new CustomEvent('audio-play-state-change', {
@@ -92,7 +74,6 @@ export default function GlobalAudioPlayer() {
     )
   }, [playing, audioData?.src])
 
-  // 音频事件监听
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
@@ -157,30 +138,17 @@ export default function GlobalAudioPlayer() {
     setCurrentTime(next)
   }
 
-  // 修复音量悬浮条消失Bug：延迟消失
-  const handleVolumeEnter = () => {
-    if (volumeTimeoutRef.current) clearTimeout(volumeTimeoutRef.current)
-    setShowVolume(true)
-  }
-  const handleVolumeLeave = () => {
-    volumeTimeoutRef.current = setTimeout(() => {
-      setShowVolume(false)
-    }, 300) // 300ms的缓冲时间，鼠标足以移动到滑块上
-  }
-
   const progress = duration ? (currentTime / duration) * 100 : 0
 
-  // 注意：即使 minimized 状态，也要保留 <audio> 标签，防止音频被销毁
+  if (!visible || !audioData?.src) return null
+
   return (
     <div id="global-audio-player-root">
       <audio ref={audioRef} />
-
-      {/* 平滑折叠/展开动画 */}
-      <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-3xl z-[9999] transition-all duration-500 ease-out transform ${visible && !minimized ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
+      <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-3xl z-[9999] transition-all duration-500 ease-out transform ${visible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
         <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-white/30 dark:border-gray-700/50 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] px-4 py-3 flex items-center gap-4">
-          
           <div className="relative flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm cursor-pointer group" onClick={togglePlay}>
-            {audioData?.cover ? (
+            {audioData.cover ? (
               <img src={audioData.cover} alt='封面' className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white">
@@ -196,12 +164,12 @@ export default function GlobalAudioPlayer() {
 
           <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
             <div className="font-extrabold text-sm text-gray-800 dark:text-gray-100 truncate">
-              {audioData?.href ? (
+              {audioData.href ? (
                 <SmartLink href={audioData.href} className="hover:text-indigo-500 transition-colors">
                   {audioData.title || '未知节目'}
                 </SmartLink>
               ) : (
-                audioData?.title || '未知节目'
+                audioData.title || '未知节目'
               )}
             </div>
             <div className="flex items-center gap-2">
@@ -232,35 +200,26 @@ export default function GlobalAudioPlayer() {
             <button onClick={cycleSpeed} className="w-10 h-6 rounded text-[10px] font-bold text-gray-500 hover:text-indigo-500 border border-gray-300 dark:border-gray-600 transition-colors flex items-center justify-center" title="切换倍速">
               {SPEEDS[speedIndex]}x
             </button>
-            
-            {/* 音量按钮（修复Bug） */}
-            <div 
-              className="relative flex items-center" 
-              onMouseEnter={handleVolumeEnter} 
-              onMouseLeave={handleVolumeLeave}
-            >
+            <div className="relative flex items-center" onMouseEnter={() => setShowVolume(true)} onMouseLeave={() => setShowVolume(false)}>
               <button onClick={toggleMute} className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
                 <i className={`fas ${muted ? 'fa-volume-mute' : volume === 0 ? 'fa-volume-mute' : volume < 0.5 ? 'fa-volume-down' : 'fa-volume-up'} text-sm`} />
               </button>
               {showVolume && (
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 pb-3">
-                  <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-600 z-[99999]">
-                    <input
-                      type="range" min="0" max="1" step="0.05" value={muted ? 0 : volume}
-                      onChange={(e) => {
-                        const vol = parseFloat(e.target.value)
-                        setVolume(vol)
-                        setMuted(false)
-                        if (audioRef.current) { audioRef.current.volume = vol; audioRef.current.muted = false; }
-                      }}
-                      className="w-20 h-1 accent-indigo-500 cursor-pointer"
-                    />
-                  </div>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-600 z-[99999]">
+                  <input
+                    type="range" min="0" max="1" step="0.05" value={muted ? 0 : volume}
+                    onChange={(e) => {
+                      const vol = parseFloat(e.target.value)
+                      setVolume(vol)
+                      setMuted(false)
+                      if (audioRef.current) { audioRef.current.volume = vol; audioRef.current.muted = false; }
+                    }}
+                    className="w-20 h-1 accent-indigo-500 cursor-pointer"
+                  />
                 </div>
               )}
             </div>
-
-            <button onClick={() => setMinimized(true)} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-indigo-500 transition-colors" title="折叠到右侧工具栏">
+            <button onClick={() => setVisible(false)} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-indigo-500 transition-colors" title="收起播放器">
               <i className="fas fa-chevron-down text-xs" />
             </button>
           </div>
