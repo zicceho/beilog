@@ -33,6 +33,7 @@ import TocDrawer from './components/TocDrawer'
 import TocDrawerButton from './components/TocDrawerButton'
 import ArticleSwitchPlaceholder from './components/ArticleSwitchPlaceholder'
 import NotionAudioEnhancer from './components/NotionAudioEnhancer'
+import GlobalAudioPlayer from './components/GlobalAudioPlayer'
 import CONFIG from './config'
 import { Style } from './style'
 
@@ -153,6 +154,7 @@ const LayoutBase = props => {
         </div>
         <RightFloatArea floatSlot={floatSlot} />
         <AlgoliaSearchModal cRef={searchModal} {...props} />
+        <GlobalAudioPlayer />
         <Footer title={siteConfig('TITLE')} />
       </div>
     </ThemeGlobalHexo.Provider>
