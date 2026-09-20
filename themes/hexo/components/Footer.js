@@ -9,14 +9,14 @@ const Footer = ({ title }) => {
     parseInt(since) < currentYear ? since + '-' + currentYear : currentYear
 
   return (
-    // pt-6 是顶部留白，pb-6 是底部留白，这样上下都有呼吸感，不会太紧凑
     <footer className='relative z-10 flex-shrink-0 justify-center text-center m-auto w-full leading-6 text-gray-600 dark:text-gray-100 text-sm pt-6 pb-6'>
       <i className='fas fa-copyright' /> {`${copyrightDate}`}
       <span>
-        <i className='mx-1 animate-pulse fas fa-heart' />
+        {/* 这里已经将心形改成了干杯图标，并去掉了跳动动画 */}
+        <i className='mx-1 fas fa-glass-cheers' />
         <a
           href={siteConfig('LINK')}
-          className='underline font-bold dark:text-gray-300'>
+          className='font-bold dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors'>
           {siteConfig('AUTHOR')}
         </a>
         <BeiAnSite />
@@ -24,7 +24,7 @@ const Footer = ({ title }) => {
           <i className='fas fa-eye' />
           <span className='px-1 busuanzi_value_site_pv'> </span>
         </span>
-        <span className='pl-2 hidden busuanzi_container_site_uv'>
+        <span className='pl-2 busuanzi_container_site_uv'>
           <i className='fas fa-users' />
           <span className='px-1 busuanzi_value_site_uv'> </span>
         </span>
