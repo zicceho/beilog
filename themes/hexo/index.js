@@ -151,7 +151,7 @@ const LayoutBase = props => {
         <div className='block lg:hidden'>
           <TocDrawer post={post} cRef={drawerRight} targetRef={tocRef} />
         </div>
-        <RightFloatArea floatSlot={floatSlot} />
+        <RightFloatArea floatSlot={floatSlot} posts={props.posts} />
         <AlgoliaSearchModal cRef={searchModal} {...props} />
         <GlobalAudioPlayer />
         <Footer title={siteConfig('TITLE')} />
