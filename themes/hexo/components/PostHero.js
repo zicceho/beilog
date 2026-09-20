@@ -70,9 +70,7 @@ export default function PostHero({ post, siteInfo }) {
                   </SmartLink>
                 </>
               )}
-              <div className='pl-1 mr-2'>
-                {locale.COMMON.LAST_EDITED_TIME}: {post.lastEditedDay}
-              </div>
+              {/* ⚠️ 就在这里：原本这里有一个显示 LAST_EDITED_TIME 的 div 块，现在已被彻底删除 */}
             </div>
 
             {JSON.parse(siteConfig('ANALYTICS_BUSUANZI_ENABLE')) && (
