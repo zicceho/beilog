@@ -25,9 +25,7 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
       <div
         key={post.id}
         id='blog-post-card'
-        {/* 恢复了 md:h-56，确保整体卡片高度和原来一模一样 */}
         className={`group md:h-56 w-full flex justify-between md:flex-row-reverse flex-col-reverse shadow-sm overflow-hidden border dark:border-black rounded-xl bg-white dark:bg-hexo-black-gray`}>
-        {/* 文字内容：图片变窄后，它会自动占据剩余空间，自然向左靠拢 */}
         <BlogPostCardInfo
           index={index}
           post={post}
@@ -36,9 +34,7 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
           showSummary={showSummary}
         />
 
-        {/* 图片封面 */}
         {showPageCover && (
-          {/* md:w-56 表示电脑端宽度固定为 224px，md:h-56 表示高度也是 224px，这正是正方形 */}
           <div className='md:w-56 md:h-56 flex-shrink-0 overflow-hidden'>
             <SmartLink href={post?.href}>
               <>
@@ -46,8 +42,7 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
                   priority={index === 1}
                   alt={post?.title}
                   src={post?.pageCoverThumbnail}
-                  {/* 电脑端铺满正方形框(md:h-full)，手机端保持原样(h-56) */}
-                  className='w-full h-56 md:h-full object-cover object-center group-hover:scale-110 duration-500'
+                  className='h-56 md:h-full w-full object-cover object-center group-hover:scale-110 duration-500'
                 />
               </>
             </SmartLink>
