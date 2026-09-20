@@ -30,8 +30,7 @@ export default function RightFloatArea({ floatSlot }) {
 
   useEffect(() => {
     const handleAudioState = (e) => {
-      const { playing } = e.detail
-      setIsPlaying(playing)
+      setIsPlaying(e.detail.playing)
     }
     window.addEventListener('audio-play-state-change', handleAudioState)
     return () => window.removeEventListener('audio-play-state-change', handleAudioState)
@@ -46,15 +45,15 @@ export default function RightFloatArea({ floatSlot }) {
       <div className={'justify-center flex flex-col items-center cursor-pointer'}>
         <ButtonDarkModeFloat />
         
-        {/* 替换随机漫游，常驻简约耳机图标 */}
+        {/* 保持原来的图标（fa-random），点击触发播放器展开 */}
         <div
           onClick={() => window.dispatchEvent(new CustomEvent('expand-global-audio'))}
           className='w-10 h-10 flex justify-center items-center hover:bg-indigo-600 transition-colors'
           title='展开播放器'>
-          <i className={`fas fa-headphones text-lg ${isPlaying ? 'animate-pulse' : ''}`} />
+          <i className={`fas fa-random text-base ${isPlaying ? 'animate-pulse' : ''}`} />
         </div>
 
-        {/* 保留原来的评论等按钮，只去掉了随机逛逛 */}
+        {/* 保留原有的评论等按钮 */}
         {floatSlot}
 
         <ButtonJumpToTop />
