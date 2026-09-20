@@ -46,9 +46,6 @@ export const useHexoGlobal = () => useContext(ThemeGlobalHexo)
 
 /**
  * 基础布局 采用左右两侧布局，移动端使用顶部导航栏
- * @param props
- * @returns {JSX.Element}
- * @constructor
  */
 const LayoutBase = props => {
   const { post, children, slotTop, className } = props
@@ -74,7 +71,6 @@ const LayoutBase = props => {
   const drawerRight = useRef(null)
   const tocRef = isBrowser ? document.getElementById('article-wrapper') : null
 
-  // 悬浮按钮内容
   const floatSlot = (
     <>
       {post?.toc?.length > 1 && (
@@ -91,7 +87,6 @@ const LayoutBase = props => {
     </>
   )
 
-  // Algolia搜索框
   const searchModal = useRef(null)
 
   return (
@@ -100,11 +95,7 @@ const LayoutBase = props => {
         id='theme-hexo'
         className={`${siteConfig('FONT_STYLE')} dark:bg-black scroll-smooth`}>
         <Style />
-
-        {/* 顶部导航 */}
         <Header {...props} />
-
-        {/* 顶部嵌入 */}
         <Transition
           show={!onLoading}
           appear={true}
@@ -118,7 +109,7 @@ const LayoutBase = props => {
           {headerSlot}
         </Transition>
 
-        {/* 主区块 */}
+        {/* 主区块：保留 pt-20，避免遮挡且不空旷 */}
         <main
           id='wrapper'
           className={`${router.route === '/' && siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? 'pt-0' : 'pt-20'} bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
@@ -145,15 +136,11 @@ const LayoutBase = props => {
                   leaveFrom='opacity-100 translate-y-0'
                   leaveTo='opacity-0 -translate-y-16'
                   unmount={false}>
-                  {/* 主区上部嵌入 */}
                   {slotTop}
-
                   {children}
                 </Transition>
               )}
             </div>
-
-            {/* 右侧栏 */}
             <SideRight {...props} />
           </div>
         </main>
@@ -161,35 +148,18 @@ const LayoutBase = props => {
         <div className='block lg:hidden'>
           <TocDrawer post={post} cRef={drawerRight} targetRef={tocRef} />
         </div>
-
-        {/* 悬浮菜单 */}
         <RightFloatArea floatSlot={floatSlot} />
-
-        {/* 全文搜索 */}
         <AlgoliaSearchModal cRef={searchModal} {...props} />
-
-        {/* 页脚 */}
         <Footer title={siteConfig('TITLE')} />
       </div>
     </ThemeGlobalHexo.Provider>
   )
 }
 
-/**
- * 首页
- * 是一个博客列表，嵌入一个Hero大图
- * @param {*} props
- * @returns
- */
 const LayoutIndex = props => {
   return <LayoutPostList {...props} className='pt-8' />
 }
 
-/**
- * 博客列表
- * @param {*} props
- * @returns
- */
 const LayoutPostList = props => {
   return (
     <div className='pt-8'>
@@ -203,11 +173,6 @@ const LayoutPostList = props => {
   )
 }
 
-/**
- * 搜索
- * @param {*} props
- * @returns
- */
 const LayoutSearch = props => {
   const { keyword } = props
   const router = useRouter()
@@ -244,11 +209,6 @@ const LayoutSearch = props => {
   )
 }
 
-/**
- * 归档
- * @param {*} props
- * @returns
- */
 const LayoutArchive = props => {
   const { archivePosts } = props
   return (
@@ -268,17 +228,11 @@ const LayoutArchive = props => {
   )
 }
 
-/**
- * 文章详情
- * @param {*} props
- * @returns
- */
 const LayoutSlug = props => {
   const { post, lock, validPassword } = props
   const router = useRouter()
   const waiting404 = siteConfig('POST_WAITING_TIME_FOR_404') * 1000
   useEffect(() => {
-    // 404
     if (!post) {
       setTimeout(
         () => {
@@ -299,18 +253,14 @@ const LayoutSlug = props => {
     <>
       <div className='w-full lg:hover:shadow lg:border rounded-t-xl lg:rounded-xl lg:px-2 lg:py-4 bg-white dark:bg-hexo-black-gray dark:border-black article'>
         {lock && <ArticleLock validPassword={validPassword} />}
-
         {!lock && post && (
           <div className='overflow-x-auto flex-grow mx-auto md:w-full md:px-5 '>
             <article
               id='article-wrapper'
               className='subpixel-antialiased overflow-y-hidden'>
-              {/* Notion文章主体 */}
               <section className='px-5 justify-center mx-auto max-w-2xl lg:max-w-full'>
                 {post && <NotionPage post={post} />}
               </section>
-
-              {/* 分享 */}
               <ShareBar post={post} />
               {post?.type === 'Post' && (
                 <>
@@ -320,10 +270,7 @@ const LayoutSlug = props => {
                 </>
               )}
             </article>
-
             <div className='pt-4 border-dashed'></div>
-
-            {/* 评论互动 */}
             <div className='duration-200 overflow-x-auto bg-white dark:bg-hexo-black-gray px-3'>
               <Comment frontMatter={post} />
             </div>
@@ -334,23 +281,15 @@ const LayoutSlug = props => {
   )
 }
 
-/**
- * 404
- * @param {*} props
- * @returns
- */
 const Layout404 = props => {
   const router = useRouter()
   const { locale } = useGlobal()
   useEffect(() => {
-    // 延时3秒如果加载失败就返回首页
     setTimeout(() => {
       if (isBrowser) {
         const article = document.querySelector('#article-wrapper #notion-article')
         if (!article) {
-          router.push('/').then(() => {
-            // console.log('找不到页面', router.asPath)
-          })
+          router.push('/').then(() => {})
         }
       }
     }, 3000)
@@ -372,9 +311,7 @@ const Layout404 = props => {
 }
 
 /**
- * 分类列表
- * @param {*} props
- * @returns
+ * 分类列表（栏目页面）
  */
 const LayoutCategoryIndex = props => {
   const { categoryOptions } = props
@@ -383,7 +320,8 @@ const LayoutCategoryIndex = props => {
     <div className='mt-8'>
       <Card className='w-full min-h-screen'>
         <div className='dark:text-gray-200 mb-5 mx-3'>
-          <i className='mr-4 fas fa-th' /> {locale.COMMON.CATEGORY}:
+          {/* 这里改成了你想要的 layer-group */}
+          <i className='mr-4 fa-solid fa-layer-group' /> {locale.COMMON.CATEGORY}:
         </div>
         <div id='category-list' className='duration-200 flex flex-wrap mx-8'>
           {categoryOptions?.map(category => {
@@ -393,12 +331,8 @@ const LayoutCategoryIndex = props => {
                 href={`/category/${category.name}`}
                 passHref
                 legacyBehavior>
-                <div
-                  className={
-                    ' duration-300 dark:hover:text-white px-5 cursor-pointer py-2 hover:text-indigo-400'
-                  }>
-                  <i className='mr-4 fas fa-folder' /> {category.name}(
-                  {category.count})
+                <div className={' duration-300 dark:hover:text-white px-5 cursor-pointer py-2 hover:text-indigo-400'}>
+                  <i className='mr-4 fas fa-folder' /> {category.name}({category.count})
                 </div>
               </SmartLink>
             )
@@ -410,9 +344,7 @@ const LayoutCategoryIndex = props => {
 }
 
 /**
- * 标签列表
- * @param {*} props
- * @returns
+ * 标签列表（主创页面）
  */
 const LayoutTagIndex = props => {
   const { tagOptions } = props
@@ -421,7 +353,8 @@ const LayoutTagIndex = props => {
     <div className='mt-8'>
       <Card className='w-full'>
         <div className='dark:text-gray-200 mb-5 ml-4'>
-          <i className='mr-4 fas fa-tag' /> {locale.COMMON.TAGS}:
+          {/* 这里改成了 fa fa-user，满足你的需求 */}
+          <i className='mr-4 fa fa-user' /> {locale.COMMON.TAGS}:
         </div>
         <div id='tags-list' className='duration-200 flex flex-wrap ml-8'>
           {tagOptions.map(tag => (
