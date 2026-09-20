@@ -32,6 +32,7 @@ import TagItemMini from './components/TagItemMini'
 import TocDrawer from './components/TocDrawer'
 import TocDrawerButton from './components/TocDrawerButton'
 import ArticleSwitchPlaceholder from './components/ArticleSwitchPlaceholder'
+import NotionAudioEnhancer from './components/NotionAudioEnhancer'
 import CONFIG from './config'
 import { Style } from './style'
 
@@ -40,13 +41,9 @@ const AlgoliaSearchModal = dynamic(
   { ssr: false }
 )
 
-// 主题全局状态
 const ThemeGlobalHexo = createContext()
 export const useHexoGlobal = () => useContext(ThemeGlobalHexo)
 
-/**
- * 基础布局 采用左右两侧布局，移动端使用顶部导航栏
- */
 const LayoutBase = props => {
   const { post, children, slotTop, className } = props
   const { onLoading, fullWidth } = useGlobal()
@@ -109,7 +106,6 @@ const LayoutBase = props => {
           {headerSlot}
         </Transition>
 
-        {/* 主区块：外面统一留出 80px (导航栏64px + 缝隙16px) */}
         <main
           id='wrapper'
           className={`${router.route === '/' && siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? 'pt-0' : 'pt-20'} bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
@@ -162,7 +158,6 @@ const LayoutIndex = props => {
 
 const LayoutPostList = props => {
   return (
-    {/* 这里改成了 pt-0，不再叠加间距 */}
     <div className='pt-0'>
       <SlotBar {...props} />
       {siteConfig('POST_LIST_STYLE') === 'page' ? (
@@ -193,7 +188,6 @@ const LayoutSearch = props => {
   })
 
   return (
-    {/* 这里改成了 pt-0 */}
     <div className='pt-0'>
       {!currentSearch ? (
         <SearchNav {...props} />
@@ -214,7 +208,6 @@ const LayoutSearch = props => {
 const LayoutArchive = props => {
   const { archivePosts } = props
   return (
-    {/* 这里改成了 pt-0 */}
     <div className='pt-0'>
       <Card className='w-full'>
         <div className='mb-10 pb-20 bg-white md:p-12 p-3 min-h-full dark:bg-hexo-black-gray'>
@@ -252,6 +245,7 @@ const LayoutSlug = props => {
       )
     }
   }, [post])
+
   return (
     <>
       <div className='w-full lg:hover:shadow lg:border rounded-t-xl lg:rounded-xl lg:px-2 lg:py-4 bg-white dark:bg-hexo-black-gray dark:border-black article'>
@@ -263,6 +257,7 @@ const LayoutSlug = props => {
               className='subpixel-antialiased overflow-y-hidden'>
               <section className='px-5 justify-center mx-auto max-w-2xl lg:max-w-full'>
                 {post && <NotionPage post={post} />}
+                {post && <NotionAudioEnhancer post={post} />}
               </section>
               <ShareBar post={post} />
               {post?.type === 'Post' && (
@@ -313,14 +308,10 @@ const Layout404 = props => {
   )
 }
 
-/**
- * 分类列表（栏目页面）
- */
 const LayoutCategoryIndex = props => {
   const { categoryOptions } = props
   const { locale } = useGlobal()
   return (
-    {/* 这里改成了 mt-0 */}
     <div className='mt-0'>
       <Card className='w-full min-h-screen'>
         <div className='dark:text-gray-200 mb-5 mx-3'>
@@ -346,14 +337,10 @@ const LayoutCategoryIndex = props => {
   )
 }
 
-/**
- * 标签列表（主创页面）
- */
 const LayoutTagIndex = props => {
   const { tagOptions } = props
   const { locale } = useGlobal()
   return (
-    {/* 这里改成了 mt-0 */}
     <div className='mt-0'>
       <Card className='w-full'>
         <div className='dark:text-gray-200 mb-5 ml-4'>
