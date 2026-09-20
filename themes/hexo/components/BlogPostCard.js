@@ -25,7 +25,7 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
       <div
         key={post.id}
         id='blog-post-card'
-        className={`group md:h-56 w-full flex justify-start md:gap-6 md:flex-row-reverse flex-col-reverse shadow-sm overflow-hidden border dark:border-black rounded-xl bg-white dark:bg-hexo-black-gray`}>
+        className={`group md:h-56 w-full flex justify-start md:gap-2 md:flex-row-reverse flex-col-reverse shadow-sm overflow-hidden border dark:border-black rounded-xl bg-white dark:bg-hexo-black-gray`}>
         <BlogPostCardInfo
           index={index}
           post={post}
