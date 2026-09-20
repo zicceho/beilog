@@ -11,8 +11,7 @@ import ButtonJumpToTop from './ButtonJumpToTop'
 export default function RightFloatArea({ floatSlot }) {
   const [showFloatButton, switchShow] = useState(false)
   
-  // 新增：控制音频图标显示状态
-  const [hasAudio, setHasAudio] = useState(false)
+  // 保留播放状态，让耳机图标有呼吸动画
   const [isPlaying, setIsPlaying] = useState(false)
 
   const scrollListener = useCallback(() => {
@@ -55,11 +54,10 @@ export default function RightFloatArea({ floatSlot }) {
     return () => window.removeEventListener('scroll', throttledScroll)
   }, [scrollListener])
 
-  // 新增：监听全局音频状态
+  // 监听全局音频状态，只保留播放状态（用于呼吸动画）
   useEffect(() => {
     const handleAudioState = (e) => {
-      const { playing, currentSrc } = e.detail
-      setHasAudio(!!currentSrc) // 如果有音频链接，就标记为 true
+      const { playing } = e.detail
       setIsPlaying(playing)
     }
     window.addEventListener('audio-play-state-change', handleAudioState)
@@ -67,7 +65,7 @@ export default function RightFloatArea({ floatSlot }) {
       window.removeEventListener('audio-play-state-change', handleAudioState)
   }, [])
 
-  // 新增：点击耳机图标展开全局播放器
+  // 点击耳机图标展开全局播放器
   const handleExpandAudio = () => {
     window.dispatchEvent(new CustomEvent('expand-global-audio'))
   }
@@ -82,18 +80,14 @@ export default function RightFloatArea({ floatSlot }) {
         className={'justify-center flex flex-col items-center cursor-pointer'}>
         <ButtonDarkModeFloat />
         
-        {/* 这里是修改的核心：如果有音频，第三个位置就变成耳机图标；否则保持原来的随机逛逛 */}
-        {hasAudio ? (
-          <div
-            onClick={handleExpandAudio}
-            className='w-10 h-10 flex justify-center items-center hover:bg-indigo-600 transition-colors'
-            title='展开播放器'>
-            <i className={`fas fa-headphones-alt ${isPlaying ? 'animate-pulse' : ''}`} />
-          </div>
-        ) : (
-          floatSlot
-        )}
-        
+        {/* 核心改动：永远显示耳机图标，替换原来的随机逛逛 */}
+        <div
+          onClick={handleExpandAudio}
+          className='w-10 h-10 flex justify-center items-center hover:bg-indigo-600 transition-colors'
+          title='展开播放器'>
+          <i className={`fas fa-headphones-alt text-lg ${isPlaying ? 'animate-pulse' : ''}`} />
+        </div>
+
         <ButtonJumpToTop />
       </div>
     </div>
