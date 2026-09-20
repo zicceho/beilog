@@ -9,8 +9,8 @@ const Footer = ({ title }) => {
     parseInt(since) < currentYear ? since + '-' + currentYear : currentYear
 
   return (
-    // 这里的 pt-4 是上面留一点空间，pb-1 是下面只留极小空间，彻底解决底部过宽的问题
-    <footer className='relative z-10 flex-shrink-0 justify-center text-center m-auto w-full leading-6 text-gray-600 dark:text-gray-100 text-sm pt-4 pb-1'>
+    // pt-6 是顶部留白，pb-6 是底部留白，这样上下都有呼吸感，不会太紧凑
+    <footer className='relative z-10 flex-shrink-0 justify-center text-center m-auto w-full leading-6 text-gray-600 dark:text-gray-100 text-sm pt-6 pb-6'>
       <i className='fas fa-copyright' /> {`${copyrightDate}`}
       <span>
         <i className='mx-1 animate-pulse fas fa-heart' />
