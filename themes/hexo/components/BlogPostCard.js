@@ -25,9 +25,9 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
       <div
         key={post.id}
         id='blog-post-card'
-        // ⚠️ 注意看这里：md:h-56 改成了 md:h-48（只改桌面端高度），手机端没有任何前缀，保持原样
-        className={`group md:h-48 w-full flex justify-between md:flex-row-reverse flex-col-reverse shadow-sm overflow-hidden border dark:border-black rounded-xl bg-white dark:bg-hexo-black-gray`}>
-        {/* 文字内容 */}
+        {/* 恢复了 md:h-56，确保整体卡片高度和原来一模一样 */}
+        className={`group md:h-56 w-full flex justify-between md:flex-row-reverse flex-col-reverse shadow-sm overflow-hidden border dark:border-black rounded-xl bg-white dark:bg-hexo-black-gray`}>
+        {/* 文字内容：图片变窄后，它会自动占据剩余空间，自然向左靠拢 */}
         <BlogPostCardInfo
           index={index}
           post={post}
@@ -38,16 +38,16 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
 
         {/* 图片封面 */}
         {showPageCover && (
-          // ⚠️ 注意看这里：md:w-5/12 改成了 md:w-1/2（只改桌面端宽度占比）
-          <div className='md:w-1/2 overflow-hidden'>
+          {/* md:w-56 表示电脑端宽度固定为 224px，md:h-56 表示高度也是 224px，这正是正方形 */}
+          <div className='md:w-56 md:h-56 flex-shrink-0 overflow-hidden'>
             <SmartLink href={post?.href}>
               <>
                 <LazyImage
                   priority={index === 1}
                   alt={post?.title}
                   src={post?.pageCoverThumbnail}
-                  // ⚠️ 注意看这里：原先是 h-56，现在是 h-56 md:h-48，意思是：手机端维持 224px 高，电脑端变成 192px 高
-                  className='h-56 md:h-48 w-full object-cover object-center group-hover:scale-110 duration-500'
+                  {/* 电脑端铺满正方形框(md:h-full)，手机端保持原样(h-56) */}
+                  className='w-full h-56 md:h-full object-cover object-center group-hover:scale-110 duration-500'
                 />
               </>
             </SmartLink>
