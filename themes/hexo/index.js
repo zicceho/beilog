@@ -109,7 +109,7 @@ const LayoutBase = props => {
           {headerSlot}
         </Transition>
 
-        {/* 主区块：保留 pt-20，避免遮挡且不空旷 */}
+        {/* 主区块：外面统一留出 80px (导航栏64px + 缝隙16px) */}
         <main
           id='wrapper'
           className={`${router.route === '/' && siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? 'pt-0' : 'pt-20'} bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
@@ -162,7 +162,8 @@ const LayoutIndex = props => {
 
 const LayoutPostList = props => {
   return (
-    <div className='pt-8'>
+    {/* 这里改成了 pt-0，不再叠加间距 */}
+    <div className='pt-0'>
       <SlotBar {...props} />
       {siteConfig('POST_LIST_STYLE') === 'page' ? (
         <BlogPostListPage {...props} />
@@ -192,7 +193,8 @@ const LayoutSearch = props => {
   })
 
   return (
-    <div className='pt-8'>
+    {/* 这里改成了 pt-0 */}
+    <div className='pt-0'>
       {!currentSearch ? (
         <SearchNav {...props} />
       ) : (
@@ -212,7 +214,8 @@ const LayoutSearch = props => {
 const LayoutArchive = props => {
   const { archivePosts } = props
   return (
-    <div className='pt-8'>
+    {/* 这里改成了 pt-0 */}
+    <div className='pt-0'>
       <Card className='w-full'>
         <div className='mb-10 pb-20 bg-white md:p-12 p-3 min-h-full dark:bg-hexo-black-gray'>
           {Object.keys(archivePosts).map(archiveTitle => (
@@ -317,10 +320,10 @@ const LayoutCategoryIndex = props => {
   const { categoryOptions } = props
   const { locale } = useGlobal()
   return (
-    <div className='mt-8'>
+    {/* 这里改成了 mt-0 */}
+    <div className='mt-0'>
       <Card className='w-full min-h-screen'>
         <div className='dark:text-gray-200 mb-5 mx-3'>
-          {/* 这里改成了你想要的 layer-group */}
           <i className='mr-4 fa-solid fa-layer-group' /> {locale.COMMON.CATEGORY}:
         </div>
         <div id='category-list' className='duration-200 flex flex-wrap mx-8'>
@@ -350,10 +353,10 @@ const LayoutTagIndex = props => {
   const { tagOptions } = props
   const { locale } = useGlobal()
   return (
-    <div className='mt-8'>
+    {/* 这里改成了 mt-0 */}
+    <div className='mt-0'>
       <Card className='w-full'>
         <div className='dark:text-gray-200 mb-5 ml-4'>
-          {/* 这里改成了 fa fa-user，满足你的需求 */}
           <i className='mr-4 fa fa-user' /> {locale.COMMON.TAGS}:
         </div>
         <div id='tags-list' className='duration-200 flex flex-wrap ml-8'>
