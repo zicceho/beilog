@@ -25,7 +25,8 @@ export default function SearchNav(props) {
         {/* 分类 */}
         <Card className="w-full mt-4">
             <div className="dark:text-gray-200 mb-5 mx-3">
-                <i className="mr-4 fas fa-th" />
+                {/* ⚠️ 图标改成了 layer-group */}
+                <i className="mr-4 fa-solid fa-layer-group" />
                 {locale.COMMON.CATEGORY}:
             </div>
             <div id="category-list" className="duration-200 flex flex-wrap mx-8">
@@ -52,10 +53,11 @@ export default function SearchNav(props) {
         {/* 标签 */}
         <Card className="w-full mt-4">
             <div className="dark:text-gray-200 mb-5 ml-4">
-                <i className="mr-4 fas fa-tag" />
+                {/* ⚠️ 图标改成了 user */}
+                <i className="mr-4 fa fa-user" />
                 {locale.COMMON.TAGS}:
             </div>
-            <div id="tags-list" className="duration-200 flex flex-wrap ml-8">
+            <div id="tags-list" className="duration-200 flex ml-8 flex-wrap">
                 {tagOptions?.map(tag => {
                   return (
                         <div key={tag.name} className="p-2">
