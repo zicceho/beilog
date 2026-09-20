@@ -41,6 +41,7 @@ const AlgoliaSearchModal = dynamic(
   { ssr: false }
 )
 
+// 主题全局状态
 const ThemeGlobalHexo = createContext()
 export const useHexoGlobal = () => useContext(ThemeGlobalHexo)
 
@@ -108,7 +109,13 @@ const LayoutBase = props => {
 
         <main
           id='wrapper'
-          className={`${router.route === '/' && siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? 'pt-0' : 'pt-20'} bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
+          className={`${
+            post
+              ? 'pt-0'
+              : router.route === '/' && siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG)
+                ? 'pt-8'
+                : 'pt-20'
+          } bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
           <div
             id='container-inner'
             className={
