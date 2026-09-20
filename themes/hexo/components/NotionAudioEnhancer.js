@@ -22,29 +22,32 @@ const enhanceAudio = () => {
 export default function NotionAudioEnhancer({ post }) {
   const [players, setPlayers] = useState([])
 
-  // 封面图优先级：文章缩略图 > 文章大图 > 站点默认背景图
   const cover = post?.pageCoverThumbnail || post?.pageCover || siteConfig('HEXO_POST_LIST_COVER_DEFAULT')
   const title = post?.title
   const href = post?.href
-  // 新增：获取文章所属栏目
   const category = post?.category
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const enhanced = enhanceAudio()
-    setPlayers(enhanced)
+    // 增加一点延迟，确保 Notion 正文已经渲染完毕
+    const timer = setTimeout(() => {
+      const enhanced = enhanceAudio()
+      setPlayers(enhanced)
+    }, 500)
 
-    return () =>
+    return () => {
+      clearTimeout(timer)
+      const enhanced = enhanceAudio()
       enhanced.forEach(({ mount, nativeAudio, originalDisplay }) => {
         mount.remove()
         nativeAudio.style.display = originalDisplay
       })
+    }
   }, [post?.id])
 
   return (
     <>
       {players.map(({ mount, src }) => (
-        // 新增：把 category 传给 AudioPlayer
         createPortal(<AudioPlayer src={src} cover={cover} title={title} href={href} category={category} />, mount)
       ))}
     </>
