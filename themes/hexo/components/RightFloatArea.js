@@ -10,8 +10,6 @@ import ButtonJumpToTop from './ButtonJumpToTop'
  */
 export default function RightFloatArea({ floatSlot }) {
   const [showFloatButton, switchShow] = useState(false)
-  
-  // 保留播放状态，让耳机图标有呼吸动画
   const [isPlaying, setIsPlaying] = useState(false)
 
   const scrollListener = useCallback(() => {
@@ -27,13 +25,11 @@ export default function RightFloatArea({ floatSlot }) {
 
     let per = parseFloat(((scrollY / fullHeight) * 100).toFixed(0))
 
-    // 完整的边界处理
     if (isNaN(per) || per < 0) per = 0
     if (per > 100) per = 100
 
     const shouldShow = scrollY > 100 && per > 0
 
-    // 右下角显示悬浮按钮
     if (shouldShow !== showFloatButton) {
       switchShow(shouldShow)
     }
@@ -47,14 +43,11 @@ export default function RightFloatArea({ floatSlot }) {
     }
 
     window.addEventListener('scroll', throttledScroll, { passive: true })
-
-    // 初始调用一次检查初始状态
     scrollListener()
 
     return () => window.removeEventListener('scroll', throttledScroll)
   }, [scrollListener])
 
-  // 监听全局音频状态，只保留播放状态（用于呼吸动画）
   useEffect(() => {
     const handleAudioState = (e) => {
       const { playing } = e.detail
@@ -65,7 +58,6 @@ export default function RightFloatArea({ floatSlot }) {
       window.removeEventListener('audio-play-state-change', handleAudioState)
   }, [])
 
-  // 点击耳机图标展开全局播放器
   const handleExpandAudio = () => {
     window.dispatchEvent(new CustomEvent('expand-global-audio'))
   }
@@ -80,13 +72,16 @@ export default function RightFloatArea({ floatSlot }) {
         className={'justify-center flex flex-col items-center cursor-pointer'}>
         <ButtonDarkModeFloat />
         
-        {/* 核心改动：永远显示耳机图标，替换原来的随机逛逛 */}
+        {/* 耳机图标：独立于原来的 floatSlot，不干扰评论按钮 */}
         <div
           onClick={handleExpandAudio}
           className='w-10 h-10 flex justify-center items-center hover:bg-indigo-600 transition-colors'
           title='展开播放器'>
           <i className={`fas fa-headphones-alt text-lg ${isPlaying ? 'animate-pulse' : ''}`} />
         </div>
+
+        {/* 原来的 floatSlot 保留，里面包含“去评论”按钮 */}
+        {floatSlot}
 
         <ButtonJumpToTop />
       </div>
