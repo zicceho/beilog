@@ -73,23 +73,23 @@ export const BlogPostCardInfo = ({
         )}
       </div>
 
+      {/* 底部日期与标签区域 */}
       <div>
-        <div className='text-gray-400 justify-between flex'>
+        {/* 将 justify-between 改为靠左排列 */}
+        <div className='text-gray-400 flex items-center'>
           <SmartLink
             href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
             passHref
-            className='font-light menu-link cursor-pointer text-sm leading-4 mr-3'>
+            className='font-light menu-link cursor-pointer text-sm leading-4'>
             <i className='far fa-calendar-alt mr-1' />
             {post?.publishDay || post.date}
           </SmartLink>
 
-          <div className='md:flex-nowrap flex-wrap md:justify-start inline-block'>
-            <div>
-              {' '}
-              {post.tagItems?.map(tag => (
-                <TagItemMini key={tag.name} tag={tag} />
-              ))}
-            </div>
+          {/* 标签区域移到日期后面，ml-2 实现空两格 */}
+          <div className='flex flex-wrap items-center ml-2 gap-1'>
+            {post.tagItems?.map(tag => (
+              <TagItemMini key={tag.name} tag={tag} />
+            ))}
           </div>
         </div>
       </div>
