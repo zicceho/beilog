@@ -18,6 +18,7 @@ export const BlogPostCardInfo = ({
       <div>
         <header>
           <h2 className='flex items-start gap-2'>
+            {/* 有音频：显示按钮 */}
             {post?.audio ? (
               <button
                 onClick={(e) => {
@@ -37,9 +38,12 @@ export const BlogPostCardInfo = ({
                 }}
                 className='flex-shrink-0 mt-1 w-7 h-7 rounded-full bg-indigo-50 dark:bg-indigo-900/50 text-indigo-500 hover:bg-indigo-500 hover:text-white flex items-center justify-center transition-colors shadow-sm'
                 title='播放本期音频'>
-                <i className='fas fa-play text-xs ml-0.5' />
+                <i className='fas fa-play-circle text-sm' />
               </button>
-            ) : null}
+            ) : (
+              /* 无音频：显示透明占位符，保持所有标题对齐 */
+              <div className='flex-shrink-0 mt-1 w-7 h-7' />
+            )}
 
             <SmartLink
               href={post?.href}
