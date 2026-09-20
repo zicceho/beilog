@@ -12,7 +12,7 @@ const Footer = ({ title }) => {
     <footer className='relative z-10 flex-shrink-0 justify-center text-center m-auto w-full leading-6 text-gray-600 dark:text-gray-100 text-sm pt-6 pb-6'>
       <i className='fas fa-copyright' /> {`${copyrightDate}`}
       <span>
-        {/* 这里已经将心形改成了干杯图标，并去掉了跳动动画 */}
+        {/* 干杯图标 */}
         <i className='mx-1 fas fa-glass-cheers' />
         <a
           href={siteConfig('LINK')}
@@ -20,14 +20,7 @@ const Footer = ({ title }) => {
           {siteConfig('AUTHOR')}
         </a>
         <BeiAnSite />
-        <span className='hidden busuanzi_container_site_pv'>
-          <i className='fas fa-eye' />
-          <span className='px-1 busuanzi_value_site_pv'> </span>
-        </span>
-        <span className='pl-2 busuanzi_container_site_uv'>
-          <i className='fas fa-users' />
-          <span className='px-1 busuanzi_value_site_uv'> </span>
-        </span>
+        {/* ⚠️ 删除的就是下面这两块统计代码 */}
       </span>
     </footer>
   )
