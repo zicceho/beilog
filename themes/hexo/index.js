@@ -109,13 +109,7 @@ const LayoutBase = props => {
 
         <main
           id='wrapper'
-          className={`${
-            post
-              ? 'pt-0'
-              : router.route === '/' && siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG)
-                ? 'pt-8'
-                : 'pt-20'
-          } bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
+          className='pt-8 bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative'>
           <div
             id='container-inner'
             className={
