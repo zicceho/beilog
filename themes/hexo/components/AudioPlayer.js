@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export default function AudioPlayer({ src, cover, title, href }) {
+export default function AudioPlayer({ src, cover, title, href, category }) {
   const [isPlaying, setIsPlaying] = useState(false)
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function AudioPlayer({ src, cover, title, href }) {
     } else {
       window.dispatchEvent(
         new CustomEvent('play-global-audio', {
-          detail: { src, cover, title, href }
+          detail: { src, cover, title, href, category }
         })
       )
     }
@@ -39,9 +39,10 @@ export default function AudioPlayer({ src, cover, title, href }) {
             <i className='fas fa-music text-2xl' />
           </div>
         )}
-        <div className='absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/50 transition-colors'>
-          <div className='w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg'>
-            <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-xl text-indigo-600 ${!isPlaying ? 'translate-x-[2px]' : ''}`} />
+        {/* 玻璃质感圆底 + 居中三角形 */}
+        <div className='absolute inset-0 bg-black/20 flex items-center justify-center'>
+          <div className='w-12 h-12 rounded-full bg-white/60 backdrop-blur-md flex items-center justify-center shadow-lg'>
+            <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-xl text-gray-800 ${!isPlaying ? 'translate-x-[2px]' : ''}`} />
           </div>
         </div>
       </div>
@@ -50,7 +51,8 @@ export default function AudioPlayer({ src, cover, title, href }) {
         <div className='font-bold text-base text-gray-800 dark:text-gray-100 truncate'>
           {title || '本期节目'}
         </div>
-        <div className='text-xs text-gray-500 mt-1.5'>念安酒馆 · 点击封面开始收听</div>
+        {/* 这里换成栏目名 */}
+        <div className='text-xs text-gray-500 mt-1.5'>{category || '念安酒馆'}</div>
       </div>
     </div>
   )
