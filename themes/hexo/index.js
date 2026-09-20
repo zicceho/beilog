@@ -41,7 +41,6 @@ const AlgoliaSearchModal = dynamic(
   { ssr: false }
 )
 
-// 主题全局状态
 const ThemeGlobalHexo = createContext()
 export const useHexoGlobal = () => useContext(ThemeGlobalHexo)
 
@@ -107,13 +106,14 @@ const LayoutBase = props => {
           {headerSlot}
         </Transition>
 
+        {/* 关键改动：统一由 main 来控制顶部间距，左右两边就会永久平齐 */}
         <main
           id='wrapper'
           className={`${
             post
-              ? 'pt-0'
+              ? 'pt-6'
               : router.route === '/' && siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG)
-                ? 'pt-8'
+                ? 'pt-6'
                 : 'pt-28'
           } bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
           <div
@@ -160,7 +160,7 @@ const LayoutBase = props => {
 }
 
 const LayoutIndex = props => {
-  return <LayoutPostList {...props} className='pt-8' />
+  return <LayoutPostList {...props} className='pt-0' />
 }
 
 const LayoutPostList = props => {
