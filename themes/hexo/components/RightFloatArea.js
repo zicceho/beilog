@@ -36,6 +36,10 @@ export default function RightFloatArea({ floatSlot }) {
     return () => window.removeEventListener('audio-play-state-change', handleAudioState)
   }, [])
 
+  const handleToggleAudio = () => {
+    window.dispatchEvent(new CustomEvent('toggle-global-audio'))
+  }
+
   return (
     <div
       className={
@@ -44,18 +48,13 @@ export default function RightFloatArea({ floatSlot }) {
       }>
       <div className={'justify-center flex flex-col items-center cursor-pointer'}>
         <ButtonDarkModeFloat />
-        
-        {/* 保持原来的图标（fa-random），点击触发播放器展开 */}
         <div
-          onClick={() => window.dispatchEvent(new CustomEvent('expand-global-audio'))}
+          onClick={handleToggleAudio}
           className='w-10 h-10 flex justify-center items-center hover:bg-indigo-600 transition-colors'
           title='展开播放器'>
           <i className={`fas fa-random text-base ${isPlaying ? 'animate-pulse' : ''}`} />
         </div>
-
-        {/* 保留原有的评论等按钮 */}
         {floatSlot}
-
         <ButtonJumpToTop />
       </div>
     </div>
