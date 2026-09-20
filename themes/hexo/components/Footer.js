@@ -1,6 +1,4 @@
-import { BeiAnGongAn } from '@/components/BeiAnGongAn'
 import BeiAnSite from '@/components/BeiAnSite'
-import PoweredBy from '@/components/PoweredBy'
 import { siteConfig } from '@/lib/config'
 
 const Footer = ({ title }) => {
@@ -21,9 +19,8 @@ const Footer = ({ title }) => {
           className='underline font-bold  dark:text-gray-300 '>
           {siteConfig('AUTHOR')}
         </a>
-        .<br />
+        <br />
         <BeiAnSite />
-        <BeiAnGongAn />
         <span className='hidden busuanzi_container_site_pv'>
           <i className='fas fa-eye' />
           <span className='px-1 busuanzi_value_site_pv'> </span>
@@ -32,10 +29,6 @@ const Footer = ({ title }) => {
           <i className='fas fa-users' />
           <span className='px-1 busuanzi_value_site_uv'> </span>
         </span>
-        <h1 className='text-xs pt-4 text-light-400 dark:text-gray-400'>
-          {title} {siteConfig('BIO') && <>|</>} {siteConfig('BIO')}
-        </h1>
-        <PoweredBy className='justify-center' />
       </span>
       <br />
     </footer>
