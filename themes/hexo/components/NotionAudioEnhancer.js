@@ -26,6 +26,8 @@ export default function NotionAudioEnhancer({ post }) {
   const cover = post?.pageCoverThumbnail || post?.pageCover || siteConfig('HEXO_POST_LIST_COVER_DEFAULT')
   const title = post?.title
   const href = post?.href
+  // 新增：获取文章所属栏目
+  const category = post?.category
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -42,7 +44,8 @@ export default function NotionAudioEnhancer({ post }) {
   return (
     <>
       {players.map(({ mount, src }) => (
-        createPortal(<AudioPlayer src={src} cover={cover} title={title} href={href} />, mount)
+        // 新增：把 category 传给 AudioPlayer
+        createPortal(<AudioPlayer src={src} cover={cover} title={title} href={href} category={category} />, mount)
       ))}
     </>
   )
