@@ -58,38 +58,39 @@ export default function PostHero({ post, siteInfo }) {
             {post.title}
           </div>
 
-          <section className='flex-wrap shadow-text-md flex text-sm justify-center mt-4 text-white dark:text-gray-400 font-light leading-8'>
-            <div className='flex justify-center dark:text-gray-200 text-opacity-70'>
+          {/* ⚠️ 改动位置：时间和标签同行的容器 */}
+          <section className='flex-wrap shadow-text-md flex text-sm justify-center items-center mt-4 text-white dark:text-gray-400 font-light leading-8 gap-x-6'>
+            {/* 1. 时间显示（日历图标 + 日期） */}
+            <div className='flex justify-center items-center dark:text-gray-200 text-opacity-70'>
               {post?.type !== 'Page' && (
-                <>
-                  <SmartLink
-                    href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
-                    passHref
-                    className='pl-1 mr-2 cursor-pointer hover:underline'>
-                    {locale.COMMON.POST_TIME}: {post?.publishDay}
-                  </SmartLink>
-                </>
+                <SmartLink
+                  href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
+                  passHref
+                  className='pl-1 cursor-pointer hover:underline flex items-center'>
+                  <i className='far fa-calendar-alt mr-1' />
+                  {post?.publishDay || post.date}
+                </SmartLink>
               )}
-              {/* ⚠️ 就在这里：原本这里有一个显示 LAST_EDITED_TIME 的 div 块，现在已被彻底删除 */}
             </div>
 
+            {/* 2. 浏览量（如果有） */}
             {JSON.parse(siteConfig('ANALYTICS_BUSUANZI_ENABLE')) && (
-              <div className='busuanzi_container_page_pv font-light mr-2'>
+              <div className='busuanzi_container_page_pv font-light'>
                 <span className='mr-2 busuanzi_value_page_pv' />
                 {locale.COMMON.VIEWS}
               </div>
             )}
-          </section>
 
-          <div className='mt-4 mb-1'>
+            {/* 3. 标签（搬进了同一个容器内，保证同行显示） */}
             {post.tagItems && (
-              <div className='flex justify-center flex-nowrap overflow-x-auto'>
+              <div className='flex items-center justify-center flex-wrap gap-1'>
                 {post.tagItems.map(tag => (
                   <TagItemMini key={tag.name} tag={tag} />
                 ))}
               </div>
             )}
-          </div>
+          </section>
+
         </div>
       </header>
     </div>
