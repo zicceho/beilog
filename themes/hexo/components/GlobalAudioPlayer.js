@@ -19,7 +19,8 @@ export default function GlobalAudioPlayer() {
   const [playing, setPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
-  const [volume, setVolume] = useState(1)
+  // 默认音量 80%
+  const [volume, setVolume] = useState(0.8)
   const [muted, setMuted] = useState(false)
   const [showVolume, setShowVolume] = useState(false)
   const [speedIndex, setSpeedIndex] = useState(0)
@@ -88,12 +89,24 @@ export default function GlobalAudioPlayer() {
     )
   }, [playing, audioData?.src, minimized])
 
+  // 广播时间更新给文章内组件
+  useEffect(() => {
+    if (duration > 0) {
+      window.dispatchEvent(
+        new CustomEvent('audio-time-update', {
+          detail: { currentTime, duration, currentSrc: audioData?.src }
+        })
+      )
+    }
+  }, [currentTime, duration, audioData?.src])
+
+  // 自动折叠逻辑：9秒后折叠
   useEffect(() => {
     let autoCollapseTimer = null
     if (playing && !hasManuallyExpanded && !minimized) {
       autoCollapseTimer = setTimeout(() => {
         setMinimized(true)
-      }, 5000)
+      }, 9000)
     }
     return () => clearTimeout(autoCollapseTimer)
   }, [playing, hasManuallyExpanded, minimized])
