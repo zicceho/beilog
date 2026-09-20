@@ -12,6 +12,9 @@ export const BlogPostCardInfo = ({
   showPageCover,
   showSummary
 }) => {
+  // 兼容大小写：不管它映射成 audio 还是 Audio，都能抓到
+  const audioUrl = post?.audio || post?.Audio
+
   return (
     <article
       className={`flex flex-col justify-between lg:p-6 p-4 lg:px-8 px-6 ${showPageCover && !showPreview ? 'md:flex-1 w-full md:max-h-60' : 'w-full'}`}>
@@ -19,7 +22,7 @@ export const BlogPostCardInfo = ({
         <header>
           <h2 className='flex items-start gap-2'>
             {/* 有音频：显示按钮 */}
-            {post?.audio ? (
+            {audioUrl ? (
               <button
                 onClick={(e) => {
                   e.preventDefault()
@@ -27,7 +30,7 @@ export const BlogPostCardInfo = ({
                   window.dispatchEvent(
                     new CustomEvent('play-global-audio', {
                       detail: {
-                        src: post.audio,
+                        src: audioUrl,
                         cover: post.pageCoverThumbnail || post.pageCover,
                         title: post.title,
                         href: post.href,
@@ -41,7 +44,7 @@ export const BlogPostCardInfo = ({
                 <i className='fas fa-play-circle text-sm' />
               </button>
             ) : (
-              /* 无音频：显示透明占位符，保持所有标题对齐 */
+              /* 无音频：显示透明占位符，保持对齐 */
               <div className='flex-shrink-0 mt-1 w-7 h-7' />
             )}
 
