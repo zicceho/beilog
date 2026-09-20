@@ -32,7 +32,7 @@ import TagItemMini from './components/TagItemMini'
 import TocDrawer from './components/TocDrawer'
 import TocDrawerButton from './components/TocDrawerButton'
 import ArticleSwitchPlaceholder from './components/ArticleSwitchPlaceholder'
-import AudioPlayer from './components/AudioPlayer'
+import NotionAudioEnhancer from './components/NotionAudioEnhancer'
 import GlobalAudioPlayer from './components/GlobalAudioPlayer'
 import CONFIG from './config'
 import { Style } from './style'
@@ -82,7 +82,6 @@ const LayoutBase = props => {
         </div>
       )}
       {post && <ButtonJumpToComment />}
-      {/* 修改点2：删除了原本的随机逛逛按钮 */}
     </>
   )
 
@@ -154,7 +153,6 @@ const LayoutBase = props => {
         </div>
         <RightFloatArea floatSlot={floatSlot} />
         <AlgoliaSearchModal cRef={searchModal} {...props} />
-        {/* 修改点4：确保全局播放器挂载在 Footer 上方 */}
         <GlobalAudioPlayer />
         <Footer title={siteConfig('TITLE')} />
       </div>
@@ -266,17 +264,8 @@ const LayoutSlug = props => {
               id='article-wrapper'
               className='subpixel-antialiased overflow-y-hidden'>
               <section className='px-5 justify-center mx-auto max-w-2xl lg:max-w-full'>
-                {/* 修改点3：替换为从 Notion Audio 字段读取，并在正文上方生成播放器 */}
-                {post?.audio && (
-                  <AudioPlayer
-                    src={post.audio}
-                    cover={post.pageCoverThumbnail || post.pageCover}
-                    title={post.title}
-                    href={post.href}
-                    category={post.category}
-                  />
-                )}
                 {post && <NotionPage post={post} />}
+                {post && <NotionAudioEnhancer post={post} />}
               </section>
               <ShareBar post={post} />
               {post?.type === 'Post' && (
