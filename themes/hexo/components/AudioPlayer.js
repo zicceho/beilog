@@ -8,7 +8,7 @@ const formatTime = (seconds) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-export default function AudioPlayer({ src }) {
+export default function AudioPlayer({ src, cover, title, href }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [remaining, setRemaining] = useState(0)
@@ -39,36 +39,35 @@ export default function AudioPlayer({ src }) {
     }
   }, [src])
 
-  // 点击整个胶囊条，唤起全局播放器
   const handleClick = () => {
-    window.dispatchEvent(new CustomEvent('play-global-audio', { detail: { src } }))
+    window.dispatchEvent(
+      new CustomEvent('play-global-audio', {
+        detail: { src, cover, title, href }
+      })
+    )
   }
 
   return (
-    <div className='my-3 mb-6 flex justify-start'>
-      <div
-        onClick={handleClick}
-        className='inline-flex items-center gap-3 px-4 py-2 rounded-full cursor-pointer shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]'
-        style={{
-          background: 'linear-gradient(135deg, #5A6A9A 0%, #3A4A7A 100%)'
-        }}
-      >
-        {/* 播放/暂停按钮 */}
-        <i className={`fa ${isPlaying ? 'fa-pause-circle-o' : 'fa-play-circle-o'} text-white text-2xl`} />
-
-        {/* 白色半透明进度条 */}
-        <div className='w-40 h-1 bg-white/30 rounded-full overflow-hidden'>
-          <div
-            className='h-full bg-white rounded-full transition-all duration-300'
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
-        {/* 倒计时 */}
-        <span className='text-xs text-white/90 tabular-nums whitespace-nowrap'>
-          {formatTime(remaining)}
-        </span>
+    <div 
+      className='my-3 mb-6 flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg px-2 py-1.5 transition-colors'
+      onClick={handleClick}
+    >
+      <i 
+        className={`fa ${isPlaying ? 'fa-pause-circle-o' : 'fa-play-circle-o'} text-2xl`}
+        style={{ color: '#3A4A7A' }}
+      />
+      <div className='flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden max-w-2xl'>
+        <div
+          className='h-full rounded-full transition-all duration-300'
+          style={{ 
+            width: `${progress}%`,
+            background: 'linear-gradient(90deg, #5A6A9A 0%, #3A4A7A 100%)'
+          }}
+        />
       </div>
+      <span className='text-xs text-gray-400 tabular-nums whitespace-nowrap'>
+        {formatTime(remaining)}
+      </span>
     </div>
   )
 }
