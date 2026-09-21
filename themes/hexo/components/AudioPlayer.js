@@ -88,15 +88,25 @@ export default function AudioPlayer({ src }) {
   const progress = duration ? (currentTime / duration) * 100 : 0
 
   return (
-    <div className='relative my-4 flex items-center gap-3 rounded-xl px-3 py-2.5 bg-gray-50 dark:bg-white/5'>
+    <div className='relative my-4 flex items-center gap-3 rounded-xl px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700'>
       <audio ref={audioRef} src={src} preload='metadata' />
 
-      {/* 播放/暂停：加 leading-none 和 ml-[2px] 保证三角绝对居中 */}
+      {/* 播放/暂停：用纯 SVG 图标，几何绝对居中 */}
       <button
         onClick={togglePlay}
-        className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center leading-none transition-transform hover:scale-105'
-        style={{ backgroundColor: '#3A4A7A' }}>
-        <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} text-sm text-white ${!isPlaying ? 'ml-[2px]' : ''}`} />
+        className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105'
+        style={{ backgroundColor: '#3A4A7A' }}
+        aria-label={isPlaying ? '暂停' : '播放'}>
+        {isPlaying ? (
+          <svg width='14' height='14' viewBox='0 0 24 24' fill='white'>
+            <rect x='6' y='4' width='4' height='16' rx='1' />
+            <rect x='14' y='4' width='4' height='16' rx='1' />
+          </svg>
+        ) : (
+          <svg width='14' height='14' viewBox='0 0 24 24' fill='white' style={{ marginLeft: '2px' }}>
+            <path d='M8 5v14l11-7z' />
+          </svg>
+        )}
       </button>
 
       {/* 进度条 + 时间 */}
@@ -139,7 +149,7 @@ export default function AudioPlayer({ src }) {
         {SPEEDS[speedIndex]}x
       </button>
 
-      {/* 音量控制：浮层改为朝下弹出，不再超出容器 */}
+      {/* 音量控制：浮层朝下弹出 */}
       <div
         className='relative flex items-center flex-shrink-0'
         onMouseEnter={() => setShowVolume(true)}
