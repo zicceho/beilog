@@ -3,6 +3,7 @@ import { siteConfig } from '@/lib/config'
 import SmartLink from '@/components/SmartLink'
 import CONFIG from '../config'
 import { BlogPostCardInfo } from './BlogPostCardInfo'
+import { useEffect, useState } from 'react'
 
 const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
   const showPreview =
@@ -20,22 +21,45 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
     !showPreview
 
   const audioUrl = post?.audio || post?.Audio
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  // 监听全局播放状态，判断当前封面音频是否在播放
+  useEffect(() => {
+    const handleStateChange = (e) => {
+      const { playing, currentSrc } = e.detail
+      if (currentSrc === audioUrl) {
+        setIsPlaying(playing)
+      } else {
+        setIsPlaying(false)
+      }
+    }
+    window.addEventListener('audio-play-state-change', handleStateChange)
+    return () =>
+      window.removeEventListener('audio-play-state-change', handleStateChange)
+  }, [audioUrl])
 
   const handleCoverClick = (e) => {
     if (audioUrl) {
+      // 有音频：阻止跳转，只控制播放/暂停
       e.preventDefault()
-      window.dispatchEvent(
-        new CustomEvent('play-global-audio', {
-          detail: {
-            src: audioUrl,
-            cover: post.pageCoverThumbnail || post.pageCover,
-            title: post.title,
-            href: post.href,
-            category: post.category
-          }
-        })
-      )
+      e.stopPropagation()
+      if (isPlaying) {
+        window.dispatchEvent(new CustomEvent('pause-global-audio'))
+      } else {
+        window.dispatchEvent(
+          new CustomEvent('play-global-audio', {
+            detail: {
+              src: audioUrl,
+              cover: post.pageCoverThumbnail || post.pageCover,
+              title: post.title,
+              href: post.href,
+              category: post.category
+            }
+          })
+        )
+      }
     }
+    // 无音频：不做拦截，让 SmartLink 正常跳转（或者你也可以改为什么都不做）
   }
 
   return (
@@ -63,11 +87,18 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
                 className='h-56 w-full object-cover object-center group-hover:scale-110 duration-500'
               />
               
-              {/* 播放按钮：绝对居中，CSS极细圆环+内嵌三角 */}
-              <div className='absolute inset-0 z-10 flex items-center justify-center pointer-events-none'>
-                <div className='w-9 h-9 rounded-full border-[1.5px] border-white/50 flex items-center justify-center shadow-sm'>
-                  <i className='fas fa-play text-sm text-white/50 ml-[1px]' />
-                </div>
+              {/* 播放按钮：根据播放状态变化位置和大小 */}
+              <div
+                className={`absolute z-10 transition-all duration-300 ease-in-out pointer-events-none ${
+                  isPlaying
+                    ? 'bottom-2 right-2 w-8 h-8' /* 播放中：右下角，变小 */
+                    : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12' /* 暂停：正中间，变大 */
+                } rounded-full border border-white/60 bg-black/30 backdrop-blur-md flex items-center justify-center shadow-lg`}>
+                <i
+                  className={`fas ${
+                    isPlaying ? 'fa-pause text-xs' : 'fa-play text-lg ml-[2px]'
+                  } text-white/90`}
+                />
               </div>
             </SmartLink>
           </div>
