@@ -19,7 +19,6 @@ export default function GlobalAudioPlayer() {
   const [playing, setPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
-  // 默认音量 80%
   const [volume, setVolume] = useState(0.8)
   const [muted, setMuted] = useState(false)
   const [showVolume, setShowVolume] = useState(false)
@@ -89,7 +88,6 @@ export default function GlobalAudioPlayer() {
     )
   }, [playing, audioData?.src, minimized])
 
-  // 广播时间更新给文章内组件
   useEffect(() => {
     if (duration > 0) {
       window.dispatchEvent(
@@ -100,7 +98,6 @@ export default function GlobalAudioPlayer() {
     }
   }, [currentTime, duration, audioData?.src])
 
-  // 自动折叠逻辑：9秒后折叠
   useEffect(() => {
     let autoCollapseTimer = null
     if (playing && !hasManuallyExpanded && !minimized) {
@@ -180,25 +177,20 @@ export default function GlobalAudioPlayer() {
   return (
     <div id="global-audio-player-root">
       <audio ref={audioRef} />
-      <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-3xl z-[9999] transition-all duration-500 ease-out transform ${visible && !minimized ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
-        <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-white/30 dark:border-gray-700/50 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] px-4 py-3 flex items-center gap-4">
-          <div className="relative flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm cursor-pointer group" onClick={togglePlay}>
-            {audioData?.cover ? (
-              <img src={audioData.cover} alt='封面' className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white">
-                <i className="fas fa-music text-xl" />
-              </div>
-            )}
-            <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/40 transition-colors">
-              <div className="w-8 h-8 rounded-full border border-white/70 bg-white/20 backdrop-blur-md flex items-center justify-center shadow-md">
-                <i className={`fas ${playing ? 'fa-pause' : 'fa-play'} text-sm text-white ${!playing ? 'translate-x-[1px]' : ''}`} />
-              </div>
-            </div>
-          </div>
+      <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-2xl z-[9999] transition-all duration-500 ease-out transform ${visible && !minimized ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
+        <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-white/30 dark:border-gray-700/50 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] px-4 py-3 flex items-center gap-3">
+          
+          {/* 播放/暂停按钮（与文章内统一） */}
+          <button
+            onClick={togglePlay}
+            className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-colors'
+            style={{ backgroundColor: '#3A4A7A' }}>
+            <i className={`fas ${playing ? 'fa-pause' : 'fa-play'} text-sm text-white ${!playing ? 'ml-[2px]' : ''}`} />
+          </button>
 
+          {/* 中间：标题 + 进度条 */}
           <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
-            <div className="font-extrabold text-sm text-gray-800 dark:text-gray-100 truncate">
+            <div className="font-bold text-xs text-gray-800 dark:text-gray-100 truncate">
               {audioData?.href ? (
                 <SmartLink href={audioData.href} className="hover:text-indigo-500 transition-colors">
                   {audioData.title || '未知节目'}
@@ -208,31 +200,23 @@ export default function GlobalAudioPlayer() {
               )}
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => skip(-15)} className="text-gray-500 hover:text-indigo-500 transition-colors flex-shrink-0" title="后退15秒">
-                <i className="fas fa-undo-alt text-xs" />
-              </button>
-              <div className="flex-1 flex items-center gap-2">
-                <span className="text-[10px] text-gray-500 tabular-nums w-8 text-right">{formatTime(currentTime)}</span>
-                <div
-                  ref={progressRef}
-                  onPointerDown={(e) => { e.preventDefault(); setDragging(true); seekFromClientX(e.clientX) }}
-                  onPointerMove={(e) => dragging && seekFromClientX(e.clientX)}
-                  onPointerUp={() => setDragging(false)}
-                  className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer relative group"
-                >
-                  <div className="h-full bg-indigo-500 rounded-full group-hover:bg-indigo-400 transition-colors" style={{ width: `${progress}%` }} />
-                  <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-indigo-500 rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity" style={{ left: `calc(${progress}% - 6px)` }} />
-                </div>
-                <span className="text-[10px] text-gray-500 tabular-nums w-8">{formatTime(duration)}</span>
+              <span className="text-[10px] text-gray-500 tabular-nums w-8 text-right">{formatTime(currentTime)}</span>
+              <div
+                ref={progressRef}
+                onPointerDown={(e) => { e.preventDefault(); setDragging(true); seekFromClientX(e.clientX) }}
+                onPointerMove={(e) => dragging && seekFromClientX(e.clientX)}
+                onPointerUp={() => setDragging(false)}
+                className="flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer relative group max-w-md"
+              >
+                <div className="h-full rounded-full transition-colors" style={{ width: `${progress}%`, backgroundColor: '#3A4A7A' }} />
               </div>
-              <button onClick={() => skip(15)} className="text-gray-500 hover:text-indigo-500 transition-colors flex-shrink-0" title="前进15秒">
-                <i className="fas fa-redo-alt text-xs" />
-              </button>
+              <span className="text-[10px] text-gray-500 tabular-nums w-8">{formatTime(duration)}</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2">
-            <button onClick={cycleSpeed} className="w-10 h-6 rounded text-[10px] font-bold text-gray-500 hover:text-indigo-500 border border-gray-300 dark:border-gray-600 transition-colors flex items-center justify-center" title="切换倍速">
+          {/* 右侧：倍速 + 音量 + 折叠，垂直居中对齐 */}
+          <div className="flex items-center justify-end gap-1 flex-shrink-0">
+            <button onClick={cycleSpeed} className="w-8 h-6 rounded text-[10px] font-bold text-gray-500 hover:text-indigo-500 border border-gray-300 dark:border-gray-600 transition-colors flex items-center justify-center" title="切换倍速">
               {SPEEDS[speedIndex]}x
             </button>
             <div className="relative flex items-center" onMouseEnter={() => setShowVolume(true)} onMouseLeave={() => setShowVolume(false)}>
@@ -250,13 +234,14 @@ export default function GlobalAudioPlayer() {
                         setMuted(false)
                         if (audioRef.current) { audioRef.current.volume = vol; audioRef.current.muted = false; }
                       }}
-                      className="w-20 h-1 accent-indigo-500 cursor-pointer"
+                      className="w-20 h-1 cursor-pointer"
+                      style={{ accentColor: '#3A4A7A' }}
                     />
                   </div>
                 </div>
               )}
             </div>
-            <button onClick={() => setMinimized(true)} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-indigo-500 transition-colors" title="折叠到右侧工具栏">
+            <button onClick={() => setMinimized(true)} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-indigo-500 transition-colors" title="折叠">
               <i className="fas fa-chevron-down text-xs" />
             </button>
           </div>
