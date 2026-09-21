@@ -4,9 +4,25 @@ import CONFIG from '../config'
 import { BlogPostCardInfo } from './BlogPostCardInfo'
 import { useEffect, useState } from 'react'
 
-// 模块级全局状态：保证同一时间只有一个音频在播放，且暂停后能恢复
 let currentAudio = null
 let currentSrc = null
+
+// 解析 ext：既支持纯链接，也支持 {"audio":"链接"} 格式
+const parseAudioFromExt = (ext) => {
+  if (!ext) return null
+  const raw = typeof ext === 'string' ? ext.trim() : ''
+  if (!raw) return null
+  // 先尝试 JSON 解析
+  try {
+    const parsed = JSON.parse(raw)
+    if (parsed?.audio) return parsed.audio
+  } catch (e) {
+    // 不是 JSON，看是不是直接的链接
+  }
+  // 纯链接判断
+  if (raw.startsWith('http')) return raw
+  return null
+}
 
 const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
   const showPreview =
@@ -19,28 +35,14 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
     post?.pageCoverThumbnail &&
     !showPreview
 
-  // 解析 ext 字段
-  let audioUrl = null
-  if (post.ext) {
-    try {
-      const extData = typeof post.ext === 'string' ? JSON.parse(post.ext) : post.ext
-      audioUrl = extData?.audio || null
-    } catch (e) {
-      audioUrl = null
-    }
-  }
-
+  const audioUrl = parseAudioFromExt(post.ext)
   const [isPlaying, setIsPlaying] = useState(false)
 
-  // 监听全局音频状态，同步当前卡片图标
   useEffect(() => {
     const handleStateChange = (e) => {
       const { src, playing } = e.detail
-      if (src === audioUrl) {
-        setIsPlaying(playing)
-      } else {
-        setIsPlaying(false)
-      }
+      if (src === audioUrl) setIsPlaying(playing)
+      else setIsPlaying(false)
     }
     window.addEventListener('cover-audio-state-change', handleStateChange)
     return () => window.removeEventListener('cover-audio-state-change', handleStateChange)
@@ -61,20 +63,18 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
       return
     }
 
-    // 情况1：点击的是同一个音频
+    // 同一首：暂停/继续
     if (currentSrc === audioUrl && currentAudio) {
       if (currentAudio.paused) {
-        // 暂停中 → 继续播放
         currentAudio.play().then(() => broadcastState(audioUrl, true)).catch(() => {})
       } else {
-        // 播放中 → 暂停（保留实例，不销毁）
         currentAudio.pause()
         broadcastState(audioUrl, false)
       }
       return
     }
 
-    // 情况2：点击的是不同音频，先停掉旧的
+    // 不同首：停旧的，播新的
     if (currentAudio) {
       currentAudio.pause()
       broadcastState(currentSrc, false)
@@ -82,23 +82,22 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
       currentSrc = null
     }
 
-    // 情况3：播放新音频
     const audio = new Audio(audioUrl)
     audio
       .play()
       .then(() => {
         currentAudio = audio
         currentSrc = audioUrl
+        window.__coverAudio = audio
         broadcastState(audioUrl, true)
       })
-      .catch(() => {
-        alert('播放失败，请检查音频链接')
-      })
+      .catch(() => alert('播放失败，请检查音频链接'))
 
     audio.onended = () => {
       if (currentAudio === audio) {
         currentAudio = null
         currentSrc = null
+        window.__coverAudio = null
         broadcastState(audioUrl, false)
       }
     }
