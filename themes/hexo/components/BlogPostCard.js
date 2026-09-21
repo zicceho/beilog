@@ -22,7 +22,6 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
   const audioUrl = post?.audio || post?.Audio
   const [isPlaying, setIsPlaying] = useState(false)
 
-  // 监听全局播放状态
   useEffect(() => {
     const handleStateChange = (e) => {
       const { playing, currentSrc } = e.detail
@@ -38,12 +37,10 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
   }, [audioUrl])
 
   const handleCoverClick = (e) => {
-    // 无论如何，先阻止冒泡和默认跳转
     e.preventDefault()
     e.stopPropagation()
 
     if (audioUrl) {
-      // 有音频：控制播放/暂停
       if (isPlaying) {
         window.dispatchEvent(new CustomEvent('pause-global-audio'))
       } else {
@@ -60,7 +57,6 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
         )
       }
     } else {
-      // 无音频：弹出提示
       alert('暂无音频节目，点击标题查看文稿')
     }
   }
@@ -84,7 +80,6 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
           <div
             className='md:w-[38%] h-56 flex-shrink-0 overflow-hidden relative cursor-pointer'
             onClick={handleCoverClick}>
-            {/* 这里用普通 div 包裹，绝对不跳转，只控制播放 */}
             <LazyImage
               priority={index === 1}
               alt={post?.title}
@@ -92,19 +87,12 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
               className='h-56 w-full object-cover object-center group-hover:scale-110 duration-500'
             />
             
-            {/* 播放/暂停按钮：绝对居中（大） <-> 右下角（小） */}
             <div
               className={`absolute z-10 pointer-events-none transition-all duration-300 ease-in-out ${
                 isPlaying
                   ? 'bottom-2 right-2'
                   : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
               }`}>
-              {/* 
-                核心逻辑：
-                1. 暂停时：fa-regular fa-play-circle，居中，text-5xl（大）
-                2. 播放时：fa-regular fa-pause-circle，右下角，text-3xl（小）
-                两者使用完全相同的 fa-regular 前缀，确保圆环粗细和透明度一模一样。
-              */}
               <i
                 className={`fa-regular ${
                   isPlaying
