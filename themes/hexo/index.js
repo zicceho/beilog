@@ -71,7 +71,6 @@ const LayoutBase = props => {
         </div>
       )}
       {post && <ButtonJumpToComment />}
-      {showRandomButton && <ButtonRandomPostMini {...props} />}
     </>
   )
 
@@ -190,7 +189,7 @@ const LayoutArchive = props => {
 }
 
 const LayoutSlug = props => {
-  const { post, lock, validPassword, siteInfo } = props
+  const { post, lock, validPassword } = props
   const router = useRouter()
   const waiting404 = siteConfig('POST_WAITING_TIME_FOR_404') * 1000
 
@@ -205,8 +204,19 @@ const LayoutSlug = props => {
     }
   }, [post])
 
-  const coverUrl = post?.pageCoverThumbnail || post?.pageCover || siteInfo?.pageCover || siteInfo?.icon
-  const hasAudioField = post?.audio || post?.Audio
+  // 从 ext 字段解析音频链接：既支持纯链接，也支持 {"audio":"链接"} 格式
+  let extAudio = null
+  if (post?.ext) {
+    const raw = typeof post.ext === 'string' ? post.ext.trim() : ''
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw)
+        extAudio = parsed?.audio || null
+      } catch (e) {
+        if (raw.startsWith('http')) extAudio = raw
+      }
+    }
+  }
 
   return (
     <>
@@ -216,15 +226,9 @@ const LayoutSlug = props => {
           <div className='overflow-x-auto flex-grow mx-auto md:w-full md:px-5 '>
             <article id='article-wrapper' className='subpixel-antialiased overflow-y-hidden'>
               <section className='px-5 justify-center mx-auto max-w-2xl lg:max-w-full'>
-                {hasAudioField ? (
+                {extAudio ? (
                   <div className='mb-8'>
-                    <AudioPlayer
-                      src={post.audio || post.Audio}
-                      cover={coverUrl}
-                      title={post.title}
-                      href={post.href}
-                      category={post.category}
-                    />
+                    <AudioPlayer src={extAudio} />
                   </div>
                 ) : (
                   <NotionAudioEnhancer post={post} />
