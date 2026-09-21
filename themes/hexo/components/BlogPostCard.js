@@ -54,7 +54,6 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
         />
 
         {showPageCover && (
-          {/* 宽度收窄至 38% */}
           <div className='md:w-[38%] h-56 flex-shrink-0 overflow-hidden relative'>
             <SmartLink href={post?.href} onClick={handleCoverClick}>
               <LazyImage
@@ -67,7 +66,6 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
               {/* 播放按钮：绝对居中，CSS极细圆环+内嵌三角 */}
               <div className='absolute inset-0 z-10 flex items-center justify-center pointer-events-none'>
                 <div className='w-9 h-9 rounded-full border-[1.5px] border-white/50 flex items-center justify-center shadow-sm'>
-                  {/* 这里的 ml-[1px] 用来微调三角形的视觉居中，使其不偏不倚 */}
                   <i className='fas fa-play text-sm text-white/50 ml-[1px]' />
                 </div>
               </div>
