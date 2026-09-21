@@ -12,8 +12,30 @@ export const BlogPostCardInfo = ({
   showPageCover,
   showSummary
 }) => {
-  // 兼容大小写：不管它映射成 audio 还是 Audio，都能抓到
   const audioUrl = post?.audio || post?.Audio
+
+  const handleButtonClick = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (audioUrl) {
+      // 有音频：播放
+      window.dispatchEvent(
+        new CustomEvent('play-global-audio', {
+          detail: {
+            src: audioUrl,
+            cover: post.pageCoverThumbnail || post.pageCover,
+            title: post.title,
+            href: post.href,
+            category: post.category
+          }
+        })
+      )
+    } else {
+      // 无音频：直接跳转到文章页面
+      window.location.href = post?.href || '/'
+    }
+  }
 
   return (
     <article
@@ -21,32 +43,13 @@ export const BlogPostCardInfo = ({
       <div>
         <header>
           <h2 className='flex items-start gap-2'>
-            {/* 有音频：显示按钮 */}
-            {audioUrl ? (
-              <button
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  window.dispatchEvent(
-                    new CustomEvent('play-global-audio', {
-                      detail: {
-                        src: audioUrl,
-                        cover: post.pageCoverThumbnail || post.pageCover,
-                        title: post.title,
-                        href: post.href,
-                        category: post.category
-                      }
-                    })
-                  )
-                }}
-                className='flex-shrink-0 mt-1 w-7 h-7 rounded-full bg-indigo-50 dark:bg-indigo-900/50 text-indigo-500 hover:bg-indigo-500 hover:text-white flex items-center justify-center transition-colors shadow-sm'
-                title='播放本期音频'>
-                <i className='fas fa-play-circle text-sm' />
-              </button>
-            ) : (
-              /* 无音频：显示透明占位符，保持对齐 */
-              <div className='flex-shrink-0 mt-1 w-7 h-7' />
-            )}
+            {/* 始终显示播放按钮，点击逻辑根据有没有音频来区分 */}
+            <button
+              onClick={handleButtonClick}
+              className='flex-shrink-0 mt-1 w-7 h-7 rounded-full bg-indigo-50 dark:bg-indigo-900/50 text-indigo-500 hover:bg-indigo-500 hover:text-white flex items-center justify-center transition-colors shadow-sm'
+              title={audioUrl ? '播放本期音频' : '阅读本期文章'}>
+              <i className='fas fa-play-circle text-sm' />
+            </button>
 
             <SmartLink
               href={post?.href}
