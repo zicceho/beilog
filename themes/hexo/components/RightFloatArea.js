@@ -1,73 +1,67 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
 import ButtonDarkModeFloat from './ButtonFloatDarkMode'
 import ButtonJumpToTop from './ButtonJumpToTop'
 
+/**
+ * 悬浮在右下角的按钮，当页面向下滚动100px时会出现
+ * 当页面回到顶部时会隐藏
+ * @param {*} param0
+ * @returns
+ */
 export default function RightFloatArea({ floatSlot }) {
   const [showFloatButton, switchShow] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const router = useRouter()
-
-  const isArticlePage = router.pathname === '/[prefix]/[slug]'
 
   const scrollListener = useCallback(() => {
-    const targetRef = document.getElementById('wrapper') || document.documentElement
+    const targetRef =
+      document.getElementById('wrapper') || document.documentElement
     const clientHeight = targetRef?.clientHeight || 0
-    const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0
-    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0
+    const scrollY =
+      window.pageYOffset || document.documentElement.scrollTop || 0
+    const viewportHeight =
+      window.innerHeight || document.documentElement.clientHeight || 0
+
     const fullHeight = Math.max(1, clientHeight - viewportHeight)
+
     let per = parseFloat(((scrollY / fullHeight) * 100).toFixed(0))
+
+    // 完整的边界处理
     if (isNaN(per) || per < 0) per = 0
     if (per > 100) per = 100
+
     const shouldShow = scrollY > 100 && per > 0
-    if (shouldShow !== showFloatButton) switchShow(shouldShow)
+
+    // 右下角显示悬浮按钮
+    if (shouldShow !== showFloatButton) {
+      switchShow(shouldShow)
+    }
   }, [showFloatButton])
 
   useEffect(() => {
-    const throttledScroll = () => window.requestAnimationFrame(() => scrollListener())
+    const throttledScroll = () => {
+      window.requestAnimationFrame(() => {
+        scrollListener()
+      })
+    }
+
     window.addEventListener('scroll', throttledScroll, { passive: true })
+
+    // 初始调用一次检查初始状态
     scrollListener()
+
     return () => window.removeEventListener('scroll', throttledScroll)
   }, [scrollListener])
-
-  useEffect(() => {
-    const handleAudioState = (e) => setIsPlaying(e.detail.playing)
-    window.addEventListener('audio-play-state-change', handleAudioState)
-    return () => window.removeEventListener('audio-play-state-change', handleAudioState)
-  }, [])
-
-  const handleTogglePlayer = () => {
-    window.dispatchEvent(new CustomEvent('toggle-player-visibility'))
-  }
 
   return (
     <div
       className={
         (showFloatButton ? 'opacity-100 ' : 'invisible opacity-0') +
-        ' duration-300 transition-all bottom-12 right-1 fixed z-20 text-white bg-[#3A4A7A] rounded-sm'
+        '  duration-300 transition-all bottom-12 right-1 fixed justify-end z-20  text-white bg-indigo-500 dark:bg-hexo-black-gray rounded-sm'
       }>
-      <div className='flex flex-col items-center select-none'>
-        {/* 统一使用官方标准 40x40 尺寸单元，保证图标不挤压变形 */}
-        <div className='w-10 h-10 flex justify-center items-center'>
-          <ButtonDarkModeFloat />
-        </div>
-
-        <div
-          onClick={handleTogglePlayer}
-          className='w-10 h-10 flex justify-center items-center hover:bg-black/20 transition-colors cursor-pointer'
-          title='展开/收起播放器'>
-          <i className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-base`} />
-        </div>
-
-        {isArticlePage && (
-          <div className='w-10 h-10 flex justify-center items-center'>
-            {floatSlot}
-          </div>
-        )}
-
-        <div className='w-10 h-10 flex items-center justify-center'>
-          <ButtonJumpToTop />
-        </div>
+      <div
+        className={'justify-center flex flex-col items-center cursor-pointer'}>
+        <ButtonDarkModeFloat />
+        {floatSlot}
+        <ButtonJumpToTop />
       </div>
     </div>
   )
