@@ -237,23 +237,32 @@ const LayoutSlug = props => {
   const router = useRouter()
   const waiting404 = siteConfig('POST_WAITING_TIME_FOR_404') * 1000
 
-  // 自动播放逻辑：从首页跳转过来时，如果带有 autoplay 参数，则自动触发播放
+  // 自动播放逻辑：从首页封面跳转过来时，如果 URL 带有 autoplay=true，且文章有音频，则自动触发全局播放
   useEffect(() => {
-    if (post && router.query.autoplay === 'true' && (post.audio || post.Audio)) {
+    if (post && router.query.autoplay === 'true') {
       const audioSrc = post.audio || post.Audio
-      window.dispatchEvent(
-        new CustomEvent('play-global-audio', {
-          detail: {
-            src: audioSrc,
-            cover: post.pageCoverThumbnail || post.pageCover,
-            title: post.title,
-            href: post.href,
-            category: post.category
-          }
-        })
-      )
-      // 用 replace 悄悄去掉 URL 里的参数，防止刷新或切换路由时重复播放
-      router.replace(post.href, undefined, { shallow: true })
+      if (audioSrc) {
+        // 延迟 800ms，确保全局播放器组件挂载完成后再发指令
+        const timer = setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent('play-global-audio', {
+              detail: {
+                src: audioSrc,
+                cover: post.pageCoverThumbnail || post.pageCover,
+                title: post.title,
+                href: post.href,
+                category: post.category
+              }
+            })
+          )
+        }, 800)
+        // 悄悄移除 URL 参数，避免刷新或切换路由时重复播放
+        router.replace(post.href, undefined, { shallow: true })
+        return () => clearTimeout(timer)
+      } else {
+        // 文章没有音频，只清理参数即可，不触发播放
+        router.replace(post.href, undefined, { shallow: true })
+      }
     }
   }, [post, router])
 
