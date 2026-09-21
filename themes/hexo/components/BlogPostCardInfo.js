@@ -12,49 +12,16 @@ export const BlogPostCardInfo = ({
   showPageCover,
   showSummary
 }) => {
-  const audioUrl = post?.audio || post?.Audio
-
-  const handleButtonClick = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    if (audioUrl) {
-      // 有音频：播放
-      window.dispatchEvent(
-        new CustomEvent('play-global-audio', {
-          detail: {
-            src: audioUrl,
-            cover: post.pageCoverThumbnail || post.pageCover,
-            title: post.title,
-            href: post.href,
-            category: post.category
-          }
-        })
-      )
-    } else {
-      // 无音频：直接跳转到文章页面
-      window.location.href = post?.href || '/'
-    }
-  }
-
   return (
     <article
       className={`flex flex-col justify-between lg:p-6 p-4 lg:px-8 px-6 ${showPageCover && !showPreview ? 'md:flex-1 w-full md:max-h-60' : 'w-full'}`}>
       <div>
         <header>
-          <h2 className='flex items-start gap-2'>
-            {/* 始终显示播放按钮，点击逻辑根据有没有音频来区分 */}
-            <button
-              onClick={handleButtonClick}
-              className='flex-shrink-0 mt-1 w-7 h-7 rounded-full bg-indigo-50 dark:bg-indigo-900/50 text-indigo-500 hover:bg-indigo-500 hover:text-white flex items-center justify-center transition-colors shadow-sm'
-              title={audioUrl ? '播放本期音频' : '阅读本期文章'}>
-              <i className='fas fa-play-circle text-sm' />
-            </button>
-
+          <h2>
             <SmartLink
               href={post?.href}
               passHref
-              className={`flex-1 min-w-0 line-clamp-2 replace cursor-pointer text-2xl ${
+              className={`line-clamp-2 replace cursor-pointer text-2xl ${
                 showPreview ? 'text-center' : ''
               } leading-tight font-bold text-gray-600 dark:text-gray-100 hover:text-indigo-700 dark:hover:text-indigo-400`}>
               {siteConfig('POST_TITLE_ICON') && (
@@ -106,7 +73,9 @@ export const BlogPostCardInfo = ({
         )}
       </div>
 
+      {/* 底部日期与标签区域 */}
       <div>
+        {/* 将 justify-between 改为靠左排列 */}
         <div className='text-gray-400 flex items-center'>
           <SmartLink
             href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
@@ -116,6 +85,7 @@ export const BlogPostCardInfo = ({
             {post?.publishDay || post.date}
           </SmartLink>
 
+          {/* 标签区域移到日期后面，ml-2 实现空两格 */}
           <div className='flex flex-wrap items-center ml-2 gap-1'>
             {post.tagItems?.map(tag => (
               <TagItemMini key={tag.name} tag={tag} />
