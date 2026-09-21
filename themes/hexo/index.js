@@ -1,4 +1,4 @@
-import Comment from '@/components/Comment'
+=import Comment from '@/components/Comment'
 import replaceSearchResult from '@/components/Mark'
 import NotionPage from '@/components/NotionPage'
 import ShareBar from '@/components/ShareBar'
@@ -42,7 +42,6 @@ const AlgoliaSearchModal = dynamic(
   { ssr: false }
 )
 
-// 主题全局状态
 const ThemeGlobalHexo = createContext()
 export const useHexoGlobal = () => useContext(ThemeGlobalHexo)
 
@@ -52,18 +51,12 @@ const LayoutBase = props => {
   const router = useRouter()
   const showRandomButton = siteConfig('HEXO_MENU_RANDOM', false, CONFIG)
   const isArticleSlugPage = router.pathname === '/[prefix]/[slug]'
-  const hexoArticleRouteLoading = siteConfig(
-    'HEXO_ARTICLE_ROUTE_LOADING',
-    true,
-    CONFIG
-  )
-  const showArticleSwitchPlaceholder =
-    hexoArticleRouteLoading && isArticleSlugPage && onLoading
+  const hexoArticleRouteLoading = siteConfig('HEXO_ARTICLE_ROUTE_LOADING', true, CONFIG)
+  const showArticleSwitchPlaceholder = hexoArticleRouteLoading && isArticleSlugPage && onLoading
 
   const headerSlot = post ? (
     <PostHero {...props} />
-  ) : router.route === '/' &&
-    siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? (
+  ) : router.route === '/' && siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? (
     <Hero {...props} />
   ) : null
 
@@ -74,11 +67,7 @@ const LayoutBase = props => {
     <>
       {post?.toc?.length > 1 && (
         <div className='block lg:hidden'>
-          <TocDrawerButton
-            onClick={() => {
-              drawerRight?.current?.handleSwitchVisible()
-            }}
-          />
+          <TocDrawerButton onClick={() => drawerRight?.current?.handleSwitchVisible()} />
         </div>
       )}
       {post && <ButtonJumpToComment />}
@@ -89,9 +78,7 @@ const LayoutBase = props => {
 
   return (
     <ThemeGlobalHexo.Provider value={{ searchModal }}>
-      <div
-        id='theme-hexo'
-        className={`${siteConfig('FONT_STYLE')} dark:bg-black scroll-smooth`}>
+      <div id='theme-hexo' className={`${siteConfig('FONT_STYLE')} dark:bg-black scroll-smooth`}>
         <Style />
         <Header {...props} />
         <Transition
@@ -110,22 +97,12 @@ const LayoutBase = props => {
         <main
           id='wrapper'
           className={`${
-            post
-              ? 'pt-6'
-              : router.route === '/' && siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG)
-                ? 'pt-6'
-                : 'pt-28'
+            post ? 'pt-6' : router.route === '/' && siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? 'pt-6' : 'pt-28'
           } bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
           <div
             id='container-inner'
-            className={
-              (JSON.parse(siteConfig('LAYOUT_SIDEBAR_REVERSE'))
-                ? 'flex-row-reverse'
-                : '') +
-              ' w-full mx-auto lg:flex lg:space-x-4 justify-center relative z-10'
-            }>
-            <div
-              className={`${className || ''} w-full ${fullWidth ? '' : 'max-w-4xl'} h-full overflow-hidden`}>
+            className={(JSON.parse(siteConfig('LAYOUT_SIDEBAR_REVERSE')) ? 'flex-row-reverse' : '') + ' w-full mx-auto lg:flex lg:space-x-4 justify-center relative z-10'}>
+            <div className={`${className || ''} w-full ${fullWidth ? '' : 'max-w-4xl'} h-full overflow-hidden`}>
               {showArticleSwitchPlaceholder ? (
                 <ArticleSwitchPlaceholder />
               ) : (
@@ -160,22 +137,14 @@ const LayoutBase = props => {
   )
 }
 
-const LayoutIndex = props => {
-  return <LayoutPostList {...props} className='pt-0' />
-}
+const LayoutIndex = props => <LayoutPostList {...props} className='pt-0' />
 
-const LayoutPostList = props => {
-  return (
-    <div className='pt-0'>
-      <SlotBar {...props} />
-      {siteConfig('POST_LIST_STYLE') === 'page' ? (
-        <BlogPostListPage {...props} />
-      ) : (
-        <BlogPostListScroll {...props} />
-      )}
-    </div>
-  )
-}
+const LayoutPostList = props => (
+  <div className='pt-0'>
+    <SlotBar {...props} />
+    {siteConfig('POST_LIST_STYLE') === 'page' ? <BlogPostListPage {...props} /> : <BlogPostListScroll {...props} />}
+  </div>
+)
 
 const LayoutSearch = props => {
   const { keyword } = props
@@ -187,10 +156,7 @@ const LayoutSearch = props => {
       replaceSearchResult({
         doms: document.getElementsByClassName('replace'),
         search: keyword,
-        target: {
-          element: 'span',
-          className: 'text-red-500 border-b border-dashed'
-        }
+        target: { element: 'span', className: 'text-red-500 border-b border-dashed' }
       })
     }
   })
@@ -201,12 +167,7 @@ const LayoutSearch = props => {
         <SearchNav {...props} />
       ) : (
         <div id='posts-wrapper'>
-          {' '}
-          {siteConfig('POST_LIST_STYLE') === 'page' ? (
-            <BlogPostListPage {...props} />
-          ) : (
-            <BlogPostListScroll {...props} />
-          )}{' '}
+          {siteConfig('POST_LIST_STYLE') === 'page' ? <BlogPostListPage {...props} /> : <BlogPostListScroll {...props} />}
         </div>
       )}
     </div>
@@ -220,11 +181,7 @@ const LayoutArchive = props => {
       <Card className='w-full'>
         <div className='mb-10 pb-20 bg-white md:px-12 md:pt-6 md:pb-12 p-3 min-h-full dark:bg-hexo-black-gray'>
           {Object.keys(archivePosts).map(archiveTitle => (
-            <BlogPostArchive
-              key={archiveTitle}
-              posts={archivePosts[archiveTitle]}
-              archiveTitle={archiveTitle}
-            />
+            <BlogPostArchive key={archiveTitle} posts={archivePosts[archiveTitle]} archiveTitle={archiveTitle} />
           ))}
         </div>
       </Card>
@@ -233,56 +190,23 @@ const LayoutArchive = props => {
 }
 
 const LayoutSlug = props => {
-  const { post, lock, validPassword } = props
+  const { post, lock, validPassword, siteInfo } = props
   const router = useRouter()
   const waiting404 = siteConfig('POST_WAITING_TIME_FOR_404') * 1000
 
-  // 自动播放逻辑：从首页封面跳转过来时，如果 URL 带有 autoplay=true，且文章有音频，则自动触发全局播放
-  useEffect(() => {
-    if (post && router.query.autoplay === 'true') {
-      const audioSrc = post.audio || post.Audio
-      if (audioSrc) {
-        // 延迟 800ms，确保全局播放器组件挂载完成后再发指令
-        const timer = setTimeout(() => {
-          window.dispatchEvent(
-            new CustomEvent('play-global-audio', {
-              detail: {
-                src: audioSrc,
-                cover: post.pageCoverThumbnail || post.pageCover,
-                title: post.title,
-                href: post.href,
-                category: post.category
-              }
-            })
-          )
-        }, 800)
-        // 悄悄移除 URL 参数，避免刷新或切换路由时重复播放
-        router.replace(post.href, undefined, { shallow: true })
-        return () => clearTimeout(timer)
-      } else {
-        // 文章没有音频，只清理参数即可，不触发播放
-        router.replace(post.href, undefined, { shallow: true })
-      }
-    }
-  }, [post, router])
-
   useEffect(() => {
     if (!post) {
-      setTimeout(
-        () => {
-          if (isBrowser) {
-            const article = document.querySelector('#article-wrapper #notion-article')
-            if (!article) {
-              router.push('/404').then(() => {
-                console.warn('找不到页面', router.asPath)
-              })
-            }
-          }
-        },
-        waiting404
-      )
+      setTimeout(() => {
+        if (isBrowser) {
+          const article = document.querySelector('#article-wrapper #notion-article')
+          if (!article) router.push('/404').then(() => console.warn('找不到页面', router.asPath))
+        }
+      }, waiting404)
     }
   }, [post])
+
+  // 默认封面回退链：文章缩略图 -> 文章大图 -> 站点背景图 -> 站点个人主页图(InfoCard)
+  const coverUrl = post?.pageCoverThumbnail || post?.pageCover || siteInfo?.pageCover || siteInfo?.icon
 
   return (
     <>
@@ -290,16 +214,13 @@ const LayoutSlug = props => {
         {lock && <ArticleLock validPassword={validPassword} />}
         {!lock && post && (
           <div className='overflow-x-auto flex-grow mx-auto md:w-full md:px-5 '>
-            <article
-              id='article-wrapper'
-              className='subpixel-antialiased overflow-y-hidden'>
+            <article id='article-wrapper' className='subpixel-antialiased overflow-y-hidden'>
               <section className='px-5 justify-center mx-auto max-w-2xl lg:max-w-full'>
-                {/* 从 Notion 的 Audio 字段读取，自动在正文上方生成播放器 */}
                 {post?.audio || post?.Audio ? (
                   <div className='mb-8'>
                     <AudioPlayer
                       src={post.audio || post.Audio}
-                      cover={post.pageCoverThumbnail || post.pageCover}
+                      cover={coverUrl}
                       title={post.title}
                       href={post.href}
                       category={post.category}
@@ -335,9 +256,7 @@ const Layout404 = props => {
     setTimeout(() => {
       if (isBrowser) {
         const article = document.querySelector('#article-wrapper #notion-article')
-        if (!article) {
-          router.push('/').then(() => {})
-        }
+        if (!article) router.push('/').then(() => {})
       }
     }, 3000)
   })
@@ -345,9 +264,7 @@ const Layout404 = props => {
     <>
       <div className='text-black w-full h-screen text-center justify-center content-center items-center flex flex-col'>
         <div className='dark:text-gray-200'>
-          <h2 className='inline-block border-r-2 border-gray-600 mr-2 px-3 py-2 align-top'>
-            404
-          </h2>
+          <h2 className='inline-block border-r-2 border-gray-600 mr-2 px-3 py-2 align-top'>404</h2>
           <div className='inline-block text-left h-32 leading-10 items-center'>
             <h2 className='m-0 p-0'>{locale.COMMON.NOT_FOUND}</h2>
           </div>
@@ -367,19 +284,13 @@ const LayoutCategoryIndex = props => {
           <i className='mr-4 fa-solid fa-layer-group' /> {locale.COMMON.CATEGORY}:
         </div>
         <div id='category-list' className='duration-200 flex flex-wrap mx-8'>
-          {categoryOptions?.map(category => {
-            return (
-              <SmartLink
-                key={category.name}
-                href={`/category/${category.name}`}
-                passHref
-                legacyBehavior>
-                <div className={' duration-300 dark:hover:text-white px-5 cursor-pointer py-2 hover:text-indigo-400'}>
-                  <i className='mr-4 fas fa-folder' /> {category.name}({category.count})
-                </div>
-              </SmartLink>
-            )
-          })}
+          {categoryOptions?.map(category => (
+            <SmartLink key={category.name} href={`/category/${category.name}`} passHref legacyBehavior>
+              <div className={' duration-300 dark:hover:text-white px-5 cursor-pointer py-2 hover:text-indigo-400'}>
+                <i className='mr-4 fas fa-folder' /> {category.name}({category.count})
+              </div>
+            </SmartLink>
+          ))}
         </div>
       </Card>
     </div>
