@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const formatTime = (seconds) => {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00'
@@ -8,79 +8,155 @@ const formatTime = (seconds) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-// 默认音频链接（无音频时播放）
-const DEFAULT_AUDIO_URL = 'https://na.885111.xyz/faq'
-
-export default function AudioPlayer({ src, cover, title, href, siteInfo }) {
+export default function AudioPlayer({ src }) {
+  const audioRef = useRef(null)
+  const progressRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [remaining, setRemaining] = useState(0)
-
-  // 有传入的音频则使用，否则使用默认音频
-  const hasAudio = !!src
-  const audioSrc = src || DEFAULT_AUDIO_URL
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [volume, setVolume] = useState(0.8)
+  const [muted, setMuted] = useState(false)
+  const [showVolume, setShowVolume] = useState(false)
+  const [dragging, setDragging] = useState(false)
 
   useEffect(() => {
-    const handleStateChange = (e) => {
-      const { playing, currentSrc } = e.detail
-      if (currentSrc === audioSrc) setIsPlaying(playing)
-      else setIsPlaying(false)
-    }
+    const audio = audioRef.current
+    if (!audio) return
+    audio.volume = volume
+    audio.muted = muted
 
-    const handleTimeUpdate = (e) => {
-      const { currentTime, duration, currentSrc } = e.detail
-      if (currentSrc === audioSrc && duration > 0) {
-        setProgress((currentTime / duration) * 100)
-        setRemaining(Math.max(0, duration - currentTime))
-      } else if (currentSrc !== audioSrc) {
-        setProgress(0)
-        setRemaining(0)
-      }
-    }
+    const onTimeUpdate = () => setCurrentTime(audio.currentTime)
+    const onLoadedMetadata = () => setDuration(audio.duration || 0)
+    const onPlaying = () => setIsPlaying(true)
+    const onPause = () => setIsPlaying(false)
+    const onEnded = () => { setIsPlaying(false); setCurrentTime(0); audio.currentTime = 0 }
 
-    window.addEventListener('audio-play-state-change', handleStateChange)
-    window.addEventListener('audio-time-update', handleTimeUpdate)
+    audio.addEventListener('timeupdate', onTimeUpdate)
+    audio.addEventListener('loadedmetadata', onLoadedMetadata)
+    audio.addEventListener('playing', onPlaying)
+    audio.addEventListener('pause', onPause)
+    audio.addEventListener('ended', onEnded)
+
     return () => {
-      window.removeEventListener('audio-play-state-change', handleStateChange)
-      window.removeEventListener('audio-time-update', handleTimeUpdate)
+      audio.removeEventListener('timeupdate', onTimeUpdate)
+      audio.removeEventListener('loadedmetadata', onLoadedMetadata)
+      audio.removeEventListener('playing', onPlaying)
+      audio.removeEventListener('pause', onPause)
+      audio.removeEventListener('ended', onEnded)
     }
-  }, [audioSrc])
+  }, [volume, muted])
 
-  const handleClick = () => {
-    // 始终使用 audioSrc 触发播放
-    window.dispatchEvent(
-      new CustomEvent('toggle-global-audio', {
-        detail: { src: audioSrc, cover, title, href }
-      })
-    )
+  const togglePlay = () => {
+    if (!audioRef.current) return
+    if (audioRef.current.paused) {
+      audioRef.current.play().catch(() => {})
+    } else {
+      audioRef.current.pause()
+    }
   }
 
+  const skip = (seconds) => {
+    if (!audioRef.current) return
+    audioRef.current.currentTime = Math.max(0, Math.min(duration, audioRef.current.currentTime + seconds))
+  }
+
+  const toggleMute = () => {
+    if (!audioRef.current) return
+    const newMuted = !audioRef.current.muted
+    audioRef.current.muted = newMuted
+    setMuted(newMuted)
+  }
+
+  const seekFromClientX = (clientX) => {
+    const audio = audioRef.current
+    const bar = progressRef.current
+    if (!audio || !bar || !duration) return
+    const rect = bar.getBoundingClientRect()
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width))
+    const next = ratio * duration
+    audio.currentTime = next
+    setCurrentTime(next)
+  }
+
+  const progress = duration ? (currentTime / duration) * 100 : 0
+
   return (
-    <div 
-      className='my-3 mb-6 flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5'
-      onClick={handleClick}
-    >
-      <div className='flex-shrink-0 w-8 h-8 flex items-center justify-center leading-none'>
-        <i 
-          className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-2xl`}
-          style={{ color: '#3A4A7A' }}
-        />
-      </div>
+    <div className='my-4 flex items-center gap-3 rounded-xl px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700'>
+      <audio ref={audioRef} src={src} preload='metadata' />
 
-      {/* 进度条自适应宽度，translate-y 微调对齐 */}
-      <div className='flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden flex items-center translate-y-[1px]'>
+      {/* 播放/暂停 */}
+      <button
+        onClick={togglePlay}
+        className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105'
+        style={{ backgroundColor: '#3A4A7A' }}>
+        <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} text-sm text-white ${!isPlaying ? 'ml-[2px]' : ''}`} />
+      </button>
+
+      {/* 快退 5 秒 */}
+      <button onClick={() => skip(-5)} className='text-gray-500 hover:text-[#3A4A7A] transition-colors flex-shrink-0' title='后退5秒'>
+        <i className='fa-solid fa-rotate-left text-sm' />
+      </button>
+
+      {/* 进度条 + 时间 */}
+      <div className='flex-1 flex items-center gap-2'>
+        <span className='text-[10px] text-gray-500 tabular-nums w-9 text-right'>{formatTime(currentTime)}</span>
         <div
-          className='h-full rounded-full transition-all duration-300'
-          style={{ 
-            width: `${progress}%`,
-            background: 'linear-gradient(90deg, #5A6A9A 0%, #3A4A7A 100%)'
-          }}
-        />
+          ref={progressRef}
+          onPointerDown={(e) => { e.preventDefault(); setDragging(true); seekFromClientX(e.clientX) }}
+          onPointerMove={(e) => dragging && seekFromClientX(e.clientX)}
+          onPointerUp={() => setDragging(false)}
+          className='flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer relative group'
+        >
+          <div
+            className='h-full rounded-full transition-all duration-300'
+            style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #5A6A9A 0%, #3A4A7A 100%)' }}
+          />
+          <div
+            className='absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-[#3A4A7A] rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity'
+            style={{ left: `calc(${progress}% - 6px)` }}
+          />
+        </div>
+        <span className='text-[10px] text-gray-500 tabular-nums w-9'>{formatTime(duration)}</span>
       </div>
 
-      <span className='text-xs text-gray-400 tabular-nums whitespace-nowrap'>
-        {formatTime(remaining)}
-      </span>
+      {/* 快进 5 秒 */}
+      <button onClick={() => skip(5)} className='text-gray-500 hover:text-[#3A4A7A] transition-colors flex-shrink-0' title='前进5秒'>
+        <i className='fa-solid fa-rotate-right text-sm' />
+      </button>
+
+      {/* 音量控制 */}
+      <div
+        className='relative flex items-center flex-shrink-0'
+        onMouseEnter={() => setShowVolume(true)}
+        onMouseLeave={() => setShowVolume(false)}
+      >
+        <button
+          onClick={toggleMute}
+          className='w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors'>
+          <i className={`fa-solid ${muted ? 'fa-volume-xmark' : 'fa-volume-high'} text-sm`} />
+        </button>
+        {showVolume && (
+          <div className='absolute bottom-full left-1/2 -translate-x-1/2 pb-2'>
+            <div className='p-3 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-600 z-50 flex items-center justify-center' style={{ width: '36px', height: '100px' }}>
+              <input
+                type='range'
+                min='0'
+                max='1'
+                step='0.05'
+                value={muted ? 0 : volume}
+                onChange={(e) => {
+                  const vol = parseFloat(e.target.value)
+                  setVolume(vol)
+                  setMuted(false)
+                  if (audioRef.current) { audioRef.current.volume = vol; audioRef.current.muted = false }
+                }}
+                className='w-20 h-1 cursor-pointer'
+                style={{ accentColor: '#3A4A7A', transform: 'rotate(-90deg)', transformOrigin: 'center' }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
