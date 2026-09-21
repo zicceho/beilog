@@ -32,7 +32,7 @@ import TagItemMini from './components/TagItemMini'
 import TocDrawer from './components/TocDrawer'
 import TocDrawerButton from './components/TocDrawerButton'
 import ArticleSwitchPlaceholder from './components/ArticleSwitchPlaceholder'
-import NotionAudioEnhancer from './components/NotionAudioEnhancer'
+import AudioPlayer from './components/AudioPlayer'
 import GlobalAudioPlayer from './components/GlobalAudioPlayer'
 import CONFIG from './config'
 import { Style } from './style'
@@ -264,8 +264,19 @@ const LayoutSlug = props => {
               id='article-wrapper'
               className='subpixel-antialiased overflow-y-hidden'>
               <section className='px-5 justify-center mx-auto max-w-2xl lg:max-w-full'>
+                {/* 从 Notion 的 Audio 字段读取，自动在正文上方生成播放器 */}
+                {post?.audio || post?.Audio ? (
+                  <div className='mb-8'>
+                    <AudioPlayer
+                      src={post.audio || post.Audio}
+                      cover={post.pageCoverThumbnail || post.pageCover}
+                      title={post.title}
+                      href={post.href}
+                      category={post.category}
+                    />
+                  </div>
+                ) : null}
                 {post && <NotionPage post={post} />}
-                {post && <NotionAudioEnhancer post={post} />}
               </section>
               <ShareBar post={post} />
               {post?.type === 'Post' && (
