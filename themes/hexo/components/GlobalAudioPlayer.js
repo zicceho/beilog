@@ -179,14 +179,15 @@ export default function GlobalAudioPlayer() {
               <img src={audioData.cover} alt='封面' className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-[#5A6A9A] to-[#3A4A7A] flex items-center justify-center text-white">
-                <i className="fas fa-music text-lg" />
+                <i className="fa-solid fa-music text-lg" />
               </div>
             )}
             <button
               onClick={togglePlay}
               className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[1px] hover:bg-black/50 transition-colors"
             >
-              <i className={`fa ${playing ? 'fa-pause-circle-o' : 'fa-play-circle-o'} text-3xl text-white/80`} />
+              {/* 使用 FA6 图标 */}
+              <i className={`fa-solid ${playing ? 'fa-circle-pause' : 'fa-circle-play'} text-3xl text-white/80`} />
             </button>
           </div>
 
@@ -202,7 +203,7 @@ export default function GlobalAudioPlayer() {
             </div>
             <div className="flex items-center gap-2">
               <button onClick={() => skip(-5)} className="text-gray-500 hover:text-[#3A4A7A] transition-colors flex-shrink-0" title="后退5秒">
-                <i className="fas fa-undo-alt text-xs" />
+                <i className="fa-solid fa-rotate-left text-xs" />
               </button>
               <span className="text-[10px] text-gray-500 tabular-nums w-8 text-right">{formatTime(currentTime)}</span>
               <div
@@ -217,7 +218,7 @@ export default function GlobalAudioPlayer() {
               </div>
               <span className="text-[10px] text-gray-500 tabular-nums w-8">{formatTime(duration)}</span>
               <button onClick={() => skip(5)} className="text-gray-500 hover:text-[#3A4A7A] transition-colors flex-shrink-0" title="前进5秒">
-                <i className="fas fa-redo-alt text-xs" />
+                <i className="fa-solid fa-rotate-right text-xs" />
               </button>
             </div>
           </div>
@@ -225,7 +226,7 @@ export default function GlobalAudioPlayer() {
           <div className="flex items-center justify-end gap-1 flex-shrink-0">
             <div className="relative flex items-center" onMouseEnter={() => setShowVolume(true)} onMouseLeave={() => setShowVolume(false)}>
               <button onClick={toggleMute} className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
-                <i className={`fa ${muted ? 'fa-volume-off' : 'fa-volume-up'} text-sm`} />
+                <i className={`fa-solid ${muted ? 'fa-volume-xmark' : 'fa-volume-high'} text-sm`} />
               </button>
               {showVolume && (
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 pb-2">
@@ -246,7 +247,7 @@ export default function GlobalAudioPlayer() {
               )}
             </div>
             <button onClick={() => setMinimized(true)} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#3A4A7A] transition-colors" title="折叠">
-              <i className="fas fa-chevron-down text-xs" />
+              <i className="fa-solid fa-chevron-down text-xs" />
             </button>
           </div>
         </div>
