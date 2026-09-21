@@ -12,6 +12,7 @@ const formatTime = (seconds) => {
 export default function GlobalAudioPlayer() {
   const audioRef = useRef(null)
   const progressRef = useRef(null)
+  const titleRef = useRef(null)
 
   const [audioData, setAudioData] = useState(null)
   const [playing, setPlaying] = useState(false)
@@ -24,27 +25,52 @@ export default function GlobalAudioPlayer() {
   const [visible, setVisible] = useState(false)
   const [minimized, setMinimized] = useState(false)
   const [hasManuallyExpanded, setHasManuallyExpanded] = useState(false)
+  const [shouldScroll, setShouldScroll] = useState(false) // 长标题滚动判定
+
+  // 检查标题是否需要滚动
+  useEffect(() => {
+    if (titleRef.current && audioData?.title) {
+      // 如果文本实际宽度 > 容器宽度，则开启滚动
+      setShouldScroll(titleRef.current.scrollWidth > titleRef.current.clientWidth)
+    } else {
+      setShouldScroll(false)
+    }
+  }, [audioData?.title, visible])
 
   useEffect(() => {
-    const handlePlayGlobal = (e) => {
+    const handleToggleGlobal = (e) => {
       const { src, cover, title, href } = e.detail
-      setAudioData((prev) => ({
-        src,
-        cover: cover || prev?.cover,
-        title: title || prev?.title,
-        href: href || prev?.href
-      }))
-      setVisible(true)
-      setMinimized(false)
-      setHasManuallyExpanded(false)
-      setTimeout(() => {
+
+      // 1. 如果当前没有播放任何音频，或者点击的是另一首音频
+      if (!audioData || audioData.src !== src) {
+        setAudioData({ src, cover, title, href })
+        setVisible(true)
+        setMinimized(false)
+        setHasManuallyExpanded(false)
+        
+        // 延迟播放新音频
+        setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.src = src
+            audioRef.current.volume = volume
+            audioRef.current.muted = muted
+            audioRef.current.play().catch(() => {})
+          }
+        }, 0)
+      } 
+      // 2. 点击的是当前正在播放/暂停的这一首，切换状态即可，绝不重置进度
+      else {
+        setVisible(true)
+        setMinimized(false)
+        setHasManuallyExpanded(true) // 手动操作后，取消自动折叠
         if (audioRef.current) {
-          audioRef.current.src = src
-          audioRef.current.volume = volume
-          audioRef.current.muted = muted
-          audioRef.current.play().catch(() => {})
+          if (audioRef.current.paused) {
+            audioRef.current.play().catch(() => {})
+          } else {
+            audioRef.current.pause()
+          }
         }
-      }, 0)
+      }
     }
 
     const handlePauseGlobal = () => {
@@ -70,17 +96,19 @@ export default function GlobalAudioPlayer() {
       }
     }
 
-    window.addEventListener('play-global-audio', handlePlayGlobal)
+    window.addEventListener('toggle-global-audio', handleToggleGlobal)
+    window.addEventListener('play-global-audio', handleToggleGlobal) // 兼容旧事件
     window.addEventListener('pause-global-audio', handlePauseGlobal)
     window.addEventListener('expand-global-audio', handleExpand)
     window.addEventListener('toggle-global-audio', handleToggle)
     return () => {
-      window.removeEventListener('play-global-audio', handlePlayGlobal)
+      window.removeEventListener('toggle-global-audio', handleToggleGlobal)
+      window.removeEventListener('play-global-audio', handleToggleGlobal)
       window.removeEventListener('pause-global-audio', handlePauseGlobal)
       window.removeEventListener('expand-global-audio', handleExpand)
       window.removeEventListener('toggle-global-audio', handleToggle)
     }
-  }, [volume, muted, visible, minimized])
+  }, [audioData, volume, muted, visible, minimized])
 
   useEffect(() => {
     window.dispatchEvent(
@@ -172,7 +200,6 @@ export default function GlobalAudioPlayer() {
     <div id="global-audio-player-root">
       <audio ref={audioRef} />
 
-      {/* 定义滚动动画的 keyframes */}
       <style jsx global>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -188,7 +215,7 @@ export default function GlobalAudioPlayer() {
       <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-2xl z-[9999] transition-all duration-500 ease-out transform ${visible && !minimized ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
         <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-white/30 dark:border-gray-700/50 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] px-4 py-3 flex items-center gap-4">
 
-          {/* 方形封面，去掉虚化，让按钮更透明 */}
+          {/* 封面 + 极透明磨砂按钮 */}
           <div className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm">
             {audioData?.cover ? (
               <img src={audioData.cover} alt='封面' className="w-full h-full object-cover" />
@@ -199,23 +226,27 @@ export default function GlobalAudioPlayer() {
             )}
             <button
               onClick={togglePlay}
-              className="absolute inset-0 flex items-center justify-center bg-black/10 hover:bg-black/20 transition-colors"
+              className="absolute inset-0 flex items-center justify-center bg-black/5 hover:bg-black/20 transition-colors"
             >
-              <i className={`fa-solid ${playing ? 'fa-circle-pause' : 'fa-circle-play'} text-3xl text-white/60`} />
+              {/* 透明度降低，磨砂质感 */}
+              <i className={`fa-solid ${playing ? 'fa-circle-pause' : 'fa-circle-play'} text-3xl text-white/40 drop-shadow-md`} />
             </button>
           </div>
 
-          {/* 中间：标题 + 5秒快退快进 + 进度条 */}
           <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 overflow-hidden">
-            {/* 滚动标题实现 */}
+            {/* 长标题按需滚动 */}
             <div className="font-bold text-xs text-gray-800 dark:text-gray-100 w-full overflow-hidden">
               {audioData?.href ? (
                 <SmartLink href={audioData.href} className="hover:text-[#3A4A7A] transition-colors block w-full overflow-hidden">
-                  <span className="animate-marquee">{audioData.title || '未知节目'}</span>
+                  <span ref={titleRef} className={shouldScroll ? 'animate-marquee' : 'truncate'}>
+                    {audioData.title || '未知节目'}
+                  </span>
                 </SmartLink>
               ) : (
                 <div className="w-full overflow-hidden">
-                  <span className="animate-marquee">{audioData?.title || '未知节目'}</span>
+                  <span ref={titleRef} className={shouldScroll ? 'animate-marquee' : 'truncate'}>
+                    {audioData?.title || '未知节目'}
+                  </span>
                 </div>
               )}
             </div>
@@ -231,7 +262,6 @@ export default function GlobalAudioPlayer() {
                 onPointerUp={() => setDragging(false)}
                 className="flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer relative group max-w-md"
               >
-                {/* 全局进度条渐变 */}
                 <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #5A6A9A 0%, #3A4A7A 100%)' }} />
                 <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-white border border-[#3A4A7A] rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity" style={{ left: `calc(${progress}% - 4px)` }} />
               </div>
