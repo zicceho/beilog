@@ -1,6 +1,5 @@
 import LazyImage from '@/components/LazyImage'
 import { siteConfig } from '@/lib/config'
-import SmartLink from '@/components/SmartLink'
 import CONFIG from '../config'
 import { BlogPostCardInfo } from './BlogPostCardInfo'
 import { useEffect, useState } from 'react'
@@ -39,10 +38,12 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
   }, [audioUrl])
 
   const handleCoverClick = (e) => {
+    // 无论如何，先阻止冒泡和默认跳转
+    e.preventDefault()
+    e.stopPropagation()
+
     if (audioUrl) {
-      // 有音频：阻止跳转，只控制播放/暂停
-      e.preventDefault()
-      e.stopPropagation()
+      // 有音频：控制播放/暂停
       if (isPlaying) {
         window.dispatchEvent(new CustomEvent('pause-global-audio'))
       } else {
@@ -59,10 +60,8 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
         )
       }
     } else {
-      // 没有音频：阻止跳转，什么都不做（或者你也可以弹出提示）
-      e.preventDefault()
-      e.stopPropagation()
-      // 可选：在这里加入“暂无音频节目”的提示逻辑
+      // 无音频：弹出提示
+      alert('暂无音频节目，点击标题查看文稿')
     }
   }
 
@@ -85,7 +84,7 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
           <div
             className='md:w-[38%] h-56 flex-shrink-0 overflow-hidden relative cursor-pointer'
             onClick={handleCoverClick}>
-            {/* 这里用 div 替代了 SmartLink，确保点击图片不跳转 */}
+            {/* 这里用普通 div 包裹，绝对不跳转，只控制播放 */}
             <LazyImage
               priority={index === 1}
               alt={post?.title}
@@ -93,17 +92,25 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
               className='h-56 w-full object-cover object-center group-hover:scale-110 duration-500'
             />
             
-            {/* APlayer 式动效按钮：居中变大 <-> 右下角变小 */}
+            {/* 播放/暂停按钮：绝对居中（大） <-> 右下角（小） */}
             <div
-              className={`absolute z-10 transition-all duration-300 ease-in-out pointer-events-none ${
+              className={`absolute z-10 pointer-events-none transition-all duration-300 ease-in-out ${
                 isPlaying
-                  ? 'bottom-2 right-2 w-8 h-8'
-                  : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12'
-              } rounded-full border-[1.5px] border-white/60 bg-black/20 backdrop-blur-md flex items-center justify-center shadow-lg`}>
+                  ? 'bottom-2 right-2'
+                  : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
+              }`}>
+              {/* 
+                核心逻辑：
+                1. 暂停时：fa-regular fa-play-circle，居中，text-5xl（大）
+                2. 播放时：fa-regular fa-pause-circle，右下角，text-3xl（小）
+                两者使用完全相同的 fa-regular 前缀，确保圆环粗细和透明度一模一样。
+              */}
               <i
-                className={`fas ${
-                  isPlaying ? 'fa-pause text-xs' : 'fa-play text-lg ml-[2px]'
-                } text-white/90`}
+                className={`fa-regular ${
+                  isPlaying
+                    ? 'fa-pause-circle text-3xl'
+                    : 'fa-play-circle text-5xl'
+                } text-white/70 drop-shadow-lg`}
               />
             </div>
           </div>
