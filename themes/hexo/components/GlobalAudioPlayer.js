@@ -9,7 +9,6 @@ const formatTime = (seconds) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-// 标题字符长度阈值，超过则滚动
 const TITLE_MAX_LENGTH = 18
 
 export default function GlobalAudioPlayer({ siteInfo }) {
@@ -29,7 +28,6 @@ export default function GlobalAudioPlayer({ siteInfo }) {
   const [hasManuallyExpanded, setHasManuallyExpanded] = useState(false)
 
   const defaultCover = siteInfo?.pageCover || siteInfo?.icon
-  // 直接用字符长度判断是否滚动
   const shouldScroll = audioData?.title && audioData.title.length > TITLE_MAX_LENGTH
 
   useEffect(() => {
@@ -42,7 +40,6 @@ export default function GlobalAudioPlayer({ siteInfo }) {
       }
 
       if (audioData && audioData.src === src) {
-        // 同一首：只切换播放/暂停，保留进度
         setVisible(true)
         setMinimized(false)
         setHasManuallyExpanded(true)
@@ -54,7 +51,6 @@ export default function GlobalAudioPlayer({ siteInfo }) {
           }
         }
       } else {
-        // 新音频：替换音源，从头开始
         const newCover = cover || defaultCover
         setAudioData({ src, cover: newCover, title, href })
         setVisible(true)
@@ -84,12 +80,11 @@ export default function GlobalAudioPlayer({ siteInfo }) {
       setHasManuallyExpanded(true)
     }
 
-    // 新增：纯展开/收起切换，不碰播放状态
     const handleToggleVisibility = () => {
       if (!visible || minimized) {
         setVisible(true)
         setMinimized(false)
-        setHasManuallyExpanded(true) // 手动展开后取消自动折叠
+        setHasManuallyExpanded(true)
       } else {
         setMinimized(true)
       }
@@ -125,7 +120,6 @@ export default function GlobalAudioPlayer({ siteInfo }) {
     }
   }, [currentTime, duration, audioData?.src])
 
-  // 自动折叠：播放后 9 秒，未被手动展开过则自动收起
   useEffect(() => {
     let autoCollapseTimer = null
     if (playing && !hasManuallyExpanded && !minimized) {
@@ -221,11 +215,12 @@ export default function GlobalAudioPlayer({ siteInfo }) {
                 <i className="fa-solid fa-music text-lg" />
               </div>
             )}
+            {/* 磨砂玻璃质感按钮，不管什么封面都能看清 */}
             <button
               onClick={togglePlay}
-              className="absolute inset-0 flex items-center justify-center bg-black/5 hover:bg-black/20 transition-colors"
+              className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-colors"
             >
-              <i className={`fa-solid ${playing ? 'fa-circle-pause' : 'fa-circle-play'} text-3xl text-white/40 drop-shadow-md`} />
+              <i className={`fa-solid ${playing ? 'fa-circle-pause' : 'fa-circle-play'} text-3xl text-white/90 drop-shadow-lg`} />
             </button>
           </div>
 
