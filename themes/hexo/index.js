@@ -1,4 +1,4 @@
-=import Comment from '@/components/Comment'
+import Comment from '@/components/Comment'
 import replaceSearchResult from '@/components/Mark'
 import NotionPage from '@/components/NotionPage'
 import ShareBar from '@/components/ShareBar'
