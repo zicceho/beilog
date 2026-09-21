@@ -19,10 +19,8 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
     post?.pageCoverThumbnail &&
     !showPreview
 
-  const audioUrl = post?.audio || post?.Audio
-
-  // 拼接跳转链接：有音频则带 autoplay=true 参数
-  const jumpHref = audioUrl ? `${post?.href}?autoplay=true` : post?.href
+  // 封面跳转链接：永远带上 autoplay=true，让详情页去判断有没有音频
+  const coverHref = `${post?.href}?autoplay=true`
 
   return (
     <div
@@ -41,8 +39,8 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
 
         {showPageCover && (
           <div className='md:w-[38%] h-56 flex-shrink-0 overflow-hidden relative'>
-            {/* 点击封面跳转到详情页，并附带参数 */}
-            <SmartLink href={jumpHref}>
+            {/* 封面图用 SmartLink，带上 autoplay 参数 */}
+            <SmartLink href={coverHref}>
               <LazyImage
                 priority={index === 1}
                 alt={post?.title}
@@ -50,12 +48,10 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
                 className='h-56 w-full object-cover object-center group-hover:scale-110 duration-500 cursor-pointer'
               />
               
-              {/* 播放按钮：缩小并放置在右下角，纯视觉提示 */}
-              {audioUrl && (
-                <div className='absolute bottom-2 right-2 z-10 pointer-events-none'>
-                  <i className='fa-regular fa-play-circle text-2xl text-white/70 drop-shadow-md' />
-                </div>
-              )}
+              {/* 播放图标：永远显示，极小、极透明、右下角 */}
+              <div className='absolute bottom-2 right-2 z-10 pointer-events-none'>
+                <i className='fa-regular fa-play-circle text-2xl text-white/50 drop-shadow-md group-hover:text-white/80 transition-colors duration-300' />
+              </div>
             </SmartLink>
           </div>
         )}
