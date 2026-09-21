@@ -28,15 +28,12 @@ export default function GlobalAudioPlayer() {
   useEffect(() => {
     const handlePlayGlobal = (e) => {
       const { src, cover, title, href } = e.detail
-      setAudioData((prev) => {
-        // 如果有新的 title/cover/href 就更新，没有则保留原有数据（避免文章内简易条只传 src 时丢失信息）
-        return {
-          src,
-          cover: cover || prev?.cover,
-          title: title || prev?.title,
-          href: href || prev?.href
-        }
-      })
+      setAudioData((prev) => ({
+        src,
+        cover: cover || prev?.cover,
+        title: title || prev?.title,
+        href: href || prev?.href
+      }))
       setVisible(true)
       setMinimized(false)
       setHasManuallyExpanded(false)
@@ -177,7 +174,6 @@ export default function GlobalAudioPlayer() {
       <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-2xl z-[9999] transition-all duration-500 ease-out transform ${visible && !minimized ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
         <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-white/30 dark:border-gray-700/50 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] px-4 py-3 flex items-center gap-4">
 
-          {/* 左侧：方形封面 + 居中播放键 */}
           <div className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm">
             {audioData?.cover ? (
               <img src={audioData.cover} alt='封面' className="w-full h-full object-cover" />
@@ -188,15 +184,14 @@ export default function GlobalAudioPlayer() {
             )}
             <button
               onClick={togglePlay}
-              className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-colors"
+              className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[1px] hover:bg-black/50 transition-colors"
             >
-              <i className={`fa ${playing ? 'fa-pause-circle-o' : 'fa-play-circle-o'} text-3xl text-white`} />
+              <i className={`fa ${playing ? 'fa-pause-circle-o' : 'fa-play-circle-o'} text-3xl text-white/80`} />
             </button>
           </div>
 
-          {/* 中间：标题 + 5秒快退快进 + 进度条 */}
           <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
-            <div className="font-bold text-xs text-gray-800 dark:text-gray-100 truncate">
+            <div className="font-bold text-xs text-gray-800 dark:text-gray-100 truncate w-full max-w-[200px] sm:max-w-xs">
               {audioData?.href ? (
                 <SmartLink href={audioData.href} className="hover:text-[#3A4A7A] transition-colors">
                   {audioData.title || '未知节目'}
@@ -209,9 +204,7 @@ export default function GlobalAudioPlayer() {
               <button onClick={() => skip(-5)} className="text-gray-500 hover:text-[#3A4A7A] transition-colors flex-shrink-0" title="后退5秒">
                 <i className="fas fa-undo-alt text-xs" />
               </button>
-
               <span className="text-[10px] text-gray-500 tabular-nums w-8 text-right">{formatTime(currentTime)}</span>
-
               <div
                 ref={progressRef}
                 onPointerDown={(e) => { e.preventDefault(); setDragging(true); seekFromClientX(e.clientX) }}
@@ -222,16 +215,13 @@ export default function GlobalAudioPlayer() {
                 <div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: '#3A4A7A' }} />
                 <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-white border border-[#3A4A7A] rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity" style={{ left: `calc(${progress}% - 4px)` }} />
               </div>
-
               <span className="text-[10px] text-gray-500 tabular-nums w-8">{formatTime(duration)}</span>
-
               <button onClick={() => skip(5)} className="text-gray-500 hover:text-[#3A4A7A] transition-colors flex-shrink-0" title="前进5秒">
                 <i className="fas fa-redo-alt text-xs" />
               </button>
             </div>
           </div>
 
-          {/* 右侧：音量（竖向滑块） + 折叠 */}
           <div className="flex items-center justify-end gap-1 flex-shrink-0">
             <div className="relative flex items-center" onMouseEnter={() => setShowVolume(true)} onMouseLeave={() => setShowVolume(false)}>
               <button onClick={toggleMute} className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
@@ -249,11 +239,7 @@ export default function GlobalAudioPlayer() {
                         if (audioRef.current) { audioRef.current.volume = vol; audioRef.current.muted = false; }
                       }}
                       className="w-20 h-1 cursor-pointer"
-                      style={{
-                        accentColor: '#3A4A7A',
-                        transform: 'rotate(-90deg)',
-                        transformOrigin: 'center'
-                      }}
+                      style={{ accentColor: '#3A4A7A', transform: 'rotate(-90deg)', transformOrigin: 'center' }}
                     />
                   </div>
                 </div>
