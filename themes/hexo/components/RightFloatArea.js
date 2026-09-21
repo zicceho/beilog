@@ -38,21 +38,22 @@ export default function RightFloatArea({ floatSlot }) {
         (showFloatButton ? 'opacity-100 ' : 'invisible opacity-0') +
         ' duration-300 transition-all bottom-12 right-1 fixed z-20 text-white bg-[#3A4A7A] rounded-sm'
       }>
+      {/* 将容器宽度从 w-10 减小到 w-8，图标也稍微调小 */}
       <div className='flex flex-col items-center'>
-        <div className='w-10 h-10 flex justify-center items-center'>
+        <div className='w-8 h-8 flex justify-center items-center'>
           <ButtonDarkModeFloat />
         </div>
 
         <div
           onClick={() => window.dispatchEvent(new CustomEvent('toggle-global-audio'))}
-          className='w-10 h-10 flex justify-center items-center hover:bg-black/20 transition-colors cursor-pointer'
+          className='w-8 h-8 flex justify-center items-center hover:bg-black/20 transition-colors cursor-pointer'
           title='展开播放器'>
-          <i className={`fa ${isPlaying ? 'fa-pause-circle-o' : 'fa-play-circle-o'} text-base`} />
+          <i className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-sm`} />
         </div>
 
         {floatSlot}
 
-        <div className='w-10 h-10 flex items-center justify-center'>
+        <div className='w-8 h-8 flex items-center justify-center'>
           <ButtonJumpToTop />
         </div>
       </div>
