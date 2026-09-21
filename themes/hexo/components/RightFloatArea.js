@@ -4,6 +4,7 @@ import ButtonJumpToTop from './ButtonJumpToTop'
 
 export default function RightFloatArea({ floatSlot }) {
   const [showFloatButton, switchShow] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   const scrollListener = useCallback(() => {
     const targetRef = document.getElementById('wrapper') || document.documentElement
@@ -25,19 +26,24 @@ export default function RightFloatArea({ floatSlot }) {
     return () => window.removeEventListener('scroll', throttledScroll)
   }, [scrollListener])
 
+  useEffect(() => {
+    const onState = (e) => setIsPlaying(e.detail.playing)
+    window.addEventListener('global-audio-state', onState)
+    return () => window.removeEventListener('global-audio-state', onState)
+  }, [])
+
   return (
     <div
       className={
         (showFloatButton ? 'opacity-100 ' : 'invisible opacity-0') +
-        '  duration-300 transition-all bottom-12 right-1 fixed justify-end z-20  text-white bg-[#3A4A7A] dark:bg-hexo-black-gray rounded-sm'
+        ' duration-300 transition-all bottom-12 right-1 fixed justify-end z-20 text-white bg-[#3A4A7A] dark:bg-hexo-black-gray rounded-sm'
       }>
-      <div className={'justify-center flex flex-col items-center cursor-pointer'}>
-        {/* 播放器折叠按钮 */}
+      <div className='justify-center flex flex-col items-center cursor-pointer'>
         <div
           onClick={() => window.dispatchEvent(new CustomEvent('toggle-player-visibility'))}
           className='w-10 h-10 flex justify-center items-center hover:bg-black/20 transition-colors'
           title='展开/收起播放器'>
-          <i className='fa-solid fa-circle-play text-base' />
+          <i className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-base`} />
         </div>
         <ButtonDarkModeFloat />
         {floatSlot}
