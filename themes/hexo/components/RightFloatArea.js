@@ -38,7 +38,7 @@ export default function RightFloatArea({ floatSlot }) {
         (showFloatButton ? 'opacity-100 ' : 'invisible opacity-0') +
         ' duration-300 transition-all bottom-12 right-1 fixed z-20 text-white bg-[#3A4A7A] rounded-sm'
       }>
-      <div className='flex flex-col items-center gap-0'>
+      <div className='flex flex-col items-center'>
         <div className='w-10 h-10 flex justify-center items-center'>
           <ButtonDarkModeFloat />
         </div>
@@ -52,7 +52,7 @@ export default function RightFloatArea({ floatSlot }) {
 
         {floatSlot}
 
-        <div className='w-10 h-10 flex justify-center items-center'>
+        <div className='w-10 h-10 flex items-center justify-center'>
           <ButtonJumpToTop />
         </div>
       </div>
