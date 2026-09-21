@@ -32,26 +32,29 @@ export default function RightFloatArea({ floatSlot }) {
     return () => window.removeEventListener('audio-play-state-change', handleAudioState)
   }, [])
 
+  const handleToggleAudio = () => {
+    // 这里不再强制播放新音频，而是通过全局状态切换，如果当前有音频则直接唤出播放器
+    window.dispatchEvent(new CustomEvent('toggle-global-audio', { detail: {} }))
+  }
+
   return (
     <div
       className={
         (showFloatButton ? 'opacity-100 ' : 'invisible opacity-0') +
         ' duration-300 transition-all bottom-12 right-1 fixed z-20 text-white bg-[#3A4A7A] rounded-sm'
       }>
-      {/* 给父容器加 gap-0 避免默认间距，每个子项严格用 w-8 h-8 包裹 */}
       <div className='flex flex-col items-center gap-1.5'>
         <div className='w-8 h-8 flex justify-center items-center'>
           <ButtonDarkModeFloat />
         </div>
 
         <div
-          onClick={() => window.dispatchEvent(new CustomEvent('toggle-global-audio'))}
-          className='w-8 h-8 flex justify-center items-center hover:bg-black/20 transition-colors cursor-pointer'
-          title='展开播放器'>
+          onClick={handleToggleAudio}
+          className='w-8 h-8 flex justify-center items-center hover:bg-black/20 transition-colors cursor-pointer translate-y-[0.5px]'
+          title='展开/折叠播放器'>
           <i className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-sm`} />
         </div>
 
-        {/* 用 w-8 h-8 容器包裹评论按钮的槽位，确保和上下高度一致 */}
         <div className='w-8 h-8 flex justify-center items-center'>
           {floatSlot}
         </div>
