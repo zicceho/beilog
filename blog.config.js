@@ -96,12 +96,7 @@ const BLOG = {
 
   // 内嵌 Notion 子页面 URL 跟随父级文章路径，例如 /article/post/{pageId}
   INNER_PAGE_URL_PARENT_PATH:
-    process.env.NEXT_PUBLIC_INNER_PAGE_URL_PARENT_PATH || false,
-
-  // 自定义 Notion 字段映射，让列表页也能读取到 Audio 字段
-  NOTION_PROPERTY_NAME: {
-    audio: 'Audio',
-  },
+    process.env.NEXT_PUBLIC_INNER_PAGE_URL_PARENT_PATH || false
 }
 
 module.exports = BLOG
