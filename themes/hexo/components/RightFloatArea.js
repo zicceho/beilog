@@ -36,7 +36,6 @@ export default function RightFloatArea({ floatSlot }) {
     return () => window.removeEventListener('audio-play-state-change', handleAudioState)
   }, [])
 
-  // 右下角按钮：只负责展开/收起播放器，不控制播放/暂停
   const handleTogglePlayer = () => {
     window.dispatchEvent(new CustomEvent('toggle-player-visibility'))
   }
@@ -47,25 +46,26 @@ export default function RightFloatArea({ floatSlot }) {
         (showFloatButton ? 'opacity-100 ' : 'invisible opacity-0') +
         ' duration-300 transition-all bottom-12 right-1 fixed z-20 text-white bg-[#3A4A7A] rounded-sm'
       }>
-      <div className='flex flex-col items-center gap-1.5'>
-        <div className='w-8 h-8 flex justify-center items-center'>
+      <div className='flex flex-col items-center select-none'>
+        {/* 统一使用官方标准 40x40 尺寸单元，保证图标不挤压变形 */}
+        <div className='w-10 h-10 flex justify-center items-center'>
           <ButtonDarkModeFloat />
         </div>
 
         <div
           onClick={handleTogglePlayer}
-          className='w-8 h-8 flex justify-center items-center hover:bg-black/20 transition-colors cursor-pointer translate-y-[0.5px]'
+          className='w-10 h-10 flex justify-center items-center hover:bg-black/20 transition-colors cursor-pointer'
           title='展开/收起播放器'>
-          <i className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-sm`} />
+          <i className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-base`} />
         </div>
 
         {isArticlePage && (
-          <div className='w-8 h-8 flex justify-center items-center'>
+          <div className='w-10 h-10 flex justify-center items-center'>
             {floatSlot}
           </div>
         )}
 
-        <div className='w-8 h-8 flex items-center justify-center'>
+        <div className='w-10 h-10 flex items-center justify-center'>
           <ButtonJumpToTop />
         </div>
       </div>
