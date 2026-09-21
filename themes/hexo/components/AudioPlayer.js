@@ -52,10 +52,13 @@ export default function AudioPlayer({ src, cover, title, href }) {
       className='my-3 mb-6 flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg px-2 py-1.5 transition-colors'
       onClick={handleClick}
     >
+      {/* 使用 FA6 图标 */}
       <i 
-        className={`fa ${isPlaying ? 'fa-pause-circle-o' : 'fa-play-circle-o'} text-2xl`}
+        className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-2xl`}
         style={{ color: '#3A4A7A' }}
       />
+
+      {/* 进度条 */}
       <div className='flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden max-w-2xl'>
         <div
           className='h-full rounded-full transition-all duration-300'
@@ -65,6 +68,8 @@ export default function AudioPlayer({ src, cover, title, href }) {
           }}
         />
       </div>
+
+      {/* 倒计时 */}
       <span className='text-xs text-gray-400 tabular-nums whitespace-nowrap'>
         {formatTime(remaining)}
       </span>
