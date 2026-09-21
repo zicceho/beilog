@@ -171,9 +171,24 @@ export default function GlobalAudioPlayer() {
   return (
     <div id="global-audio-player-root">
       <audio ref={audioRef} />
+
+      {/* 定义滚动动画的 keyframes */}
+      <style jsx global>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+          display: inline-block;
+          white-space: nowrap;
+          animation: marquee 15s linear infinite;
+        }
+      `}</style>
+
       <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-2xl z-[9999] transition-all duration-500 ease-out transform ${visible && !minimized ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
         <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-white/30 dark:border-gray-700/50 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] px-4 py-3 flex items-center gap-4">
 
+          {/* 方形封面，去掉虚化，让按钮更透明 */}
           <div className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm">
             {audioData?.cover ? (
               <img src={audioData.cover} alt='封面' className="w-full h-full object-cover" />
@@ -184,21 +199,24 @@ export default function GlobalAudioPlayer() {
             )}
             <button
               onClick={togglePlay}
-              className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[1px] hover:bg-black/50 transition-colors"
+              className="absolute inset-0 flex items-center justify-center bg-black/10 hover:bg-black/20 transition-colors"
             >
-              {/* 使用 FA6 图标 */}
-              <i className={`fa-solid ${playing ? 'fa-circle-pause' : 'fa-circle-play'} text-3xl text-white/80`} />
+              <i className={`fa-solid ${playing ? 'fa-circle-pause' : 'fa-circle-play'} text-3xl text-white/60`} />
             </button>
           </div>
 
-          <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
-            <div className="font-bold text-xs text-gray-800 dark:text-gray-100 truncate w-full max-w-[200px] sm:max-w-xs">
+          {/* 中间：标题 + 5秒快退快进 + 进度条 */}
+          <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 overflow-hidden">
+            {/* 滚动标题实现 */}
+            <div className="font-bold text-xs text-gray-800 dark:text-gray-100 w-full overflow-hidden">
               {audioData?.href ? (
-                <SmartLink href={audioData.href} className="hover:text-[#3A4A7A] transition-colors">
-                  {audioData.title || '未知节目'}
+                <SmartLink href={audioData.href} className="hover:text-[#3A4A7A] transition-colors block w-full overflow-hidden">
+                  <span className="animate-marquee">{audioData.title || '未知节目'}</span>
                 </SmartLink>
               ) : (
-                audioData?.title || '未知节目'
+                <div className="w-full overflow-hidden">
+                  <span className="animate-marquee">{audioData?.title || '未知节目'}</span>
+                </div>
               )}
             </div>
             <div className="flex items-center gap-2">
@@ -213,7 +231,8 @@ export default function GlobalAudioPlayer() {
                 onPointerUp={() => setDragging(false)}
                 className="flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer relative group max-w-md"
               >
-                <div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: '#3A4A7A' }} />
+                {/* 全局进度条渐变 */}
+                <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #5A6A9A 0%, #3A4A7A 100%)' }} />
                 <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-white border border-[#3A4A7A] rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity" style={{ left: `calc(${progress}% - 4px)` }} />
               </div>
               <span className="text-[10px] text-gray-500 tabular-nums w-8">{formatTime(duration)}</span>
