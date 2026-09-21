@@ -33,6 +33,7 @@ import TocDrawer from './components/TocDrawer'
 import TocDrawerButton from './components/TocDrawerButton'
 import ArticleSwitchPlaceholder from './components/ArticleSwitchPlaceholder'
 import AudioPlayer from './components/AudioPlayer'
+import NotionAudioEnhancer from './components/NotionAudioEnhancer'
 import GlobalAudioPlayer from './components/GlobalAudioPlayer'
 import CONFIG from './config'
 import { Style } from './style'
@@ -130,7 +131,7 @@ const LayoutBase = props => {
         </div>
         <RightFloatArea floatSlot={floatSlot} posts={props.posts} />
         <AlgoliaSearchModal cRef={searchModal} {...props} />
-        <GlobalAudioPlayer />
+        <GlobalAudioPlayer siteInfo={props.siteInfo} />
         <Footer title={siteConfig('TITLE')} />
       </div>
     </ThemeGlobalHexo.Provider>
@@ -208,6 +209,9 @@ const LayoutSlug = props => {
   // 默认封面回退链：文章缩略图 -> 文章大图 -> 站点背景图 -> 站点个人主页图(InfoCard)
   const coverUrl = post?.pageCoverThumbnail || post?.pageCover || siteInfo?.pageCover || siteInfo?.icon
 
+  // 判断使用哪种音频来源：优先字段，其次是正文里的音频块
+  const hasAudioField = post?.audio || post?.Audio
+
   return (
     <>
       <div className='w-full lg:hover:shadow lg:border rounded-t-xl lg:rounded-xl lg:px-2 lg:py-4 bg-white dark:bg-hexo-black-gray dark:border-black article'>
@@ -216,7 +220,8 @@ const LayoutSlug = props => {
           <div className='overflow-x-auto flex-grow mx-auto md:w-full md:px-5 '>
             <article id='article-wrapper' className='subpixel-antialiased overflow-y-hidden'>
               <section className='px-5 justify-center mx-auto max-w-2xl lg:max-w-full'>
-                {post?.audio || post?.Audio ? (
+                {hasAudioField ? (
+                  /* 情况一：字段有音频 -> 在正文顶部渲染播放器 */
                   <div className='mb-8'>
                     <AudioPlayer
                       src={post.audio || post.Audio}
@@ -226,7 +231,10 @@ const LayoutSlug = props => {
                       category={post.category}
                     />
                   </div>
-                ) : null}
+                ) : (
+                  /* 情况二：字段没音频 -> 扫描正文里的音频块，替换成播放器 */
+                  <NotionAudioEnhancer post={post} />
+                )}
                 {post && <NotionPage post={post} />}
               </section>
               <ShareBar post={post} />
