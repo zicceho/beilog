@@ -7,11 +7,7 @@ import SmartLink from '@/components/SmartLink'
 const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
   const showPreview =
     siteConfig('HEXO_POST_LIST_PREVIEW', null, CONFIG) && post.blockMap
-  if (
-    post &&
-    !post.pageCoverThumbnail &&
-    siteConfig('HEXO_POST_LIST_COVER_DEFAULT', null, CONFIG)
-  ) {
+  if (post && !post.pageCoverThumbnail && siteConfig('HEXO_POST_LIST_COVER_DEFAULT', null, CONFIG)) {
     post.pageCoverThumbnail = siteInfo?.pageCover
   }
   const showPageCover =
@@ -20,8 +16,7 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
     !showPreview
 
   return (
-    <div
-      className={`${siteConfig('HEXO_POST_LIST_COVER_HOVER_ENLARGE', null, CONFIG) ? ' hover:scale-110 transition-all duration-150' : ''}`}>
+    <div className={`${siteConfig('HEXO_POST_LIST_COVER_HOVER_ENLARGE', null, CONFIG) ? ' hover:scale-110 transition-all duration-150' : ''}`}>
       <div
         key={post.id}
         id='blog-post-card'
