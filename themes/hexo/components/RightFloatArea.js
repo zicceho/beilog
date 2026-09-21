@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import ButtonDarkModeFloat from './ButtonFloatDarkMode'
 import ButtonJumpToTop from './ButtonJumpToTop'
 
-export default function RightFloatArea({ floatSlot, posts }) {
+export default function RightFloatArea({ floatSlot }) {
   const [showFloatButton, switchShow] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
 
@@ -20,50 +20,38 @@ export default function RightFloatArea({ floatSlot, posts }) {
   }, [showFloatButton])
 
   useEffect(() => {
-    const throttledScroll = () => {
-      window.requestAnimationFrame(() => scrollListener())
-    }
+    const throttledScroll = () => window.requestAnimationFrame(() => scrollListener())
     window.addEventListener('scroll', throttledScroll, { passive: true })
     scrollListener()
     return () => window.removeEventListener('scroll', throttledScroll)
   }, [scrollListener])
 
   useEffect(() => {
-    const handleAudioState = (e) => {
-      setIsPlaying(e.detail.playing)
-    }
+    const handleAudioState = (e) => setIsPlaying(e.detail.playing)
     window.addEventListener('audio-play-state-change', handleAudioState)
     return () => window.removeEventListener('audio-play-state-change', handleAudioState)
   }, [])
-
-  const handleToggleAudio = () => {
-    window.dispatchEvent(new CustomEvent('toggle-global-audio'))
-  }
 
   return (
     <div
       className={
         (showFloatButton ? 'opacity-100 ' : 'invisible opacity-0') +
-        '  duration-300 transition-all bottom-12 right-1 fixed justify-end z-20  text-white bg-indigo-500 dark:bg-hexo-black-gray rounded-sm'
+        ' duration-300 transition-all bottom-12 right-1 fixed z-20 text-white bg-[#3A4A7A] rounded-sm'
       }>
-      <div className={'justify-center flex flex-col items-center cursor-pointer'}>
-        {/* 深色模式按钮 */}
+      <div className='flex flex-col items-center gap-0'>
         <div className='w-10 h-10 flex justify-center items-center'>
           <ButtonDarkModeFloat />
         </div>
 
-        {/* 播放器按钮（尺寸与其他一致） */}
         <div
-          onClick={handleToggleAudio}
-          className='w-10 h-10 flex justify-center items-center hover:bg-indigo-600 transition-colors'
+          onClick={() => window.dispatchEvent(new CustomEvent('toggle-global-audio'))}
+          className='w-10 h-10 flex justify-center items-center hover:bg-black/20 transition-colors cursor-pointer'
           title='展开播放器'>
-          <i className={`fas fa-play-circle text-base ${isPlaying ? 'animate-pulse' : ''}`} />
+          <i className={`fa ${isPlaying ? 'fa-pause-circle-o' : 'fa-play-circle-o'} text-base`} />
         </div>
 
-        {/* 原有按钮（评论等） */}
         {floatSlot}
 
-        {/* 回到顶部按钮 */}
         <div className='w-10 h-10 flex justify-center items-center'>
           <ButtonJumpToTop />
         </div>
