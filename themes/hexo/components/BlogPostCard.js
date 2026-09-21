@@ -62,9 +62,10 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
                 src={post?.pageCoverThumbnail}
                 className='h-56 md:h-full w-full object-cover object-center group-hover:scale-110 duration-500'
               />
-              {/* 右下角始终显示半透明玻璃质感的播放图标 */}
-              <div className='absolute bottom-3 right-3 z-10 pointer-events-none'>
-                <i className='fa fa-play-circle text-5xl text-white/40 drop-shadow-lg hover:text-white/80 transition-colors' />
+              
+              {/* 绝对居中、透明空心圆、右三角、半透明玻璃质感 */}
+              <div className='absolute inset-0 z-10 flex items-center justify-center pointer-events-none'>
+                <i className='fa-regular fa-play-circle text-4xl text-white/40 group-hover:text-white/80 transition-colors duration-300 drop-shadow-md' />
               </div>
             </SmartLink>
           </div>
