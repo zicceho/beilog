@@ -13,6 +13,8 @@ export default function AudioPlayer({ src, cover, title, href }) {
   const [progress, setProgress] = useState(0)
   const [remaining, setRemaining] = useState(0)
 
+  const hasAudio = !!src
+
   useEffect(() => {
     const handleStateChange = (e) => {
       const { playing, currentSrc } = e.detail
@@ -39,8 +41,8 @@ export default function AudioPlayer({ src, cover, title, href }) {
     }
   }, [src])
 
-  // 统一下发 toggle 事件，由全局播放器去判断是同曲暂停还是新曲播放
   const handleClick = () => {
+    if (!hasAudio) return
     window.dispatchEvent(
       new CustomEvent('toggle-global-audio', {
         detail: { src, cover, title, href }
@@ -50,15 +52,19 @@ export default function AudioPlayer({ src, cover, title, href }) {
 
   return (
     <div 
-      className='my-3 mb-6 flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg px-2 py-1.5 transition-colors'
+      className={`my-3 mb-6 flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors ${hasAudio ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5' : 'cursor-not-allowed opacity-60'}`}
       onClick={handleClick}
     >
-      {/* 视觉微调：加 1px 向下位移，确保图标圆心绝对对齐进度条中线 */}
-      <div className='flex-shrink-0 w-8 h-8 flex items-center justify-center translate-y-[1px]'>
-        <i 
-          className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-2xl`}
-          style={{ color: '#3A4A7A' }}
-        />
+      {/* 图标容器：只做极小的垂直微调，让圆心对齐进度条中线 */}
+      <div className='flex-shrink-0 w-8 h-8 flex items-center justify-center leading-none translate-y-[1px]'>
+        {hasAudio ? (
+          <i 
+            className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-2xl`}
+            style={{ color: '#3A4A7A' }}
+          />
+        ) : (
+          <i className='fa-solid fa-circle-play text-2xl text-gray-300 dark:text-gray-600' />
+        )}
       </div>
 
       <div className='flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden max-w-2xl flex items-center'>
@@ -66,13 +72,15 @@ export default function AudioPlayer({ src, cover, title, href }) {
           className='h-full rounded-full transition-all duration-300'
           style={{ 
             width: `${progress}%`,
-            background: 'linear-gradient(90deg, #5A6A9A 0%, #3A4A7A 100%)'
+            background: hasAudio 
+              ? 'linear-gradient(90deg, #5A6A9A 0%, #3A4A7A 100%)' 
+              : 'transparent'
           }}
         />
       </div>
 
       <span className='text-xs text-gray-400 tabular-nums whitespace-nowrap'>
-        {formatTime(remaining)}
+        {hasAudio ? formatTime(remaining) : '暂无音频'}
       </span>
     </div>
   )
