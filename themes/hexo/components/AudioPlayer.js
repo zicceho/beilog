@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const formatRemaining = (seconds) => {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00'
@@ -9,93 +9,38 @@ const formatRemaining = (seconds) => {
 }
 
 export default function AudioPlayer({ src }) {
-  const audioRef = useRef(null)
-  const progressRef = useRef(null)
-  const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [remaining, setRemaining] = useState(0)
 
   useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    const onTimeUpdate = () => {
-      const dur = audio.duration || 0
-      if (dur > 0) {
-        setProgress((audio.currentTime / dur) * 100)
-        setRemaining(Math.max(0, dur - audio.currentTime))
+    const onState = (e) => {
+      const { src: currentSrc, playing, currentTime, duration } = e.detail
+      if (currentSrc === src && duration > 0) {
+        setProgress((currentTime / duration) * 100)
+        setRemaining(Math.max(0, duration - currentTime))
       }
     }
-    const onLoadedMetadata = () => {
-      if (audio.duration) {
-        setRemaining(audio.duration)
-      }
-    }
-    const onPlaying = () => setIsPlaying(true)
-    const onPause = () => setIsPlaying(false)
-    const onEnded = () => {
-      setIsPlaying(false)
-      setProgress(100)
-      setRemaining(0)
-    }
-
-    audio.addEventListener('timeupdate', onTimeUpdate)
-    audio.addEventListener('loadedmetadata', onLoadedMetadata)
-    audio.addEventListener('playing', onPlaying)
-    audio.addEventListener('pause', onPause)
-    audio.addEventListener('ended', onEnded)
-
-    return () => {
-      audio.removeEventListener('timeupdate', onTimeUpdate)
-      audio.removeEventListener('loadedmetadata', onLoadedMetadata)
-      audio.removeEventListener('playing', onPlaying)
-      audio.removeEventListener('pause', onPause)
-      audio.removeEventListener('ended', onEnded)
-    }
+    window.addEventListener('global-audio-state', onState)
+    return () => window.removeEventListener('global-audio-state', onState)
   }, [src])
-
-  const togglePlay = (e) => {
-    e.stopPropagation()
-    const audio = audioRef.current
-    if (!audio) return
-    if (audio.paused) audio.play().catch(() => {})
-    else audio.pause()
-  }
 
   const handleProgressClick = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    // 点击进度条 → 弹出全局播放器（以后接全局用）
-    window.dispatchEvent(
-      new CustomEvent('open-global-player', {
-        detail: { src }
-      })
-    )
+    window.dispatchEvent(new CustomEvent('toggle-player-visibility'))
   }
 
   return (
     <div className='my-4 flex items-center gap-3 rounded-xl px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700'>
-      <audio ref={audioRef} src={src} preload='metadata' />
-
-      {/* 播放/暂停：保持现在的 SVG 图标样式 */}
       <button
-        onClick={togglePlay}
+        onClick={() =>
+          window.dispatchEvent(new CustomEvent('toggle-global-audio', { detail: { src } }))
+        }
         className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105'
-        style={{ backgroundColor: '#3A4A7A' }}
-        aria-label={isPlaying ? '暂停' : '播放'}>
-        {isPlaying ? (
-          <svg width='14' height='14' viewBox='0 0 24 24' fill='white'>
-            <rect x='6' y='4' width='4' height='16' rx='1' />
-            <rect x='14' y='4' width='4' height='16' rx='1' />
-          </svg>
-        ) : (
-          <svg width='14' height='14' viewBox='0 0 24 24' fill='white' style={{ marginLeft: '2px' }}>
-            <path d='M8 5v14l11-7z' />
-          </svg>
-        )}
+        style={{ backgroundColor: '#3A4A7A' }}>
+        <i className='fa-solid fa-circle-play text-sm text-white' />
       </button>
 
-      {/* 进度条：不可拖，点击 → 弹出全局播放器 */}
       <div
         onClick={handleProgressClick}
         className='flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden cursor-pointer'>
@@ -105,7 +50,6 @@ export default function AudioPlayer({ src }) {
         />
       </div>
 
-      {/* 右侧倒计时 */}
       <span className='text-xs text-gray-500 tabular-nums whitespace-nowrap'>
         {formatRemaining(remaining)}
       </span>
