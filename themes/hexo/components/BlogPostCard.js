@@ -23,7 +23,7 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
   const audioUrl = post?.audio || post?.Audio
   const [isPlaying, setIsPlaying] = useState(false)
 
-  // 监听全局播放状态，判断当前封面音频是否在播放
+  // 监听全局播放状态
   useEffect(() => {
     const handleStateChange = (e) => {
       const { playing, currentSrc } = e.detail
@@ -58,8 +58,12 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
           })
         )
       }
+    } else {
+      // 没有音频：阻止跳转，什么都不做（或者你也可以弹出提示）
+      e.preventDefault()
+      e.stopPropagation()
+      // 可选：在这里加入“暂无音频节目”的提示逻辑
     }
-    // 无音频：不做拦截，让 SmartLink 正常跳转（或者你也可以改为什么都不做）
   }
 
   return (
@@ -78,29 +82,30 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
         />
 
         {showPageCover && (
-          <div className='md:w-[38%] h-56 flex-shrink-0 overflow-hidden relative'>
-            <SmartLink href={post?.href} onClick={handleCoverClick}>
-              <LazyImage
-                priority={index === 1}
-                alt={post?.title}
-                src={post?.pageCoverThumbnail}
-                className='h-56 w-full object-cover object-center group-hover:scale-110 duration-500'
+          <div
+            className='md:w-[38%] h-56 flex-shrink-0 overflow-hidden relative cursor-pointer'
+            onClick={handleCoverClick}>
+            {/* 这里用 div 替代了 SmartLink，确保点击图片不跳转 */}
+            <LazyImage
+              priority={index === 1}
+              alt={post?.title}
+              src={post?.pageCoverThumbnail}
+              className='h-56 w-full object-cover object-center group-hover:scale-110 duration-500'
+            />
+            
+            {/* APlayer 式动效按钮：居中变大 <-> 右下角变小 */}
+            <div
+              className={`absolute z-10 transition-all duration-300 ease-in-out pointer-events-none ${
+                isPlaying
+                  ? 'bottom-2 right-2 w-8 h-8'
+                  : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12'
+              } rounded-full border-[1.5px] border-white/60 bg-black/20 backdrop-blur-md flex items-center justify-center shadow-lg`}>
+              <i
+                className={`fas ${
+                  isPlaying ? 'fa-pause text-xs' : 'fa-play text-lg ml-[2px]'
+                } text-white/90`}
               />
-              
-              {/* 播放按钮：根据播放状态变化位置和大小 */}
-              <div
-                className={`absolute z-10 transition-all duration-300 ease-in-out pointer-events-none ${
-                  isPlaying
-                    ? 'bottom-2 right-2 w-8 h-8' /* 播放中：右下角，变小 */
-                    : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12' /* 暂停：正中间，变大 */
-                } rounded-full border border-white/60 bg-black/30 backdrop-blur-md flex items-center justify-center shadow-lg`}>
-                <i
-                  className={`fas ${
-                    isPlaying ? 'fa-pause text-xs' : 'fa-play text-lg ml-[2px]'
-                  } text-white/90`}
-                />
-              </div>
-            </SmartLink>
+            </div>
           </div>
         )}
       </div>
