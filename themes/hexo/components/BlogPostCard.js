@@ -54,7 +54,8 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
         />
 
         {showPageCover && (
-          <div className='md:w-5/12 overflow-hidden relative'>
+          {/* 宽度收窄至 38% */}
+          <div className='md:w-[38%] h-56 flex-shrink-0 overflow-hidden relative'>
             <SmartLink href={post?.href} onClick={handleCoverClick}>
               <LazyImage
                 priority={index === 1}
@@ -63,9 +64,12 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
                 className='h-56 w-full object-cover object-center group-hover:scale-110 duration-500'
               />
               
-              {/* 右下角半透明玻璃质感播放图标 */}
-              <div className='absolute bottom-2 right-2 z-10 pointer-events-none'>
-                <i className='fa-regular fa-play-circle text-4xl text-white/40 group-hover:text-white/80 transition-colors duration-300 drop-shadow-md' />
+              {/* 播放按钮：绝对居中，CSS极细圆环+内嵌三角 */}
+              <div className='absolute inset-0 z-10 flex items-center justify-center pointer-events-none'>
+                <div className='w-9 h-9 rounded-full border-[1.5px] border-white/50 flex items-center justify-center shadow-sm'>
+                  {/* 这里的 ml-[1px] 用来微调三角形的视觉居中，使其不偏不倚 */}
+                  <i className='fas fa-play text-sm text-white/50 ml-[1px]' />
+                </div>
               </div>
             </SmartLink>
           </div>
