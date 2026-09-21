@@ -14,7 +14,7 @@ export const BlogPostCardInfo = ({
 }) => {
   return (
     <article
-      className={`flex flex-col justify-between lg:p-6 p-4 lg:px-8 px-6 ${showPageCover && !showPreview ? 'md:w-7/12 w-full md:max-h-60' : 'w-full'}`}>
+      className={`flex flex-col justify-between lg:p-6 p-4 lg:px-8 px-6 ${showPageCover && !showPreview ? 'md:w-[62%] w-full md:max-h-60' : 'w-full'}`}>
       <div>
         <header>
           <h2>
@@ -75,7 +75,6 @@ export const BlogPostCardInfo = ({
 
       {/* 底部日期与标签区域 */}
       <div>
-        {/* 将 justify-between 改为靠左排列 */}
         <div className='text-gray-400 flex items-center'>
           <SmartLink
             href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
@@ -85,7 +84,6 @@ export const BlogPostCardInfo = ({
             {post?.publishDay || post.date}
           </SmartLink>
 
-          {/* 标签区域移到日期后面，ml-2 实现空两格 */}
           <div className='flex flex-wrap items-center ml-2 gap-1'>
             {post.tagItems?.map(tag => (
               <TagItemMini key={tag.name} tag={tag} />
