@@ -8,6 +8,8 @@ const formatTime = (seconds) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
+const SPEEDS = [1, 1.25, 1.5, 2, 0.75]
+
 export default function AudioPlayer({ src }) {
   const audioRef = useRef(null)
   const progressRef = useRef(null)
@@ -18,12 +20,14 @@ export default function AudioPlayer({ src }) {
   const [muted, setMuted] = useState(false)
   const [showVolume, setShowVolume] = useState(false)
   const [dragging, setDragging] = useState(false)
+  const [speedIndex, setSpeedIndex] = useState(0)
 
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
     audio.volume = volume
     audio.muted = muted
+    audio.playbackRate = SPEEDS[speedIndex]
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime)
     const onLoadedMetadata = () => setDuration(audio.duration || 0)
@@ -44,20 +48,23 @@ export default function AudioPlayer({ src }) {
       audio.removeEventListener('pause', onPause)
       audio.removeEventListener('ended', onEnded)
     }
-  }, [volume, muted])
+  }, [volume, muted, speedIndex])
 
   const togglePlay = () => {
     if (!audioRef.current) return
-    if (audioRef.current.paused) {
-      audioRef.current.play().catch(() => {})
-    } else {
-      audioRef.current.pause()
-    }
+    if (audioRef.current.paused) audioRef.current.play().catch(() => {})
+    else audioRef.current.pause()
   }
 
   const skip = (seconds) => {
     if (!audioRef.current) return
     audioRef.current.currentTime = Math.max(0, Math.min(duration, audioRef.current.currentTime + seconds))
+  }
+
+  const cycleSpeed = () => {
+    const next = (speedIndex + 1) % SPEEDS.length
+    setSpeedIndex(next)
+    if (audioRef.current) audioRef.current.playbackRate = SPEEDS[next]
   }
 
   const toggleMute = () => {
@@ -81,24 +88,19 @@ export default function AudioPlayer({ src }) {
   const progress = duration ? (currentTime / duration) * 100 : 0
 
   return (
-    <div className='my-4 flex items-center gap-3 rounded-xl px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700'>
+    <div className='relative my-4 flex items-center gap-3 rounded-xl px-3 py-2.5 bg-gray-50 dark:bg-white/5'>
       <audio ref={audioRef} src={src} preload='metadata' />
 
-      {/* 播放/暂停 */}
+      {/* 播放/暂停：加 leading-none 和 ml-[2px] 保证三角绝对居中 */}
       <button
         onClick={togglePlay}
-        className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105'
+        className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center leading-none transition-transform hover:scale-105'
         style={{ backgroundColor: '#3A4A7A' }}>
         <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} text-sm text-white ${!isPlaying ? 'ml-[2px]' : ''}`} />
       </button>
 
-      {/* 快退 5 秒 */}
-      <button onClick={() => skip(-5)} className='text-gray-500 hover:text-[#3A4A7A] transition-colors flex-shrink-0' title='后退5秒'>
-        <i className='fa-solid fa-rotate-left text-sm' />
-      </button>
-
       {/* 进度条 + 时间 */}
-      <div className='flex-1 flex items-center gap-2'>
+      <div className='flex-1 flex items-center gap-2 min-w-0'>
         <span className='text-[10px] text-gray-500 tabular-nums w-9 text-right'>{formatTime(currentTime)}</span>
         <div
           ref={progressRef}
@@ -119,12 +121,25 @@ export default function AudioPlayer({ src }) {
         <span className='text-[10px] text-gray-500 tabular-nums w-9'>{formatTime(duration)}</span>
       </div>
 
-      {/* 快进 5 秒 */}
+      {/* 快退5秒 */}
+      <button onClick={() => skip(-5)} className='text-gray-500 hover:text-[#3A4A7A] transition-colors flex-shrink-0' title='后退5秒'>
+        <i className='fa-solid fa-rotate-left text-sm' />
+      </button>
+
+      {/* 快进5秒 */}
       <button onClick={() => skip(5)} className='text-gray-500 hover:text-[#3A4A7A] transition-colors flex-shrink-0' title='前进5秒'>
         <i className='fa-solid fa-rotate-right text-sm' />
       </button>
 
-      {/* 音量控制 */}
+      {/* 倍速 */}
+      <button
+        onClick={cycleSpeed}
+        className='flex-shrink-0 w-10 h-6 rounded text-[10px] font-bold text-gray-500 hover:text-[#3A4A7A] border border-gray-300 dark:border-gray-600 transition-colors flex items-center justify-center'
+        title='切换倍速'>
+        {SPEEDS[speedIndex]}x
+      </button>
+
+      {/* 音量控制：浮层改为朝下弹出，不再超出容器 */}
       <div
         className='relative flex items-center flex-shrink-0'
         onMouseEnter={() => setShowVolume(true)}
@@ -136,8 +151,8 @@ export default function AudioPlayer({ src }) {
           <i className={`fa-solid ${muted ? 'fa-volume-xmark' : 'fa-volume-high'} text-sm`} />
         </button>
         {showVolume && (
-          <div className='absolute bottom-full left-1/2 -translate-x-1/2 pb-2'>
-            <div className='p-3 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-600 z-50 flex items-center justify-center' style={{ width: '36px', height: '100px' }}>
+          <div className='absolute top-full right-0 mt-2 z-50'>
+            <div className='p-3 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-600 flex items-center justify-center' style={{ width: '36px', height: '100px' }}>
               <input
                 type='range'
                 min='0'
