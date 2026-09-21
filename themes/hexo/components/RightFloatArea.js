@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
 import ButtonDarkModeFloat from './ButtonFloatDarkMode'
 import ButtonJumpToTop from './ButtonJumpToTop'
 
 export default function RightFloatArea({ floatSlot }) {
   const [showFloatButton, switchShow] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const router = useRouter()
+
+  const isArticlePage = router.pathname === '/[prefix]/[slug]'
 
   const scrollListener = useCallback(() => {
     const targetRef = document.getElementById('wrapper') || document.documentElement
@@ -32,9 +36,9 @@ export default function RightFloatArea({ floatSlot }) {
     return () => window.removeEventListener('audio-play-state-change', handleAudioState)
   }, [])
 
-  const handleToggleAudio = () => {
-    // 这里不再强制播放新音频，而是通过全局状态切换，如果当前有音频则直接唤出播放器
-    window.dispatchEvent(new CustomEvent('toggle-global-audio', { detail: {} }))
+  // 右下角按钮：只负责展开/收起播放器，不控制播放/暂停
+  const handleTogglePlayer = () => {
+    window.dispatchEvent(new CustomEvent('toggle-player-visibility'))
   }
 
   return (
@@ -49,15 +53,17 @@ export default function RightFloatArea({ floatSlot }) {
         </div>
 
         <div
-          onClick={handleToggleAudio}
+          onClick={handleTogglePlayer}
           className='w-8 h-8 flex justify-center items-center hover:bg-black/20 transition-colors cursor-pointer translate-y-[0.5px]'
-          title='展开/折叠播放器'>
+          title='展开/收起播放器'>
           <i className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-sm`} />
         </div>
 
-        <div className='w-8 h-8 flex justify-center items-center'>
-          {floatSlot}
-        </div>
+        {isArticlePage && (
+          <div className='w-8 h-8 flex justify-center items-center'>
+            {floatSlot}
+          </div>
+        )}
 
         <div className='w-8 h-8 flex items-center justify-center'>
           <ButtonJumpToTop />
