@@ -38,8 +38,8 @@ export default function RightFloatArea({ floatSlot }) {
         (showFloatButton ? 'opacity-100 ' : 'invisible opacity-0') +
         ' duration-300 transition-all bottom-12 right-1 fixed z-20 text-white bg-[#3A4A7A] rounded-sm'
       }>
-      {/* 将容器宽度从 w-10 减小到 w-8，图标也稍微调小 */}
-      <div className='flex flex-col items-center'>
+      {/* 给父容器加 gap-0 避免默认间距，每个子项严格用 w-8 h-8 包裹 */}
+      <div className='flex flex-col items-center gap-1.5'>
         <div className='w-8 h-8 flex justify-center items-center'>
           <ButtonDarkModeFloat />
         </div>
@@ -51,7 +51,10 @@ export default function RightFloatArea({ floatSlot }) {
           <i className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-sm`} />
         </div>
 
-        {floatSlot}
+        {/* 用 w-8 h-8 容器包裹评论按钮的槽位，确保和上下高度一致 */}
+        <div className='w-8 h-8 flex justify-center items-center'>
+          {floatSlot}
+        </div>
 
         <div className='w-8 h-8 flex items-center justify-center'>
           <ButtonJumpToTop />
