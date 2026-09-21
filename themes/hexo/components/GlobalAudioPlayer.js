@@ -27,19 +27,19 @@ export default function GlobalAudioPlayer({ siteInfo }) {
   const [minimized, setMinimized] = useState(false)
   const [hasManuallyExpanded, setHasManuallyExpanded] = useState(false)
 
+  // 默认封面回退链：站点封面图 -> 站点图标
   const defaultCover = siteInfo?.pageCover || siteInfo?.icon
   const shouldScroll = audioData?.title && audioData.title.length > TITLE_MAX_LENGTH
 
   useEffect(() => {
     const handleToggleGlobal = (e) => {
       const { src, cover, title, href } = e.detail
-
-      if (!src) {
-        alert('暂无音频节目，请点击标题查看文稿')
-        return
-      }
-
+      // 使用传入的封面，如果没有则回退到默认封面
+      const newCover = cover || defaultCover
+      
+      // 判断是否同一首音频
       if (audioData && audioData.src === src) {
+        // 同一首：切换播放/暂停，保留进度
         setVisible(true)
         setMinimized(false)
         setHasManuallyExpanded(true)
@@ -51,7 +51,7 @@ export default function GlobalAudioPlayer({ siteInfo }) {
           }
         }
       } else {
-        const newCover = cover || defaultCover
+        // 新音频：替换音源，从头开始
         setAudioData({ src, cover: newCover, title, href })
         setVisible(true)
         setMinimized(false)
@@ -215,12 +215,11 @@ export default function GlobalAudioPlayer({ siteInfo }) {
                 <i className="fa-solid fa-music text-lg" />
               </div>
             )}
-            {/* 磨砂玻璃质感按钮，不管什么封面都能看清 */}
             <button
               onClick={togglePlay}
-              className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-colors"
+              className="absolute inset-0 flex items-center justify-center bg-black/10 hover:bg-black/30 transition-colors"
             >
-              <i className={`fa-solid ${playing ? 'fa-circle-pause' : 'fa-circle-play'} text-3xl text-white/90 drop-shadow-lg`} />
+              <i className={`fa-solid ${playing ? 'fa-circle-pause' : 'fa-circle-play'} text-3xl text-white/70 drop-shadow-md`} />
             </button>
           </div>
 
