@@ -36,7 +36,6 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
         })
       )
     }
-    // 如果没有音频，不阻止默认行为，SmartLink 会正常跳转
   }
 
   return (
@@ -63,10 +62,9 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
                 src={post?.pageCoverThumbnail}
                 className='h-56 md:h-full w-full object-cover object-center group-hover:scale-110 duration-500'
               />
-              {/* 封面图右下角的播放图标 */}
               {audioUrl && (
                 <div className='absolute bottom-2 right-2 z-10'>
-                  <i className='fa fa-play-circle text-3xl text-white/90 hover:text-white drop-shadow-md' />
+                  <i className='fa fa-play-circle text-3xl text-white/60 hover:text-white transition-colors drop-shadow-lg' />
                 </div>
               )}
             </SmartLink>
