@@ -4,9 +4,9 @@ import CONFIG from '../config'
 import { BlogPostCardInfo } from './BlogPostCardInfo'
 import { useEffect, useState } from 'react'
 
-// 模块级：记录当前全局正在播放的音频实例与链接，保证同一时间只有一个
-let globalAudioInstance = null
-let currentAudioSrc = null
+// 模块级全局状态：保证同一时间只有一个音频在播放，且暂停后能恢复
+let currentAudio = null
+let currentSrc = null
 
 const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
   const showPreview =
@@ -19,20 +19,20 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
     post?.pageCoverThumbnail &&
     !showPreview
 
-  // 解析 ext 字段，拿到音频链接
+  // 解析 ext 字段
   let audioUrl = null
   if (post.ext) {
     try {
       const extData = typeof post.ext === 'string' ? JSON.parse(post.ext) : post.ext
-      audioUrl = extData?.audio
+      audioUrl = extData?.audio || null
     } catch (e) {
-      // 解析失败忽略
+      audioUrl = null
     }
   }
 
   const [isPlaying, setIsPlaying] = useState(false)
 
-  // 监听全局播放状态，同步当前卡片的图标
+  // 监听全局音频状态，同步当前卡片图标
   useEffect(() => {
     const handleStateChange = (e) => {
       const { src, playing } = e.detail
@@ -61,41 +61,44 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
       return
     }
 
-    // 情况1：点击的是当前正在播放的 -> 暂停
-    if (currentAudioSrc === audioUrl && globalAudioInstance) {
-      globalAudioInstance.pause()
-      globalAudioInstance = null
-      currentAudioSrc = null
-      broadcastState(audioUrl, false)
+    // 情况1：点击的是同一个音频
+    if (currentSrc === audioUrl && currentAudio) {
+      if (currentAudio.paused) {
+        // 暂停中 → 继续播放
+        currentAudio.play().then(() => broadcastState(audioUrl, true)).catch(() => {})
+      } else {
+        // 播放中 → 暂停（保留实例，不销毁）
+        currentAudio.pause()
+        broadcastState(audioUrl, false)
+      }
       return
     }
 
-    // 情况2：有其他音频正在播放 -> 先停掉它
-    if (globalAudioInstance) {
-      globalAudioInstance.pause()
-      broadcastState(currentAudioSrc, false)
-      globalAudioInstance = null
-      currentAudioSrc = null
+    // 情况2：点击的是不同音频，先停掉旧的
+    if (currentAudio) {
+      currentAudio.pause()
+      broadcastState(currentSrc, false)
+      currentAudio = null
+      currentSrc = null
     }
 
-    // 情况3：开始播放新音频
+    // 情况3：播放新音频
     const audio = new Audio(audioUrl)
     audio
       .play()
       .then(() => {
-        globalAudioInstance = audio
-        currentAudioSrc = audioUrl
+        currentAudio = audio
+        currentSrc = audioUrl
         broadcastState(audioUrl, true)
       })
       .catch(() => {
         alert('播放失败，请检查音频链接')
       })
 
-    // 播放结束自动复位
     audio.onended = () => {
-      if (globalAudioInstance === audio) {
-        globalAudioInstance = null
-        currentAudioSrc = null
+      if (currentAudio === audio) {
+        currentAudio = null
+        currentSrc = null
         broadcastState(audioUrl, false)
       }
     }
@@ -125,7 +128,6 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
               src={post?.pageCoverThumbnail}
               className='h-56 w-full object-cover object-center group-hover:scale-110 duration-500'
             />
-            {/* 右下角图标：播放时显示暂停，暂停时显示播放 */}
             <div className='absolute bottom-2 right-2 z-10 pointer-events-none'>
               <i
                 className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-2xl text-white/70 drop-shadow-lg transition-colors`}
