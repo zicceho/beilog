@@ -62,11 +62,10 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
                 src={post?.pageCoverThumbnail}
                 className='h-56 md:h-full w-full object-cover object-center group-hover:scale-110 duration-500'
               />
-              {audioUrl && (
-                <div className='absolute bottom-2 right-2 z-10'>
-                  <i className='fa fa-play-circle text-3xl text-white/60 hover:text-white transition-colors drop-shadow-lg' />
-                </div>
-              )}
+              {/* 右下角始终显示半透明玻璃质感的播放图标 */}
+              <div className='absolute bottom-3 right-3 z-10 pointer-events-none'>
+                <i className='fa fa-play-circle text-5xl text-white/40 drop-shadow-lg hover:text-white/80 transition-colors' />
+              </div>
             </SmartLink>
           </div>
         )}
