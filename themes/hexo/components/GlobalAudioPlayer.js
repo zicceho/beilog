@@ -9,10 +9,12 @@ const formatTime = (seconds) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-export default function GlobalAudioPlayer() {
+// 标题字符长度阈值，超过则滚动
+const TITLE_MAX_LENGTH = 18
+
+export default function GlobalAudioPlayer({ siteInfo }) {
   const audioRef = useRef(null)
   const progressRef = useRef(null)
-  const titleRef = useRef(null)
 
   const [audioData, setAudioData] = useState(null)
   const [playing, setPlaying] = useState(false)
@@ -25,30 +27,39 @@ export default function GlobalAudioPlayer() {
   const [visible, setVisible] = useState(false)
   const [minimized, setMinimized] = useState(false)
   const [hasManuallyExpanded, setHasManuallyExpanded] = useState(false)
-  const [shouldScroll, setShouldScroll] = useState(false) // 长标题滚动判定
 
-  // 检查标题是否需要滚动
-  useEffect(() => {
-    if (titleRef.current && audioData?.title) {
-      // 如果文本实际宽度 > 容器宽度，则开启滚动
-      setShouldScroll(titleRef.current.scrollWidth > titleRef.current.clientWidth)
-    } else {
-      setShouldScroll(false)
-    }
-  }, [audioData?.title, visible])
+  const defaultCover = siteInfo?.pageCover || siteInfo?.icon
+  // 直接用字符长度判断是否滚动
+  const shouldScroll = audioData?.title && audioData.title.length > TITLE_MAX_LENGTH
 
   useEffect(() => {
     const handleToggleGlobal = (e) => {
       const { src, cover, title, href } = e.detail
 
-      // 1. 如果当前没有播放任何音频，或者点击的是另一首音频
-      if (!audioData || audioData.src !== src) {
-        setAudioData({ src, cover, title, href })
+      if (!src) {
+        alert('暂无音频节目，请点击标题查看文稿')
+        return
+      }
+
+      if (audioData && audioData.src === src) {
+        // 同一首：只切换播放/暂停，保留进度
+        setVisible(true)
+        setMinimized(false)
+        setHasManuallyExpanded(true)
+        if (audioRef.current) {
+          if (audioRef.current.paused) {
+            audioRef.current.play().catch(() => {})
+          } else {
+            audioRef.current.pause()
+          }
+        }
+      } else {
+        // 新音频：替换音源，从头开始
+        const newCover = cover || defaultCover
+        setAudioData({ src, cover: newCover, title, href })
         setVisible(true)
         setMinimized(false)
         setHasManuallyExpanded(false)
-        
-        // 延迟播放新音频
         setTimeout(() => {
           if (audioRef.current) {
             audioRef.current.src = src
@@ -57,19 +68,6 @@ export default function GlobalAudioPlayer() {
             audioRef.current.play().catch(() => {})
           }
         }, 0)
-      } 
-      // 2. 点击的是当前正在播放/暂停的这一首，切换状态即可，绝不重置进度
-      else {
-        setVisible(true)
-        setMinimized(false)
-        setHasManuallyExpanded(true) // 手动操作后，取消自动折叠
-        if (audioRef.current) {
-          if (audioRef.current.paused) {
-            audioRef.current.play().catch(() => {})
-          } else {
-            audioRef.current.pause()
-          }
-        }
       }
     }
 
@@ -86,29 +84,28 @@ export default function GlobalAudioPlayer() {
       setHasManuallyExpanded(true)
     }
 
-    const handleToggle = () => {
+    // 新增：纯展开/收起切换，不碰播放状态
+    const handleToggleVisibility = () => {
       if (!visible || minimized) {
         setVisible(true)
         setMinimized(false)
-        setHasManuallyExpanded(true)
+        setHasManuallyExpanded(true) // 手动展开后取消自动折叠
       } else {
         setMinimized(true)
       }
     }
 
     window.addEventListener('toggle-global-audio', handleToggleGlobal)
-    window.addEventListener('play-global-audio', handleToggleGlobal) // 兼容旧事件
     window.addEventListener('pause-global-audio', handlePauseGlobal)
     window.addEventListener('expand-global-audio', handleExpand)
-    window.addEventListener('toggle-global-audio', handleToggle)
+    window.addEventListener('toggle-player-visibility', handleToggleVisibility)
     return () => {
       window.removeEventListener('toggle-global-audio', handleToggleGlobal)
-      window.removeEventListener('play-global-audio', handleToggleGlobal)
       window.removeEventListener('pause-global-audio', handlePauseGlobal)
       window.removeEventListener('expand-global-audio', handleExpand)
-      window.removeEventListener('toggle-global-audio', handleToggle)
+      window.removeEventListener('toggle-player-visibility', handleToggleVisibility)
     }
-  }, [audioData, volume, muted, visible, minimized])
+  }, [audioData, volume, muted, defaultCover, visible, minimized])
 
   useEffect(() => {
     window.dispatchEvent(
@@ -128,6 +125,7 @@ export default function GlobalAudioPlayer() {
     }
   }, [currentTime, duration, audioData?.src])
 
+  // 自动折叠：播放后 9 秒，未被手动展开过则自动收起
   useEffect(() => {
     let autoCollapseTimer = null
     if (playing && !hasManuallyExpanded && !minimized) {
@@ -208,14 +206,13 @@ export default function GlobalAudioPlayer() {
         .animate-marquee {
           display: inline-block;
           white-space: nowrap;
-          animation: marquee 15s linear infinite;
+          animation: marquee 18s linear infinite;
         }
       `}</style>
 
       <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-2xl z-[9999] transition-all duration-500 ease-out transform ${visible && !minimized ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
         <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-white/30 dark:border-gray-700/50 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] px-4 py-3 flex items-center gap-4">
 
-          {/* 封面 + 极透明磨砂按钮 */}
           <div className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm">
             {audioData?.cover ? (
               <img src={audioData.cover} alt='封面' className="w-full h-full object-cover" />
@@ -228,24 +225,22 @@ export default function GlobalAudioPlayer() {
               onClick={togglePlay}
               className="absolute inset-0 flex items-center justify-center bg-black/5 hover:bg-black/20 transition-colors"
             >
-              {/* 透明度降低，磨砂质感 */}
               <i className={`fa-solid ${playing ? 'fa-circle-pause' : 'fa-circle-play'} text-3xl text-white/40 drop-shadow-md`} />
             </button>
           </div>
 
           <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 overflow-hidden">
-            {/* 长标题按需滚动 */}
             <div className="font-bold text-xs text-gray-800 dark:text-gray-100 w-full overflow-hidden">
               {audioData?.href ? (
                 <SmartLink href={audioData.href} className="hover:text-[#3A4A7A] transition-colors block w-full overflow-hidden">
-                  <span ref={titleRef} className={shouldScroll ? 'animate-marquee' : 'truncate'}>
-                    {audioData.title || '未知节目'}
+                  <span className={shouldScroll ? 'animate-marquee' : 'truncate'}>
+                    {audioData.title || '暂无音频，请点击标题前往播放'}
                   </span>
                 </SmartLink>
               ) : (
                 <div className="w-full overflow-hidden">
-                  <span ref={titleRef} className={shouldScroll ? 'animate-marquee' : 'truncate'}>
-                    {audioData?.title || '未知节目'}
+                  <span className={shouldScroll ? 'animate-marquee' : 'truncate'}>
+                    {audioData?.title || '暂无音频，请点击标题前往播放'}
                   </span>
                 </div>
               )}
