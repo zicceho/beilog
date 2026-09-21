@@ -39,9 +39,10 @@ export default function AudioPlayer({ src, cover, title, href }) {
     }
   }, [src])
 
+  // 统一下发 toggle 事件，由全局播放器去判断是同曲暂停还是新曲播放
   const handleClick = () => {
     window.dispatchEvent(
-      new CustomEvent('play-global-audio', {
+      new CustomEvent('toggle-global-audio', {
         detail: { src, cover, title, href }
       })
     )
@@ -52,15 +53,14 @@ export default function AudioPlayer({ src, cover, title, href }) {
       className='my-3 mb-6 flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg px-2 py-1.5 transition-colors'
       onClick={handleClick}
     >
-      {/* 使用 flex 容器严格包裹图标，强制与进度条垂直居中 */}
-      <div className='flex-shrink-0 w-8 h-8 flex items-center justify-center'>
+      {/* 视觉微调：加 1px 向下位移，确保图标圆心绝对对齐进度条中线 */}
+      <div className='flex-shrink-0 w-8 h-8 flex items-center justify-center translate-y-[1px]'>
         <i 
           className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-2xl`}
           style={{ color: '#3A4A7A' }}
         />
       </div>
 
-      {/* 渐变进度条，使用 flex-1 以及 items-center 保证高度绝对居中 */}
       <div className='flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden max-w-2xl flex items-center'>
         <div
           className='h-full rounded-full transition-all duration-300'
@@ -71,7 +71,6 @@ export default function AudioPlayer({ src, cover, title, href }) {
         />
       </div>
 
-      {/* 倒计时 */}
       <span className='text-xs text-gray-400 tabular-nums whitespace-nowrap'>
         {formatTime(remaining)}
       </span>
