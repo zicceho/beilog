@@ -2,7 +2,7 @@ import LazyImage from '@/components/LazyImage'
 import { siteConfig } from '@/lib/config'
 import CONFIG from '../config'
 import { BlogPostCardInfo } from './BlogPostCardInfo'
-import { useEffect, useState } from 'react'
+import SmartLink from '@/components/SmartLink'
 
 const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
   const showPreview =
@@ -20,46 +20,9 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
     !showPreview
 
   const audioUrl = post?.audio || post?.Audio
-  const [isPlaying, setIsPlaying] = useState(false)
 
-  useEffect(() => {
-    const handleStateChange = (e) => {
-      const { playing, currentSrc } = e.detail
-      if (currentSrc === audioUrl) {
-        setIsPlaying(playing)
-      } else {
-        setIsPlaying(false)
-      }
-    }
-    window.addEventListener('audio-play-state-change', handleStateChange)
-    return () =>
-      window.removeEventListener('audio-play-state-change', handleStateChange)
-  }, [audioUrl])
-
-  const handleCoverClick = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    if (audioUrl) {
-      if (isPlaying) {
-        window.dispatchEvent(new CustomEvent('pause-global-audio'))
-      } else {
-        window.dispatchEvent(
-          new CustomEvent('play-global-audio', {
-            detail: {
-              src: audioUrl,
-              cover: post.pageCoverThumbnail || post.pageCover,
-              title: post.title,
-              href: post.href,
-              category: post.category
-            }
-          })
-        )
-      }
-    } else {
-      alert('暂无音频节目，点击标题查看文稿')
-    }
-  }
+  // 拼接跳转链接：有音频则带 autoplay=true 参数
+  const jumpHref = audioUrl ? `${post?.href}?autoplay=true` : post?.href
 
   return (
     <div
@@ -77,30 +40,23 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
         />
 
         {showPageCover && (
-          <div
-            className='md:w-[38%] h-56 flex-shrink-0 overflow-hidden relative cursor-pointer'
-            onClick={handleCoverClick}>
-            <LazyImage
-              priority={index === 1}
-              alt={post?.title}
-              src={post?.pageCoverThumbnail}
-              className='h-56 w-full object-cover object-center group-hover:scale-110 duration-500'
-            />
-            
-            <div
-              className={`absolute z-10 pointer-events-none transition-all duration-300 ease-in-out ${
-                isPlaying
-                  ? 'bottom-2 right-2'
-                  : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
-              }`}>
-              <i
-                className={`fa-regular ${
-                  isPlaying
-                    ? 'fa-pause-circle text-3xl'
-                    : 'fa-play-circle text-5xl'
-                } text-white/70 drop-shadow-lg`}
+          <div className='md:w-[38%] h-56 flex-shrink-0 overflow-hidden relative'>
+            {/* 点击封面跳转到详情页，并附带参数 */}
+            <SmartLink href={jumpHref}>
+              <LazyImage
+                priority={index === 1}
+                alt={post?.title}
+                src={post?.pageCoverThumbnail}
+                className='h-56 w-full object-cover object-center group-hover:scale-110 duration-500 cursor-pointer'
               />
-            </div>
+              
+              {/* 播放按钮：缩小并放置在右下角，纯视觉提示 */}
+              {audioUrl && (
+                <div className='absolute bottom-2 right-2 z-10 pointer-events-none'>
+                  <i className='fa-regular fa-play-circle text-2xl text-white/70 drop-shadow-md' />
+                </div>
+              )}
+            </SmartLink>
           </div>
         )}
       </div>
