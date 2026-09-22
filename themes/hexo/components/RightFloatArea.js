@@ -14,19 +14,7 @@ const PauseIcon = ({ size = 14 }) => (
   </svg>
 )
 
-const parseExt = (ext) => {
-  if (!ext) return null
-  const raw = typeof ext === 'string' ? ext.trim() : ''
-  if (!raw) return null
-  try {
-    const parsed = JSON.parse(raw)
-    if (parsed?.audio) return parsed.audio
-  } catch (e) {}
-  if (raw.startsWith('http')) return raw
-  return null
-}
-
-export default function RightFloatArea({ floatSlot, posts }) {
+export default function RightFloatArea({ floatSlot }) {
   const [showFloatButton, switchShow] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [hasAudio, setHasAudio] = useState(false)
@@ -63,33 +51,7 @@ export default function RightFloatArea({ floatSlot, posts }) {
   }, [])
 
   const handleClick = () => {
-    if (hasAudio) {
-      window.dispatchEvent(new CustomEvent('toggle-player-visibility'))
-      return
-    }
-    const list = posts || []
-    for (let i = 0; i < list.length; i++) {
-      const p = list[i]
-      const audioUrl = p?.audio || parseExt(p?.ext)
-      if (audioUrl) {
-        window.dispatchEvent(
-          new CustomEvent('toggle-global-audio', {
-            detail: {
-              src: audioUrl,
-              cover: p.pageCoverThumbnail || p.pageCover,
-              title: p.title,
-              href: p.href
-            }
-          })
-        )
-        return
-      }
-    }
-    window.dispatchEvent(
-      new CustomEvent('show-no-audio-hint', {
-        detail: { message: '当前暂无音频节目，请点击节目页面或标题播放' }
-      })
-    )
+    window.dispatchEvent(new CustomEvent('toggle-player-visibility'))
   }
 
   return (
@@ -99,7 +61,7 @@ export default function RightFloatArea({ floatSlot, posts }) {
         ' duration-300 transition-all bottom-12 right-1 fixed z-20 text-white bg-[#3A4A7A] dark:bg-hexo-black-gray rounded-sm'
       }>
       <div className='justify-center flex flex-col items-center cursor-pointer'>
-        {!locked && (
+        {hasAudio && !locked && (
           <div
             onClick={handleClick}
             className='flex justify-center items-center w-7 h-7 hover:bg-black/20 transition-colors'
