@@ -129,7 +129,7 @@ const LayoutBase = props => {
         <div className='block lg:hidden'>
           <TocDrawer post={post} cRef={drawerRight} targetRef={tocRef} />
         </div>
-        <RightFloatArea floatSlot={floatSlot} />
+        <RightFloatArea floatSlot={floatSlot} posts={props.posts} />
         <AlgoliaSearchModal cRef={searchModal} {...props} />
         <GlobalAudioPlayer />
         <Footer title={siteConfig('TITLE')} />
@@ -206,7 +206,6 @@ const LayoutSlug = props => {
     }
   }, [post])
 
-  // 优先读 post.audio（白名单新增的字段），其次从 ext 字段解析
   let extAudio = post?.audio || null
   if (!extAudio && post?.ext) {
     const raw = typeof post.ext === 'string' ? post.ext.trim() : ''
@@ -220,6 +219,8 @@ const LayoutSlug = props => {
     }
   }
 
+  const coverUrl = post?.pageCoverThumbnail || post?.pageCover
+
   return (
     <>
       <div className='w-full lg:hover:shadow lg:border rounded-t-xl lg:rounded-xl lg:px-2 lg:py-4 bg-white dark:bg-hexo-black-gray dark:border-black article'>
@@ -230,7 +231,12 @@ const LayoutSlug = props => {
               <section className='px-5 justify-center mx-auto max-w-2xl lg:max-w-full'>
                 {extAudio ? (
                   <div className='mb-8'>
-                    <AudioPlayer src={extAudio} />
+                    <AudioPlayer
+                      src={extAudio}
+                      title={post.title}
+                      cover={coverUrl}
+                      href={post.href}
+                    />
                   </div>
                 ) : (
                   <NotionAudioEnhancer post={post} />
