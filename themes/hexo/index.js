@@ -32,9 +32,7 @@ import TagItemMini from './components/TagItemMini'
 import TocDrawer from './components/TocDrawer'
 import TocDrawerButton from './components/TocDrawerButton'
 import ArticleSwitchPlaceholder from './components/ArticleSwitchPlaceholder'
-import AudioPlayer from './components/AudioPlayer'
 import NotionAudioEnhancer from './components/NotionAudioEnhancer'
-import GlobalAudioPlayer from './components/GlobalAudioPlayer'
 import CONFIG from './config'
 import { Style } from './style'
 
@@ -52,12 +50,18 @@ const LayoutBase = props => {
   const router = useRouter()
   const showRandomButton = siteConfig('HEXO_MENU_RANDOM', false, CONFIG)
   const isArticleSlugPage = router.pathname === '/[prefix]/[slug]'
-  const hexoArticleRouteLoading = siteConfig('HEXO_ARTICLE_ROUTE_LOADING', true, CONFIG)
-  const showArticleSwitchPlaceholder = hexoArticleRouteLoading && isArticleSlugPage && onLoading
+  const hexoArticleRouteLoading = siteConfig(
+    'HEXO_ARTICLE_ROUTE_LOADING',
+    true,
+    CONFIG
+  )
+  const showArticleSwitchPlaceholder =
+    hexoArticleRouteLoading && isArticleSlugPage && onLoading
 
   const headerSlot = post ? (
     <PostHero {...props} />
-  ) : router.route === '/' && siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? (
+  ) : router.route === '/' &&
+    siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? (
     <Hero {...props} />
   ) : null
 
@@ -68,10 +72,15 @@ const LayoutBase = props => {
     <>
       {post?.toc?.length > 1 && (
         <div className='block lg:hidden'>
-          <TocDrawerButton onClick={() => drawerRight?.current?.handleSwitchVisible()} />
+          <TocDrawerButton
+            onClick={() => {
+              drawerRight?.current?.handleSwitchVisible()
+            }}
+          />
         </div>
       )}
       {post && <ButtonJumpToComment />}
+      {showRandomButton && <ButtonRandomPostMini {...props} />}
     </>
   )
 
@@ -79,7 +88,9 @@ const LayoutBase = props => {
 
   return (
     <ThemeGlobalHexo.Provider value={{ searchModal }}>
-      <div id='theme-hexo' className={`${siteConfig('FONT_STYLE')} dark:bg-black scroll-smooth`}>
+      <div
+        id='theme-hexo'
+        className={`${siteConfig('FONT_STYLE')} dark:bg-black scroll-smooth`}>
         <Style />
         <Header {...props} />
         <Transition
@@ -97,13 +108,17 @@ const LayoutBase = props => {
 
         <main
           id='wrapper'
-          className={`${
-            post ? 'pt-6' : router.route === '/' && siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? 'pt-6' : 'pt-28'
-          } bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
+          className={`${siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? 'pt-0' : 'pt-16'} bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
           <div
             id='container-inner'
-            className={(JSON.parse(siteConfig('LAYOUT_SIDEBAR_REVERSE')) ? 'flex-row-reverse' : '') + ' w-full mx-auto lg:flex lg:space-x-4 justify-center relative z-10'}>
-            <div className={`${className || ''} w-full ${fullWidth ? '' : 'max-w-4xl'} h-full overflow-hidden`}>
+            className={
+              (JSON.parse(siteConfig('LAYOUT_SIDEBAR_REVERSE'))
+                ? 'flex-row-reverse'
+                : '') +
+              ' w-full mx-auto lg:flex lg:space-x-4 justify-center relative z-10'
+            }>
+            <div
+              className={`${className || ''} w-full ${fullWidth ? '' : 'max-w-4xl'} h-full overflow-hidden`}>
               {showArticleSwitchPlaceholder ? (
                 <ArticleSwitchPlaceholder />
               ) : (
@@ -129,23 +144,30 @@ const LayoutBase = props => {
         <div className='block lg:hidden'>
           <TocDrawer post={post} cRef={drawerRight} targetRef={tocRef} />
         </div>
-        <RightFloatArea floatSlot={floatSlot} posts={props.posts} />
+        <RightFloatArea floatSlot={floatSlot} />
         <AlgoliaSearchModal cRef={searchModal} {...props} />
-        <GlobalAudioPlayer />
         <Footer title={siteConfig('TITLE')} />
       </div>
     </ThemeGlobalHexo.Provider>
   )
 }
 
-const LayoutIndex = props => <LayoutPostList {...props} className='pt-0' />
+const LayoutIndex = props => {
+  return <LayoutPostList {...props} className='pt-8' />
+}
 
-const LayoutPostList = props => (
-  <div className='pt-0'>
-    <SlotBar {...props} />
-    {siteConfig('POST_LIST_STYLE') === 'page' ? <BlogPostListPage {...props} /> : <BlogPostListScroll {...props} />}
-  </div>
-)
+const LayoutPostList = props => {
+  return (
+    <div className='pt-8'>
+      <SlotBar {...props} />
+      {siteConfig('POST_LIST_STYLE') === 'page' ? (
+        <BlogPostListPage {...props} />
+      ) : (
+        <BlogPostListScroll {...props} />
+      )}
+    </div>
+  )
+}
 
 const LayoutSearch = props => {
   const { keyword } = props
@@ -157,18 +179,26 @@ const LayoutSearch = props => {
       replaceSearchResult({
         doms: document.getElementsByClassName('replace'),
         search: keyword,
-        target: { element: 'span', className: 'text-red-500 border-b border-dashed' }
+        target: {
+          element: 'span',
+          className: 'text-red-500 border-b border-dashed'
+        }
       })
     }
   })
 
   return (
-    <div className='pt-0'>
+    <div className='pt-8'>
       {!currentSearch ? (
         <SearchNav {...props} />
       ) : (
         <div id='posts-wrapper'>
-          {siteConfig('POST_LIST_STYLE') === 'page' ? <BlogPostListPage {...props} /> : <BlogPostListScroll {...props} />}
+          {' '}
+          {siteConfig('POST_LIST_STYLE') === 'page' ? (
+            <BlogPostListPage {...props} />
+          ) : (
+            <BlogPostListScroll {...props} />
+          )}{' '}
         </div>
       )}
     </div>
@@ -178,11 +208,15 @@ const LayoutSearch = props => {
 const LayoutArchive = props => {
   const { archivePosts } = props
   return (
-    <div className='pt-0'>
+    <div className='pt-8'>
       <Card className='w-full'>
-        <div className='mb-10 pb-20 bg-white md:px-12 md:pt-6 md:pb-12 p-3 min-h-full dark:bg-hexo-black-gray'>
+        <div className='mb-10 pb-20 bg-white md:p-12 p-3 min-h-full dark:bg-hexo-black-gray'>
           {Object.keys(archivePosts).map(archiveTitle => (
-            <BlogPostArchive key={archiveTitle} posts={archivePosts[archiveTitle]} archiveTitle={archiveTitle} />
+            <BlogPostArchive
+              key={archiveTitle}
+              posts={archivePosts[archiveTitle]}
+              archiveTitle={archiveTitle}
+            />
           ))}
         </div>
       </Card>
@@ -194,55 +228,51 @@ const LayoutSlug = props => {
   const { post, lock, validPassword } = props
   const router = useRouter()
   const waiting404 = siteConfig('POST_WAITING_TIME_FOR_404') * 1000
-
   useEffect(() => {
     if (!post) {
-      setTimeout(() => {
-        if (isBrowser) {
-          const article = document.querySelector('#article-wrapper #notion-article')
-          if (!article) router.push('/404').then(() => console.warn('找不到页面', router.asPath))
-        }
-      }, waiting404)
+      setTimeout(
+        () => {
+          if (isBrowser) {
+            const article = document.querySelector(
+              '#article-wrapper #notion-article'
+            )
+            if (!article) {
+              router.push('/404').then(() => {
+                console.warn('找不到页面', router.asPath)
+              })
+            }
+          }
+        },
+        waiting404
+      )
     }
   }, [post])
 
-  let extAudio = post?.audio || null
-  if (!extAudio && post?.ext) {
+  // 判断 Audio 字段有没有音频：有的话 Hero 区已经显示了，正文里就不需要再套壳
+  let hasAudioField = !!post?.audio
+  if (!hasAudioField && post?.ext) {
     const raw = typeof post.ext === 'string' ? post.ext.trim() : ''
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw)
-        extAudio = parsed?.audio || null
-      } catch (e) {
-        if (raw.startsWith('http')) extAudio = raw
-      }
-    }
+    if (raw && raw.startsWith('http')) hasAudioField = true
   }
-
-  const coverUrl = post?.pageCoverThumbnail || post?.pageCover
 
   return (
     <>
       <div className='w-full lg:hover:shadow lg:border rounded-t-xl lg:rounded-xl lg:px-2 lg:py-4 bg-white dark:bg-hexo-black-gray dark:border-black article'>
         {lock && <ArticleLock validPassword={validPassword} />}
+
         {!lock && post && (
           <div className='overflow-x-auto flex-grow mx-auto md:w-full md:px-5 '>
-            <article id='article-wrapper' className='subpixel-antialiased overflow-y-hidden'>
+            <article
+              id='article-wrapper'
+              className='subpixel-antialiased overflow-y-hidden'>
+              {/* Notion文章主体 */}
               <section className='px-5 justify-center mx-auto max-w-2xl lg:max-w-full'>
-                {extAudio ? (
-                  <div className='mb-8'>
-                    <AudioPlayer
-                      src={extAudio}
-                      title={post.title}
-                      cover={coverUrl}
-                      href={post.href}
-                    />
-                  </div>
-                ) : (
-                  <NotionAudioEnhancer post={post} />
-                )}
+                {/* 正文里的音频块套壳。只有当 Audio 字段没有值时，才启用，避免重复 */}
+                {!hasAudioField && <NotionAudioEnhancer post={post} />}
                 {post && <NotionPage post={post} />}
               </section>
+
+              {/* 分享 */}
               <ShareBar post={post} />
               {post?.type === 'Post' && (
                 <>
@@ -252,7 +282,10 @@ const LayoutSlug = props => {
                 </>
               )}
             </article>
+
             <div className='pt-4 border-dashed'></div>
+
+            {/* 评论互动 */}
             <div className='duration-200 overflow-x-auto bg-white dark:bg-hexo-black-gray px-3'>
               <Comment frontMatter={post} />
             </div>
@@ -269,8 +302,12 @@ const Layout404 = props => {
   useEffect(() => {
     setTimeout(() => {
       if (isBrowser) {
-        const article = document.querySelector('#article-wrapper #notion-article')
-        if (!article) router.push('/').then(() => {})
+        const article = document.querySelector(
+          '#article-wrapper #notion-article'
+        )
+        if (!article) {
+          router.push('/').then(() => {})
+        }
       }
     }, 3000)
   })
@@ -278,7 +315,9 @@ const Layout404 = props => {
     <>
       <div className='text-black w-full h-screen text-center justify-center content-center items-center flex flex-col'>
         <div className='dark:text-gray-200'>
-          <h2 className='inline-block border-r-2 border-gray-600 mr-2 px-3 py-2 align-top'>404</h2>
+          <h2 className='inline-block border-r-2 border-gray-600 mr-2 px-3 py-2 align-top'>
+            404
+          </h2>
           <div className='inline-block text-left h-32 leading-10 items-center'>
             <h2 className='m-0 p-0'>{locale.COMMON.NOT_FOUND}</h2>
           </div>
@@ -292,19 +331,29 @@ const LayoutCategoryIndex = props => {
   const { categoryOptions } = props
   const { locale } = useGlobal()
   return (
-    <div className='mt-0'>
+    <div className='mt-8'>
       <Card className='w-full min-h-screen'>
         <div className='dark:text-gray-200 mb-5 mx-3'>
-          <i className='mr-4 fa-solid fa-layer-group' /> {locale.COMMON.CATEGORY}:
+          <i className='mr-4 fas fa-th' /> {locale.COMMON.CATEGORY}:
         </div>
         <div id='category-list' className='duration-200 flex flex-wrap mx-8'>
-          {categoryOptions?.map(category => (
-            <SmartLink key={category.name} href={`/category/${category.name}`} passHref legacyBehavior>
-              <div className={' duration-300 dark:hover:text-white px-5 cursor-pointer py-2 hover:text-indigo-400'}>
-                <i className='mr-4 fas fa-folder' /> {category.name}({category.count})
-              </div>
-            </SmartLink>
-          ))}
+          {categoryOptions?.map(category => {
+            return (
+              <SmartLink
+                key={category.name}
+                href={`/category/${category.name}`}
+                passHref
+                legacyBehavior>
+                <div
+                  className={
+                    ' duration-300 dark:hover:text-white px-5 cursor-pointer py-2 hover:text-indigo-400'
+                  }>
+                  <i className='mr-4 fas fa-folder' /> {category.name}(
+                  {category.count})
+                </div>
+              </SmartLink>
+            )
+          })}
         </div>
       </Card>
     </div>
@@ -315,10 +364,10 @@ const LayoutTagIndex = props => {
   const { tagOptions } = props
   const { locale } = useGlobal()
   return (
-    <div className='mt-0'>
+    <div className='mt-8'>
       <Card className='w-full'>
         <div className='dark:text-gray-200 mb-5 ml-4'>
-          <i className='mr-4 fa fa-user' /> {locale.COMMON.TAGS}:
+          <i className='mr-4 fas fa-tag' /> {locale.COMMON.TAGS}:
         </div>
         <div id='tags-list' className='duration-200 flex flex-wrap ml-8'>
           {tagOptions.map(tag => (
