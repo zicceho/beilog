@@ -134,13 +134,10 @@ export default function PostHero({ post, siteInfo }) {
       <header
         id='article-header-cover'
         className='bg-black bg-opacity-70 absolute top-0 w-full h-full flex items-center'>
-        
-        {/* 完美复刻正文的外层结构，带上右侧栏占位 */}
         <div className='w-full md:px-8 lg:px-24'>
           <div className='w-full mx-auto lg:flex lg:space-x-4 justify-center'>
-            
-            {/* 内容区 */}
-            <div className='w-full max-w-4xl'>
+            {/* ⚠️ 这里加了 md:px-5，和正文完全一致 */}
+            <div className='w-full max-w-4xl md:px-5'>
               <div className='px-5'>
                 {/* 第一行：标题 */}
                 <div className='leading-snug font-bold text-3xl sm:text-4xl md:leading-snug shadow-text-md text-white mb-4'>
@@ -248,7 +245,7 @@ export default function PostHero({ post, siteInfo }) {
               </div>
             </div>
 
-            {/* ⚠️ 关键：右侧栏占位，只有桌面端显示，宽度和正文侧边栏完全一致 */}
+            {/* 右侧栏占位 */}
             <div className='hidden lg:block lg:w-80 flex-shrink-0'></div>
           </div>
         </div>
