@@ -50,7 +50,6 @@ export default function AudioPlayer({ src, title, cover, href }) {
     return () => window.removeEventListener('global-audio-state', onState)
   }, [src, localDuration])
 
-  // 初次加载元数据，拿到总时长
   const handleMetadata = (e) => {
     const dur = e.target.duration || 0
     setLocalDuration(dur)
