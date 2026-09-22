@@ -4,7 +4,7 @@ import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { formatDateFmt } from '@/lib/utils/formatDate'
 import SmartLink from '@/components/SmartLink'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const PlayIcon = ({ size = 12 }) => (
   <svg viewBox='0 0 24 24' width={size} height={size} fill='currentColor' style={{ marginLeft: '1px' }}>
@@ -30,48 +30,82 @@ const parseExt = (ext) => {
   return null
 }
 
-const Waveform = ({ playing }) => {
-  const bars = [3, 8, 14, 20, 12, 6, 16, 22, 10, 4, 18, 14, 8, 12, 6]
-  return (
-    <div className='flex items-center gap-[2px] h-4'>
-      {bars.map((h, i) => (
-        <span
-          key={i}
-          className={`w-[2px] rounded-full bg-white/70 ${playing ? 'wave-bar' : ''}`}
-          style={{
-            height: `${h}px`,
-            animationDelay: `${i * 0.08}s`
-          }}
-        />
-      ))}
-    </div>
-  )
+const formatRemaining = (seconds) => {
+  if (!Number.isFinite(seconds) || seconds < 0) return '-0:00'
+  const total = Math.floor(seconds)
+  const h = Math.floor(total / 3600)
+  const m = Math.floor((total % 3600) / 60)
+  const s = total % 60
+  if (h > 0) {
+    return `-${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  }
+  return `-${m}:${s.toString().padStart(2, '0')}`
 }
 
 export default function PostHero({ post, siteInfo }) {
-  const { locale, fullWidth } = useGlobal()
+  const { fullWidth } = useGlobal()
   const [isPlaying, setIsPlaying] = useState(false)
   const [isCurrentSrc, setIsCurrentSrc] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [remaining, setRemaining] = useState(0)
+  const [localDuration, setLocalDuration] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const localAudioRef = useRef(null)
 
   let audioUrl = post?.audio || null
   if (!audioUrl && post?.ext) {
     audioUrl = parseExt(post.ext)
   }
 
+  const coverUrl = post?.pageCoverThumbnail || post?.pageCover
+
   useEffect(() => {
     const onState = (e) => {
-      const { src, playing } = e.detail
+      const { src, playing, currentTime, duration } = e.detail
       if (audioUrl && src === audioUrl) {
         setIsCurrentSrc(true)
         setIsPlaying(playing)
+        const dur = duration || localDuration
+        if (dur > 0) {
+          setProgress((currentTime / dur) * 100)
+          setRemaining(Math.max(0, dur - currentTime))
+        }
       } else {
         setIsCurrentSrc(false)
         setIsPlaying(false)
+        setProgress(0)
+        setRemaining(localDuration)
       }
     }
     window.addEventListener('global-audio-state', onState)
     return () => window.removeEventListener('global-audio-state', onState)
-  }, [audioUrl])
+  }, [audioUrl, localDuration])
+
+  const handleMetadata = (e) => {
+    const dur = e.target.duration || 0
+    setLocalDuration(dur)
+    if (!isCurrentSrc) {
+      setRemaining(dur)
+    }
+  }
+
+  const handleWaiting = () => setIsLoading(true)
+  const handleCanPlay = () => setIsLoading(false)
+  const handlePlaying = () => {
+    setIsLoading(false)
+    setIsPlaying(true)
+  }
+
+  const handlePlayClick = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!audioUrl) return
+    window.dispatchEvent(
+      new CustomEvent('toggle-global-audio', {
+        detail: { src: audioUrl, cover: coverUrl, title: post.title, href: post.href }
+      })
+    )
+  }
 
   if (!post) {
     return <></>
@@ -82,26 +116,9 @@ export default function PostHero({ post, siteInfo }) {
   }
 
   const headerImage = post?.pageCover ? post.pageCover : siteInfo?.pageCover
-  const coverUrl = post?.pageCoverThumbnail || post?.pageCover
-
-  const handlePlayClick = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (!audioUrl) return
-    window.dispatchEvent(
-      new CustomEvent('toggle-global-audio', {
-        detail: {
-          src: audioUrl,
-          cover: coverUrl,
-          title: post.title,
-          href: post.href
-        }
-      })
-    )
-  }
 
   return (
-    <div id='header' className='w-full h-96 md:h-[75vh] relative md:flex-shrink-0 z-10'>
+    <div id='header' className='w-full h-96 md:h-[80vh] relative md:flex-shrink-0 z-10'>
       <LazyImage
         priority={true}
         src={headerImage}
@@ -111,34 +128,9 @@ export default function PostHero({ post, siteInfo }) {
       <header
         id='article-header-cover'
         className='bg-black bg-opacity-70 absolute top-0 w-full h-full flex items-center'>
-        <div className='w-full max-w-4xl mx-auto px-6 sm:px-8'>
-          {/* 第一行：分类 + 嘉宾 */}
-          <div className='flex flex-wrap items-center gap-x-4 gap-y-1 mb-3'>
-            {post.category && (
-              <SmartLink
-                href={`/category/${post.category}`}
-                passHref
-                legacyBehavior>
-                <div className='cursor-pointer text-sm font-light text-white/80 hover:text-white transition-colors'>
-                  「{post.category}」
-                </div>
-              </SmartLink>
-            )}
-            {post.tagItems?.map(tag => (
-              <SmartLink
-                key={tag.name}
-                href={`/tag/${encodeURIComponent(tag.name)}`}
-                passHref
-                legacyBehavior>
-                <div className='cursor-pointer text-sm font-light text-white/70 hover:text-white transition-colors whitespace-nowrap'>
-                  @{tag.name}
-                </div>
-              </SmartLink>
-            ))}
-          </div>
-
-          {/* 第二行：标题 */}
-          <div className='leading-snug font-bold text-3xl sm:text-4xl md:leading-snug shadow-text-md text-white mb-6'>
+        <div className='w-full max-w-3xl mx-auto px-6 sm:px-8'>
+          {/* 第一行：标题 */}
+          <div className='leading-snug font-bold text-3xl sm:text-4xl md:leading-snug shadow-text-md text-white mb-4'>
             {siteConfig('POST_TITLE_ICON') && (
               <NotionIcon
                 icon={post.pageIcon}
@@ -148,50 +140,132 @@ export default function PostHero({ post, siteInfo }) {
             {post.title}
           </div>
 
-          {/* 第三行：日期胶囊 + 播放器胶囊 */}
-          <div className='flex flex-wrap items-center gap-3'>
-            {post?.type !== 'Page' && (
-              <SmartLink
-                href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
-                passHref>
-                <div className='cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 text-sm hover:bg-white/20 transition-colors'>
-                  <i className='fa-solid fa-calendar-days text-xs' />
-                  <span>{post?.publishDay || post.date}</span>
-                </div>
+          {/* 第二行：分类 / 日期 / 嘉宾 */}
+          <div className='flex flex-wrap items-center gap-x-3 gap-y-1 mb-6 text-sm font-light text-white/70'>
+            {post.category && (
+              <SmartLink href={`/category/${post.category}`} passHref legacyBehavior>
+                <span className='cursor-pointer hover:text-white transition-colors'>
+                  {post.category}
+                </span>
               </SmartLink>
             )}
-
-            {audioUrl && (
-              <div
-                onClick={handlePlayClick}
-                className='inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-sm cursor-pointer hover:bg-white/20 transition-colors'>
-                <Waveform playing={isCurrentSrc && isPlaying} />
-                <span className='flex items-center justify-center w-4 h-4 text-white/90'>
-                  {isCurrentSrc && isPlaying ? (
-                    <PauseIcon size={12} />
-                  ) : (
-                    <PlayIcon size={12} />
-                  )}
-                </span>
-              </div>
+            {post?.type !== 'Page' && (
+              <>
+                <span className='text-white/30'>/</span>
+                <SmartLink
+                  href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
+                  passHref>
+                  <span className='cursor-pointer hover:text-white transition-colors'>
+                    {post?.publishDay || post.date}
+                  </span>
+                </SmartLink>
+              </>
+            )}
+            {post.tagItems && post.tagItems.length > 0 && (
+              <>
+                <span className='text-white/30'>/</span>
+                <div className='flex flex-wrap items-center gap-x-2 gap-y-1'>
+                  {post.tagItems.map(tag => (
+                    <SmartLink
+                      key={tag.name}
+                      href={`/tag/${encodeURIComponent(tag.name)}`}
+                      passHref
+                      legacyBehavior>
+                      <span className='cursor-pointer hover:text-white transition-colors whitespace-nowrap'>
+                        {tag.name}
+                      </span>
+                    </SmartLink>
+                  ))}
+                </div>
+              </>
             )}
           </div>
+
+          {/* 第三行：播放器 */}
+          {audioUrl && (
+            <div className='w-full'>
+              <audio
+                ref={localAudioRef}
+                src={audioUrl}
+                preload='metadata'
+                onLoadedMetadata={handleMetadata}
+                onWaiting={handleWaiting}
+                onCanPlay={handleCanPlay}
+                onPlaying={handlePlaying}
+                style={{ display: 'none' }}
+              />
+              <div className='flex items-center gap-3 w-full'>
+                {/* 圆形播放按钮 */}
+                <button
+                  onClick={handlePlayClick}
+                  className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105 text-white'
+                  style={{
+                    background:
+                      isCurrentSrc && isPlaying
+                        ? 'linear-gradient(135deg, #7B8BC4 0%, #3A4A7A 100%)'
+                        : 'rgba(255,255,255,0.15)',
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                  {isCurrentSrc && isPlaying ? (
+                    <PauseIcon size={14} />
+                  ) : (
+                    <PlayIcon size={14} />
+                  )}
+                </button>
+
+                {/* 进度条 */}
+                <div
+                  className={`flex-1 h-1 rounded-full overflow-hidden relative ${
+                    isLoading
+                      ? 'loading-stripe'
+                      : isCurrentSrc && isPlaying
+                        ? ''
+                        : 'bg-white/15'
+                  }`}
+                  style={{
+                    backdropFilter: isLoading ? 'none' : 'blur(10px)'
+                  }}>
+                  <div
+                    className='h-full rounded-full transition-all duration-300'
+                    style={{
+                      width: `${progress}%`,
+                      background:
+                        isCurrentSrc && isPlaying
+                          ? 'linear-gradient(90deg, #8B9BD4 0%, #4A5A8A 50%, #3A4A7A 100%)'
+                          : 'transparent'
+                    }}
+                  />
+                </div>
+
+                {/* 倒计时 */}
+                <span className='flex-shrink-0 text-xs text-white/70 tabular-nums whitespace-nowrap'>
+                  {formatRemaining(remaining)}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
       <style jsx>{`
-        @keyframes wave {
-          0%,
-          100% {
-            transform: scaleY(0.4);
+        @keyframes stripe-move {
+          0% {
+            background-position: 0 0;
           }
-          50% {
-            transform: scaleY(1);
+          100% {
+            background-position: 32px 0;
           }
         }
-        .wave-bar {
-          animation: wave 1s ease-in-out infinite;
-          transform-origin: center;
+        .loading-stripe {
+          background: repeating-linear-gradient(
+            -45deg,
+            rgba(255, 255, 255, 0.25) 0px,
+            rgba(255, 255, 255, 0.25) 8px,
+            rgba(255, 255, 255, 0.05) 8px,
+            rgba(255, 255, 255, 0.05) 16px
+          );
+          background-size: 32px 100%;
+          animation: stripe-move 0.8s linear infinite;
         }
       `}</style>
     </div>
