@@ -72,12 +72,20 @@ export default function AudioPlayer({ src, title, cover, href }) {
     )
   }
 
+  // 播放中：按钮和进度条都用主题色渐变；未播放/暂停：半透明磨砂
+  const active = isCurrentSrc && isPlaying
+  const buttonStyle = {
+    background: active
+      ? 'linear-gradient(135deg, #7B8BC4 0%, #3A4A7A 100%)'
+      : 'rgba(58, 74, 122, 0.15)',
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)'
+  }
   const playedBarStyle = {
     width: `${progress}%`,
-    background:
-      progress > 0
-        ? 'linear-gradient(90deg, #8B9BD4 0%, #4A5A8A 50%, #3A4A7A 100%)'
-        : 'transparent'
+    background: progress > 0
+      ? 'linear-gradient(90deg, #8B9BD4 0%, #4A5A8A 50%, #3A4A7A 100%)'
+      : 'transparent'
   }
 
   return (
@@ -92,26 +100,17 @@ export default function AudioPlayer({ src, title, cover, href }) {
         style={{ display: 'none' }}
       />
 
-      {/* 圆形播放按钮 */}
+      {/* 圆形按钮：和头图完全一致，未播放半透明磨砂，播放中主题渐变 */}
       <button
         onClick={handleClick}
         className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105 text-white'
-        style={{
-          background:
-            isCurrentSrc && isPlaying
-              ? 'linear-gradient(135deg, #7B8BC4 0%, #3A4A7A 100%)'
-              : '#3A4A7A'
-        }}>
-        {isCurrentSrc && isPlaying ? (
-          <PauseIcon size={14} />
-        ) : (
-          <PlayIcon size={14} />
-        )}
+        style={buttonStyle}>
+        {active ? <PauseIcon size={14} /> : <PlayIcon size={14} />}
       </button>
 
-      {/* 进度条：底槽半透明 + 加载斜纹 */}
+      {/* 进度条底槽：半透明磨砂；播放中叠加主题色渐变 */}
       <div
-        className={`flex-1 h-1 rounded-full overflow-hidden relative bg-gray-200 dark:bg-gray-700 ${
+        className={`flex-1 h-1 rounded-full overflow-hidden relative bg-gray-200/60 dark:bg-gray-700/60 backdrop-blur-sm ${
           isLoading ? 'loading-stripe' : ''
         }`}>
         <div
@@ -121,18 +120,14 @@ export default function AudioPlayer({ src, title, cover, href }) {
       </div>
 
       {/* 倒计时 */}
-      <span className='flex-shrink-0 text-xs text-gray-500 tabular-nums whitespace-nowrap'>
+      <span className='flex-shrink-0 text-xs text-gray-500 dark:text-gray-400 tabular-nums whitespace-nowrap'>
         {formatRemaining(remaining)}
       </span>
 
       <style jsx>{`
         @keyframes stripe-move {
-          0% {
-            background-position: 0 0;
-          }
-          100% {
-            background-position: 32px 0;
-          }
+          0% { background-position: 0 0; }
+          100% { background-position: 32px 0; }
         }
         .loading-stripe {
           background: repeating-linear-gradient(
