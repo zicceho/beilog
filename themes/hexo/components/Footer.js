@@ -12,15 +12,12 @@ const Footer = ({ title }) => {
     <footer className='relative z-10 flex-shrink-0 justify-center text-center m-auto w-full leading-6 text-gray-600 dark:text-gray-100 text-sm pt-6 pb-6'>
       <i className='fas fa-copyright' /> {`${copyrightDate}`}
       <span>
-        {/* 干杯图标 */}
-        <i className='mx-1 fas fa-glass-cheers' />
         <a
           href={siteConfig('LINK')}
-          className='font-bold dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors'>
+          className='font-bold dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors ml-2'>
           {siteConfig('AUTHOR')}
         </a>
         <BeiAnSite />
-        {/* ⚠️ 删除的就是下面这两块统计代码 */}
       </span>
     </footer>
   )
