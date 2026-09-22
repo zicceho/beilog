@@ -136,8 +136,8 @@ export default function PostHero({ post, siteInfo }) {
         className='bg-black bg-opacity-70 absolute top-0 w-full h-full flex items-center'>
         <div className='w-full md:px-8 lg:px-24'>
           <div className='w-full mx-auto lg:flex lg:space-x-4 justify-center'>
-            <div className='w-full max-w-4xl md:px-5'>
-              <div className='px-5'>
+            <div className='w-full max-w-4xl md:pl-5 pl-5'>
+              <div className='pl-5'>
                 <div className='leading-snug font-bold text-3xl sm:text-4xl md:leading-snug shadow-text-md text-white mb-4'>
                   {siteConfig('POST_TITLE_ICON') && (
                     <NotionIcon
