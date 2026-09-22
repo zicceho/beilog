@@ -124,7 +124,8 @@ export default function PostHero({ post, siteInfo }) {
   }
 
   return (
-    <div id='header' className='w-full h-96 md:h-[80vh] relative md:flex-shrink-0 z-10'>
+    {/* 这里就是唯一改动的地方：最外层加了 mb-8 */}
+    <div id='header' className='w-full h-96 md:h-[80vh] relative md:flex-shrink-0 z-10 mb-8'>
       <LazyImage
         priority={true}
         src={headerImage}
@@ -136,7 +137,7 @@ export default function PostHero({ post, siteInfo }) {
         className='bg-black bg-opacity-70 absolute top-0 w-full h-full flex items-center'>
         <div className='w-full md:px-8 lg:px-24'>
           <div className='w-full mx-auto lg:flex lg:space-x-4 justify-center'>
-            {/* ⚠️ 这里加了 md:px-5，和正文完全一致 */}
+            {/* 核心内容左对齐容器 */}
             <div className='w-full max-w-4xl md:px-5'>
               <div className='px-5'>
                 {/* 第一行：标题 */}
@@ -194,7 +195,7 @@ export default function PostHero({ post, siteInfo }) {
                   )}
                 </div>
 
-                {/* 第三行：播放器 */}
+                {/* 第三行：播放器，完美左对齐，宽度占满 */}
                 {audioUrl && (
                   <div className='w-full'>
                     <audio
@@ -225,6 +226,7 @@ export default function PostHero({ post, siteInfo }) {
                         )}
                       </button>
 
+                      {/* 进度条 */}
                       <div
                         className={`flex-1 h-1 rounded-full overflow-hidden relative bg-white/15 ${
                           isLoading ? 'loading-stripe' : ''
