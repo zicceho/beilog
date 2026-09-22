@@ -44,7 +44,6 @@ export default function GlobalAudioPlayer() {
   const [locked, setLocked] = useState(false)
   const [showMore, setShowMore] = useState(false)
 
-  // 标题过长才滚动
   useEffect(() => {
     if (audioData?.title) {
       setTitleOverflow(audioData.title.length > TITLE_MAX_LENGTH)
@@ -53,7 +52,6 @@ export default function GlobalAudioPlayer() {
     }
   }, [audioData?.title, visible])
 
-  // 音频事件
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
@@ -83,7 +81,6 @@ export default function GlobalAudioPlayer() {
     }
   }, [volume, muted])
 
-  // 广播状态
   useEffect(() => {
     window.dispatchEvent(
       new CustomEvent('global-audio-state', {
@@ -98,7 +95,6 @@ export default function GlobalAudioPlayer() {
     )
   }, [playing, audioData?.src, currentTime, duration])
 
-  // 指令监听
   useEffect(() => {
     const onToggle = (e) => {
       const { src, cover, title, href } = e.detail || {}
@@ -146,14 +142,11 @@ export default function GlobalAudioPlayer() {
     }
   }, [audioData])
 
-  // 滚动页面 → 停止滚动 2 秒后自动折叠（锁住时不折叠）
   useEffect(() => {
     if (!visible || minimized || locked) return
     const onScroll = () => {
       if (scrollTimer.current) clearTimeout(scrollTimer.current)
-      scrollTimer.current = setTimeout(() => {
-        setMinimized(true)
-      }, 2000)
+      scrollTimer.current = setTimeout(() => setMinimized(true), 2000)
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => {
@@ -212,16 +205,13 @@ export default function GlobalAudioPlayer() {
             ? 'translate-y-0 opacity-100'
             : 'translate-y-full opacity-0 pointer-events-none'
         }`}>
-        <div className='relative bg-white/60 dark:bg-gray-900/60 backdrop-blur-2xl border border-white/40 dark:border-gray-700/40 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] px-3 py-2.5 flex items-center gap-3'>
+        <div className='relative bg-white/50 dark:bg-gray-900/50 backdrop-blur-3xl border border-white/40 dark:border-gray-700/40 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] px-3 py-2.5 flex items-center gap-3'>
 
-          {/* 封面 + 播放/暂停 */}
           <div className='relative flex-shrink-0 w-11 h-11 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm'>
             {audioData?.cover ? (
               <img src={audioData.cover} alt='封面' className='w-full h-full object-cover' />
             ) : (
-              <div className='w-full h-full bg-gradient-to-br from-[#5A6A9A] to-[#3A4A7A] flex items-center justify-center text-white'>
-                <i className='fa-solid fa-music text-base' />
-              </div>
+              <div className='w-full h-full bg-gradient-to-br from-[#5A6A9A] to-[#3A4A7A]' />
             )}
             {hasAudio && (
               <button
@@ -232,9 +222,7 @@ export default function GlobalAudioPlayer() {
             )}
           </div>
 
-          {/* 中间：标题 + 进度条 */}
           <div className='flex-1 min-w-0 flex flex-col justify-center gap-1.5'>
-            {/* 标题 */}
             <div className='font-bold text-xs text-gray-800 dark:text-gray-100 w-full overflow-hidden'>
               {noAudioMessage ? (
                 <span className='truncate block text-gray-500 dark:text-gray-400'>
@@ -261,10 +249,8 @@ export default function GlobalAudioPlayer() {
               )}
             </div>
 
-            {/* 进度条行 */}
             {hasAudio && (
               <div className='flex items-center gap-1.5'>
-                {/* 时间，左端与标题左端对齐 */}
                 <span className='text-[10px] text-gray-500 tabular-nums text-left'>
                   {formatTime(currentTime)}
                 </span>
@@ -288,7 +274,6 @@ export default function GlobalAudioPlayer() {
                   {formatTime(duration)}
                 </span>
 
-                {/* 桌面端：快退/快进/倍速 直接展开 */}
                 <div className='hidden sm:flex items-center gap-1'>
                   <button
                     onClick={() => skip(-5)}
@@ -310,7 +295,6 @@ export default function GlobalAudioPlayer() {
                   </button>
                 </div>
 
-                {/* 手机端：更多按钮 */}
                 <button
                   onClick={() => setShowMore((v) => !v)}
                   className='sm:hidden text-gray-500 hover:text-[#3A4A7A] transition-colors'
@@ -321,7 +305,6 @@ export default function GlobalAudioPlayer() {
             )}
           </div>
 
-          {/* 右侧：音量（桌面端）+ 锁 + 折叠 */}
           <div className='flex items-center justify-end gap-1 flex-shrink-0'>
             {hasAudio && (
               <div
@@ -370,7 +353,6 @@ export default function GlobalAudioPlayer() {
               </div>
             )}
 
-            {/* 锁按钮：锁住后滚动不折叠 */}
             <button
               onClick={() => setLocked((v) => !v)}
               className={`w-8 h-8 flex items-center justify-center transition-colors flex-shrink-0 ${
@@ -380,7 +362,6 @@ export default function GlobalAudioPlayer() {
               <i className={`fa-solid ${locked ? 'fa-lock' : 'fa-lock-open'} text-xs`} />
             </button>
 
-            {/* 折叠 */}
             <button
               onClick={() => setMinimized(true)}
               className='w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#3A4A7A] transition-colors flex-shrink-0'>
@@ -388,7 +369,6 @@ export default function GlobalAudioPlayer() {
             </button>
           </div>
 
-          {/* 手机端“更多”抽屉 */}
           {showMore && hasAudio && (
             <div className='absolute bottom-full left-0 right-0 mb-2 sm:hidden'>
               <div className='bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-xl shadow-xl border border-white/40 dark:border-gray-700/40 p-3 flex items-center justify-around gap-2'>
