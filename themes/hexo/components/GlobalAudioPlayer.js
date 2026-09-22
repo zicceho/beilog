@@ -28,7 +28,8 @@ export default function GlobalAudioPlayer() {
   const audioRef = useRef(null)
   const progressRef = useRef(null)
   const titleRef = useRef(null)
-  const scrollTimer = useRef(null)
+  const scrollAccumulator = useRef(0)
+  const lastScrollY = useRef(0)
 
   const [audioData, setAudioData] = useState(null)
   const [playing, setPlaying] = useState(false)
@@ -147,16 +148,26 @@ export default function GlobalAudioPlayer() {
     }
   }, [audioData])
 
+  // 方案 C：滚动累计超过 50px 立即隐藏，锁住时不生效
   useEffect(() => {
     if (!visible || minimized || locked) return
+    lastScrollY.current = window.pageYOffset
+    scrollAccumulator.current = 0
+
     const onScroll = () => {
-      if (scrollTimer.current) clearTimeout(scrollTimer.current)
-      scrollTimer.current = setTimeout(() => setMinimized(true), 2000)
+      const y = window.pageYOffset
+      scrollAccumulator.current += Math.abs(y - lastScrollY.current)
+      lastScrollY.current = y
+
+      if (scrollAccumulator.current > 50) {
+        setMinimized(true)
+        scrollAccumulator.current = 0
+      }
     }
+
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => {
       window.removeEventListener('scroll', onScroll)
-      if (scrollTimer.current) clearTimeout(scrollTimer.current)
     }
   }, [visible, minimized, locked])
 
