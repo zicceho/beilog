@@ -73,8 +73,7 @@ export default function PostHero({ post, siteInfo }) {
       } else {
         setIsCurrentSrc(false)
         setIsPlaying(false)
-        setProgress(0)
-        setRemaining(localDuration)
+        // 不重置 progress / remaining，避免暂停或切歌时闪烁
       }
     }
     window.addEventListener('global-audio-state', onState)
@@ -117,6 +116,15 @@ export default function PostHero({ post, siteInfo }) {
 
   const headerImage = post?.pageCover ? post.pageCover : siteInfo?.pageCover
 
+  // 进度条底槽永远保持半透明磨砂；已播放部分只要 progress > 0 就显示渐变
+  const playedBarStyle = {
+    width: `${progress}%`,
+    background:
+      progress > 0
+        ? 'linear-gradient(90deg, #8B9BD4 0%, #4A5A8A 50%, #3A4A7A 100%)'
+        : 'transparent'
+  }
+
   return (
     <div id='header' className='w-full h-96 md:h-[80vh] relative md:flex-shrink-0 z-10'>
       <LazyImage
@@ -128,122 +136,121 @@ export default function PostHero({ post, siteInfo }) {
       <header
         id='article-header-cover'
         className='bg-black bg-opacity-70 absolute top-0 w-full h-full flex items-center'>
-        <div className='w-full max-w-3xl mx-auto px-6 sm:px-8'>
-          {/* 第一行：标题 */}
-          <div className='leading-snug font-bold text-3xl sm:text-4xl md:leading-snug shadow-text-md text-white mb-4'>
-            {siteConfig('POST_TITLE_ICON') && (
-              <NotionIcon
-                icon={post.pageIcon}
-                className='text-3xl sm:text-4xl mr-1 inline-block'
-              />
-            )}
-            {post.title}
-          </div>
+        {/* 外层 padding 和 main 一致，内层限宽，整体靠左 */}
+        <div className='w-full px-6 sm:px-8 lg:px-24'>
+          <div className='max-w-4xl'>
+            {/* 内层宽度和正文一致（减去 SideRight 320px + gap 16px） */}
+            <div className='max-w-2xl lg:max-w-[calc(100%-21rem)]'>
+              {/* 第一行：标题 */}
+              <div className='leading-snug font-bold text-3xl sm:text-4xl md:leading-snug shadow-text-md text-white mb-4'>
+                {siteConfig('POST_TITLE_ICON') && (
+                  <NotionIcon
+                    icon={post.pageIcon}
+                    className='text-3xl sm:text-4xl mr-1 inline-block'
+                  />
+                )}
+                {post.title}
+              </div>
 
-          {/* 第二行：分类 / 日期 / 嘉宾 */}
-          <div className='flex flex-wrap items-center gap-x-3 gap-y-1 mb-6 text-sm font-light text-white/70'>
-            {post.category && (
-              <SmartLink href={`/category/${post.category}`} passHref legacyBehavior>
-                <span className='cursor-pointer hover:text-white transition-colors'>
-                  {post.category}
-                </span>
-              </SmartLink>
-            )}
-            {post?.type !== 'Page' && (
-              <>
-                <span className='text-white/30'>/</span>
-                <SmartLink
-                  href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
-                  passHref>
-                  <span className='cursor-pointer hover:text-white transition-colors'>
-                    {post?.publishDay || post.date}
-                  </span>
-                </SmartLink>
-              </>
-            )}
-            {post.tagItems && post.tagItems.length > 0 && (
-              <>
-                <span className='text-white/30'>/</span>
-                <div className='flex flex-wrap items-center gap-x-2 gap-y-1'>
-                  {post.tagItems.map(tag => (
+              {/* 第二行：分类 / 日期 / 嘉宾 */}
+              <div className='flex flex-wrap items-center gap-x-3 gap-y-1 mb-6 text-sm font-light text-white/70'>
+                {post.category && (
+                  <SmartLink
+                    href={`/category/${post.category}`}
+                    passHref
+                    legacyBehavior>
+                    <span className='cursor-pointer hover:text-white transition-colors font-bold'>
+                      {post.category}
+                    </span>
+                  </SmartLink>
+                )}
+                {post?.type !== 'Page' && (
+                  <>
+                    <span className='text-white/30'>/</span>
                     <SmartLink
-                      key={tag.name}
-                      href={`/tag/${encodeURIComponent(tag.name)}`}
-                      passHref
-                      legacyBehavior>
-                      <span className='cursor-pointer hover:text-white transition-colors whitespace-nowrap'>
-                        {tag.name}
+                      href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
+                      passHref>
+                      <span className='cursor-pointer hover:text-white transition-colors'>
+                        {post?.publishDay || post.date}
                       </span>
                     </SmartLink>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* 第三行：播放器 */}
-          {audioUrl && (
-            <div className='w-full'>
-              <audio
-                ref={localAudioRef}
-                src={audioUrl}
-                preload='metadata'
-                onLoadedMetadata={handleMetadata}
-                onWaiting={handleWaiting}
-                onCanPlay={handleCanPlay}
-                onPlaying={handlePlaying}
-                style={{ display: 'none' }}
-              />
-              <div className='flex items-center gap-3 w-full'>
-                {/* 圆形播放按钮 */}
-                <button
-                  onClick={handlePlayClick}
-                  className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105 text-white'
-                  style={{
-                    background:
-                      isCurrentSrc && isPlaying
-                        ? 'linear-gradient(135deg, #7B8BC4 0%, #3A4A7A 100%)'
-                        : 'rgba(255,255,255,0.15)',
-                    backdropFilter: 'blur(10px)'
-                  }}>
-                  {isCurrentSrc && isPlaying ? (
-                    <PauseIcon size={14} />
-                  ) : (
-                    <PlayIcon size={14} />
-                  )}
-                </button>
-
-                {/* 进度条 */}
-                <div
-                  className={`flex-1 h-1 rounded-full overflow-hidden relative ${
-                    isLoading
-                      ? 'loading-stripe'
-                      : isCurrentSrc && isPlaying
-                        ? ''
-                        : 'bg-white/15'
-                  }`}
-                  style={{
-                    backdropFilter: isLoading ? 'none' : 'blur(10px)'
-                  }}>
-                  <div
-                    className='h-full rounded-full transition-all duration-300'
-                    style={{
-                      width: `${progress}%`,
-                      background:
-                        isCurrentSrc && isPlaying
-                          ? 'linear-gradient(90deg, #8B9BD4 0%, #4A5A8A 50%, #3A4A7A 100%)'
-                          : 'transparent'
-                    }}
-                  />
-                </div>
-
-                {/* 倒计时 */}
-                <span className='flex-shrink-0 text-xs text-white/70 tabular-nums whitespace-nowrap'>
-                  {formatRemaining(remaining)}
-                </span>
+                  </>
+                )}
+                {post.tagItems && post.tagItems.length > 0 && (
+                  <>
+                    <span className='text-white/30'>/</span>
+                    <div className='flex flex-wrap items-center gap-x-2 gap-y-1'>
+                      {post.tagItems.map(tag => (
+                        <SmartLink
+                          key={tag.name}
+                          href={`/tag/${encodeURIComponent(tag.name)}`}
+                          passHref
+                          legacyBehavior>
+                          <span className='cursor-pointer hover:text-white transition-colors whitespace-nowrap'>
+                            {tag.name}
+                          </span>
+                        </SmartLink>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
+
+              {/* 第三行：播放器 */}
+              {audioUrl && (
+                <div className='w-full'>
+                  <audio
+                    ref={localAudioRef}
+                    src={audioUrl}
+                    preload='metadata'
+                    onLoadedMetadata={handleMetadata}
+                    onWaiting={handleWaiting}
+                    onCanPlay={handleCanPlay}
+                    onPlaying={handlePlaying}
+                    style={{ display: 'none' }}
+                  />
+                  <div className='flex items-center gap-3 w-full'>
+                    {/* 圆形播放按钮 */}
+                    <button
+                      onClick={handlePlayClick}
+                      className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105 text-white'
+                      style={{
+                        background:
+                          isCurrentSrc && isPlaying
+                            ? 'linear-gradient(135deg, #7B8BC4 0%, #3A4A7A 100%)'
+                            : 'rgba(255,255,255,0.15)',
+                        backdropFilter: 'blur(10px)'
+                      }}>
+                      {isCurrentSrc && isPlaying ? (
+                        <PauseIcon size={14} />
+                      ) : (
+                        <PlayIcon size={14} />
+                      )}
+                    </button>
+
+                    {/* 进度条：底槽永远半透明磨砂，已播放部分叠加渐变 */}
+                    <div
+                      className={`flex-1 h-1 rounded-full overflow-hidden relative bg-white/15 ${
+                        isLoading ? 'loading-stripe' : ''
+                      }`}
+                      style={{
+                        backdropFilter: 'blur(10px)'
+                      }}>
+                      <div
+                        className='h-full rounded-full transition-all duration-300'
+                        style={playedBarStyle}
+                      />
+                    </div>
+
+                    {/* 倒计时 */}
+                    <span className='flex-shrink-0 text-xs text-white/70 tabular-nums whitespace-nowrap'>
+                      {formatRemaining(remaining)}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </header>
 
