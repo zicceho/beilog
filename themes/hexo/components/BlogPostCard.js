@@ -17,6 +17,7 @@ const parseExt = (ext) => {
 }
 
 const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
+  if (typeof window !== 'undefined') console.log('POST.AUDIO:', post?.audio)
   const showPreview =
     siteConfig('HEXO_POST_LIST_PREVIEW', null, CONFIG) && post.blockMap
   if (post && !post.pageCoverThumbnail && siteConfig('HEXO_POST_LIST_COVER_DEFAULT', null, CONFIG)) {
