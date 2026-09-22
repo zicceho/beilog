@@ -4,7 +4,6 @@ import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { formatDateFmt } from '@/lib/utils/formatDate'
 import SmartLink from '@/components/SmartLink'
-import TagItemMini from './TagItemMini'
 
 /**
  * 文章详情页的Hero块
@@ -34,63 +33,56 @@ export default function PostHero({ post, siteInfo }) {
       <header
         id='article-header-cover'
         className='bg-black bg-opacity-70 absolute top-0 w-full h-96 py-10 flex justify-center items-center '>
-        <div className='mt-10'>
+        <div className='mt-10 w-full'>
+          {/* 分类：去掉方框，改成「」括号 */}
           <div className='mb-3 flex justify-center'>
             {post.category && (
-              <>
-                <SmartLink
-                  href={`/category/${post.category}`}
-                  passHref
-                  legacyBehavior>
-                  <div className='cursor-pointer px-2 py-1 mb-2 border rounded-sm dark:border-white text-sm font-medium hover:underline duration-200 shadow-text-md text-white'>
-                    {post.category}
-                  </div>
-                </SmartLink>
-              </>
+              <SmartLink
+                href={`/category/${post.category}`}
+                passHref
+                legacyBehavior>
+                <div className='cursor-pointer text-sm font-light text-white/80 hover:text-white transition-colors'>
+                  「{post.category}」
+                </div>
+              </SmartLink>
             )}
           </div>
 
-          {/* 文章Title */}
-          <div className='leading-snug font-bold xs:text-4xl sm:text-4xl md:text-5xl md:leading-snug text-4xl shadow-text-md flex justify-center text-center text-white'>
+          {/* 文章标题：左右留白，避免贴边 */}
+          <div className='leading-snug font-bold xs:text-4xl sm:text-4xl md:text-5xl md:leading-snug text-4xl shadow-text-md flex justify-center text-center text-white px-6 sm:px-8'>
             {siteConfig('POST_TITLE_ICON') && (
               <NotionIcon icon={post.pageIcon} className='text-4xl mx-1' />
             )}
             {post.title}
           </div>
 
-          {/* ⚠️ 改动位置：时间和标签同行的容器 */}
-          <section className='flex-wrap shadow-text-md flex text-sm justify-center items-center mt-4 text-white dark:text-gray-400 font-light leading-8 gap-x-6'>
-            {/* 1. 时间显示（日历图标 + 日期） */}
-            <div className='flex justify-center items-center dark:text-gray-200 text-opacity-70'>
-              {post?.type !== 'Page' && (
-                <SmartLink
-                  href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
-                  passHref
-                  className='pl-1 cursor-pointer hover:underline flex items-center'>
-                  <i className='far fa-calendar-alt mr-1' />
-                  {post?.publishDay || post.date}
-                </SmartLink>
-              )}
-            </div>
-
-            {/* 2. 浏览量（如果有） */}
-            {JSON.parse(siteConfig('ANALYTICS_BUSUANZI_ENABLE')) && (
-              <div className='busuanzi_container_page_pv font-light'>
-                <span className='mr-2 busuanzi_value_page_pv' />
-                {locale.COMMON.VIEWS}
-              </div>
+          {/* 日期 + 嘉宾 同行 */}
+          <section className='flex-wrap shadow-text-md flex text-sm justify-center items-center mt-4 text-white/70 font-light leading-8 gap-x-2 gap-y-1 px-6 sm:px-8'>
+            {/* 日期 */}
+            {post?.type !== 'Page' && (
+              <SmartLink
+                href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
+                passHref
+                className='cursor-pointer hover:text-white transition-colors flex items-center'>
+                <i className='far fa-calendar-alt mr-1' />
+                {post?.publishDay || post.date}
+              </SmartLink>
             )}
 
-            {/* 3. 标签（搬进了同一个容器内，保证同行显示） */}
-            {post.tagItems && (
-              <div className='flex items-center justify-center flex-wrap gap-1'>
-                {post.tagItems.map(tag => (
-                  <TagItemMini key={tag.name} tag={tag} />
-                ))}
-              </div>
+            {/* 日期和嘉宾之间的间隔（相当于两个空格） */}
+            {post.tagItems && post.tagItems.length > 0 && (
+              <span className='mx-1' />
             )}
+
+            {/* 嘉宾：去掉色块，改成 @名字 */}
+            {post.tagItems?.map(tag => (
+              <span
+                key={tag.name}
+                className='text-white/80 text-sm whitespace-nowrap'>
+                @{tag.name}
+              </span>
+            ))}
           </section>
-
         </div>
       </header>
     </div>
