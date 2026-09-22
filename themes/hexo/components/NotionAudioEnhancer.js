@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import AudioPlayer from './AudioPlayer'
-import { siteConfig } from '@/lib/config'
 
 const enhanceAudio = () => {
   const containers = document.querySelectorAll('#notion-article .notion-audio')
@@ -22,14 +21,12 @@ const enhanceAudio = () => {
 export default function NotionAudioEnhancer({ post }) {
   const [players, setPlayers] = useState([])
 
-  const cover = post?.pageCoverThumbnail || post?.pageCover || siteConfig('HEXO_POST_LIST_COVER_DEFAULT')
   const title = post?.title
+  const cover = post?.pageCoverThumbnail || post?.pageCover
   const href = post?.href
-  const category = post?.category
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    // 增加一点延迟，确保 Notion 正文已经渲染完毕
     const timer = setTimeout(() => {
       const enhanced = enhanceAudio()
       setPlayers(enhanced)
@@ -37,19 +34,17 @@ export default function NotionAudioEnhancer({ post }) {
 
     return () => {
       clearTimeout(timer)
-      const enhanced = enhanceAudio()
-      enhanced.forEach(({ mount, nativeAudio, originalDisplay }) => {
-        mount.remove()
-        nativeAudio.style.display = originalDisplay
-      })
     }
   }, [post?.id])
 
   return (
     <>
-      {players.map(({ mount, src }) => (
-        createPortal(<AudioPlayer src={src} cover={cover} title={title} href={href} category={category} />, mount)
-      ))}
+      {players.map(({ mount, src }) =>
+        createPortal(
+          <AudioPlayer src={src} title={title} cover={cover} href={href} />,
+          mount
+        )
+      )}
     </>
   )
 }
