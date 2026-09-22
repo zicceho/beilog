@@ -131,7 +131,7 @@ export default function GlobalAudioPlayer() {
     }
 
     const onShowNoAudio = (e) => {
-      const msg = e.detail?.message || '本期暂无音频节目，请点击标题查看详情'
+      const msg = e.detail?.message || '当前暂无音频节目，请前往节目页面播放'
       setNoAudioMessage(msg)
       setAudioData(null)
       setVisible(true)
@@ -148,7 +148,6 @@ export default function GlobalAudioPlayer() {
     }
   }, [audioData])
 
-  // 方案 C：滚动累计超过 50px 立即隐藏，锁住时不生效
   useEffect(() => {
     if (!visible || minimized || locked) return
     lastScrollY.current = window.pageYOffset
