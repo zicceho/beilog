@@ -73,7 +73,7 @@ export default function PostHero({ post, siteInfo }) {
       } else {
         setIsCurrentSrc(false)
         setIsPlaying(false)
-        // 不重置 progress / remaining，避免暂停或切歌时闪烁
+        // 不重置 progress，避免暂停时进度条闪烁
       }
     }
     window.addEventListener('global-audio-state', onState)
@@ -116,7 +116,6 @@ export default function PostHero({ post, siteInfo }) {
 
   const headerImage = post?.pageCover ? post.pageCover : siteInfo?.pageCover
 
-  // 进度条底槽永远保持半透明磨砂；已播放部分只要 progress > 0 就显示渐变
   const playedBarStyle = {
     width: `${progress}%`,
     background:
@@ -136,11 +135,11 @@ export default function PostHero({ post, siteInfo }) {
       <header
         id='article-header-cover'
         className='bg-black bg-opacity-70 absolute top-0 w-full h-full flex items-center'>
-        {/* 外层 padding 和 main 一致，内层限宽，整体靠左 */}
-        <div className='w-full px-6 sm:px-8 lg:px-24'>
-          <div className='max-w-4xl'>
-            {/* 内层宽度和正文一致（减去 SideRight 320px + gap 16px） */}
-            <div className='max-w-2xl lg:max-w-[calc(100%-21rem)]'>
+        {/* 外层复刻 main 的左右 padding */}
+        <div className='w-full md:px-8 lg:px-24'>
+          {/* 与正文容器对齐：max-w-4xl + md:px-5 + px-5 */}
+          <div className='w-full mx-auto max-w-4xl md:px-5'>
+            <div className='px-5'>
               {/* 第一行：标题 */}
               <div className='leading-snug font-bold text-3xl sm:text-4xl md:leading-snug shadow-text-md text-white mb-4'>
                 {siteConfig('POST_TITLE_ICON') && (
@@ -196,7 +195,7 @@ export default function PostHero({ post, siteInfo }) {
                 )}
               </div>
 
-              {/* 第三行：播放器 */}
+              {/* 第三行：播放器，宽度占满整块内容区 */}
               {audioUrl && (
                 <div className='w-full'>
                   <audio
@@ -210,7 +209,6 @@ export default function PostHero({ post, siteInfo }) {
                     style={{ display: 'none' }}
                   />
                   <div className='flex items-center gap-3 w-full'>
-                    {/* 圆形播放按钮 */}
                     <button
                       onClick={handlePlayClick}
                       className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105 text-white'
@@ -228,21 +226,17 @@ export default function PostHero({ post, siteInfo }) {
                       )}
                     </button>
 
-                    {/* 进度条：底槽永远半透明磨砂，已播放部分叠加渐变 */}
                     <div
                       className={`flex-1 h-1 rounded-full overflow-hidden relative bg-white/15 ${
                         isLoading ? 'loading-stripe' : ''
                       }`}
-                      style={{
-                        backdropFilter: 'blur(10px)'
-                      }}>
+                      style={{ backdropFilter: 'blur(10px)' }}>
                       <div
                         className='h-full rounded-full transition-all duration-300'
                         style={playedBarStyle}
                       />
                     </div>
 
-                    {/* 倒计时 */}
                     <span className='flex-shrink-0 text-xs text-white/70 tabular-nums whitespace-nowrap'>
                       {formatRemaining(remaining)}
                     </span>
