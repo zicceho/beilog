@@ -188,6 +188,16 @@ const SocialButton = () => {
             />{' '}
           </a>
         )}
+
+        {/* ⚠️ 这里就是新增的赞赏图标，其他什么都没动 */}
+        <a
+          target='_blank'
+          rel='noreferrer'
+          title={'赞赏'}
+          href='https://na.885111.xyz/sponsor'>
+          <i className='transform hover:scale-125 duration-150 fas fa-hand-holding-heart dark:hover:text-indigo-400 hover:text-indigo-600' />
+        </a>
+
         {CONTACT_WEHCHAT_PUBLIC && (
           <button
             onMouseEnter={openPopover}
