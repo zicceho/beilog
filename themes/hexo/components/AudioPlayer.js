@@ -72,14 +72,12 @@ export default function AudioPlayer({ src, title, cover, href }) {
     )
   }
 
-  // 播放中：按钮和进度条都用主题色渐变；未播放/暂停：半透明磨砂
   const active = isCurrentSrc && isPlaying
+  // 未播放/暂停：纯主题色；播放中：主题色渐变
   const buttonStyle = {
     background: active
       ? 'linear-gradient(135deg, #7B8BC4 0%, #3A4A7A 100%)'
-      : 'rgba(58, 74, 122, 0.15)',
-    backdropFilter: 'blur(10px)',
-    WebkitBackdropFilter: 'blur(10px)'
+      : '#3A4A7A'
   }
   const playedBarStyle = {
     width: `${progress}%`,
@@ -100,7 +98,6 @@ export default function AudioPlayer({ src, title, cover, href }) {
         style={{ display: 'none' }}
       />
 
-      {/* 圆形按钮：和头图完全一致，未播放半透明磨砂，播放中主题渐变 */}
       <button
         onClick={handleClick}
         className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105 text-white'
@@ -108,7 +105,6 @@ export default function AudioPlayer({ src, title, cover, href }) {
         {active ? <PauseIcon size={14} /> : <PlayIcon size={14} />}
       </button>
 
-      {/* 进度条底槽：半透明磨砂；播放中叠加主题色渐变 */}
       <div
         className={`flex-1 h-1 rounded-full overflow-hidden relative bg-gray-200/60 dark:bg-gray-700/60 backdrop-blur-sm ${
           isLoading ? 'loading-stripe' : ''
@@ -119,7 +115,6 @@ export default function AudioPlayer({ src, title, cover, href }) {
         />
       </div>
 
-      {/* 倒计时 */}
       <span className='flex-shrink-0 text-xs text-gray-500 dark:text-gray-400 tabular-nums whitespace-nowrap'>
         {formatRemaining(remaining)}
       </span>
