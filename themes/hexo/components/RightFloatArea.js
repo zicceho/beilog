@@ -2,9 +2,34 @@ import { useCallback, useEffect, useState } from 'react'
 import ButtonDarkModeFloat from './ButtonFloatDarkMode'
 import ButtonJumpToTop from './ButtonJumpToTop'
 
-export default function RightFloatArea({ floatSlot }) {
+const PlayIcon = ({ size = 16 }) => (
+  <svg viewBox='0 0 24 24' width={size} height={size} fill='currentColor' style={{ marginLeft: '1px' }}>
+    <path d='M8 5v14l11-7z' />
+  </svg>
+)
+const PauseIcon = ({ size = 16 }) => (
+  <svg viewBox='0 0 24 24' width={size} height={size} fill='currentColor'>
+    <rect x='6' y='5' width='4' height='14' rx='1' />
+    <rect x='14' y='5' width='4' height='14' rx='1' />
+  </svg>
+)
+
+const parseExt = (ext) => {
+  if (!ext) return null
+  const raw = typeof ext === 'string' ? ext.trim() : ''
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw)
+    if (parsed?.audio) return parsed.audio
+  } catch (e) {}
+  if (raw.startsWith('http')) return raw
+  return null
+}
+
+export default function RightFloatArea({ floatSlot, posts }) {
   const [showFloatButton, switchShow] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [hasAudio, setHasAudio] = useState(false)
 
   const scrollListener = useCallback(() => {
     const targetRef = document.getElementById('wrapper') || document.documentElement
@@ -27,23 +52,60 @@ export default function RightFloatArea({ floatSlot }) {
   }, [scrollListener])
 
   useEffect(() => {
-    const onState = (e) => setIsPlaying(e.detail.playing)
+    const onState = (e) => {
+      setIsPlaying(e.detail.playing)
+      setHasAudio(!!e.detail.hasAudio)
+    }
     window.addEventListener('global-audio-state', onState)
     return () => window.removeEventListener('global-audio-state', onState)
   }, [])
+
+  const handleClick = () => {
+    // 已经有音频实例：只切换面板显示/隐藏
+    if (hasAudio) {
+      window.dispatchEvent(new CustomEvent('toggle-player-visibility'))
+      return
+    }
+    // 没有音频实例：从 posts 里找第一个有音频的，直接播放
+    const list = posts || []
+    for (let i = 0; i < list.length; i++) {
+      const p = list[i]
+      const audioUrl = p?.audio || parseExt(p?.ext)
+      if (audioUrl) {
+        window.dispatchEvent(
+          new CustomEvent('toggle-global-audio', {
+            detail: {
+              src: audioUrl,
+              cover: p.pageCoverThumbnail || p.pageCover,
+              title: p.title,
+              href: p.href
+            }
+          })
+        )
+        return
+      }
+    }
+    // 全都没音频：弹出提示
+    window.dispatchEvent(
+      new CustomEvent('show-no-audio-hint', {
+        detail: { message: '当前暂无音频节目，请点击节目页面或标题播放' }
+      })
+    )
+  }
 
   return (
     <div
       className={
         (showFloatButton ? 'opacity-100 ' : 'invisible opacity-0') +
-        ' duration-300 transition-all bottom-12 right-1 fixed justify-end z-20 text-white bg-[#3A4A7A] dark:bg-hexo-black-gray rounded-sm'
+        ' duration-300 transition-all bottom-12 right-1 fixed z-20 text-white bg-[#3A4A7A] dark:bg-hexo-black-gray rounded-sm'
       }>
       <div className='justify-center flex flex-col items-center cursor-pointer'>
+        {/* 播放器折叠按钮，上边留白减 1px */}
         <div
-          onClick={() => window.dispatchEvent(new CustomEvent('toggle-player-visibility'))}
-          className='w-10 h-10 flex justify-center items-center hover:bg-black/20 transition-colors'
+          onClick={handleClick}
+          className='w-10 h-8 flex justify-center items-center hover:bg-black/20 transition-colors -mt-1'
           title='展开/收起播放器'>
-          <i className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-base`} />
+          {isPlaying ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
         </div>
         <ButtonDarkModeFloat />
         {floatSlot}
