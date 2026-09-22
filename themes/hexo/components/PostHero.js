@@ -124,7 +124,6 @@ export default function PostHero({ post, siteInfo }) {
   }
 
   return (
-    {/* 这里就是唯一改动的地方：最外层加了 mb-8 */}
     <div id='header' className='w-full h-96 md:h-[80vh] relative md:flex-shrink-0 z-10 mb-8'>
       <LazyImage
         priority={true}
@@ -137,10 +136,8 @@ export default function PostHero({ post, siteInfo }) {
         className='bg-black bg-opacity-70 absolute top-0 w-full h-full flex items-center'>
         <div className='w-full md:px-8 lg:px-24'>
           <div className='w-full mx-auto lg:flex lg:space-x-4 justify-center'>
-            {/* 核心内容左对齐容器 */}
             <div className='w-full max-w-4xl md:px-5'>
               <div className='px-5'>
-                {/* 第一行：标题 */}
                 <div className='leading-snug font-bold text-3xl sm:text-4xl md:leading-snug shadow-text-md text-white mb-4'>
                   {siteConfig('POST_TITLE_ICON') && (
                     <NotionIcon
@@ -151,7 +148,6 @@ export default function PostHero({ post, siteInfo }) {
                   {post.title}
                 </div>
 
-                {/* 第二行：分类 / 日期 / 嘉宾 */}
                 <div className='flex flex-wrap items-center gap-x-3 gap-y-1 mb-6 text-sm font-light text-white/70'>
                   {post.category && (
                     <SmartLink
@@ -195,7 +191,6 @@ export default function PostHero({ post, siteInfo }) {
                   )}
                 </div>
 
-                {/* 第三行：播放器，完美左对齐，宽度占满 */}
                 {audioUrl && (
                   <div className='w-full'>
                     <audio
@@ -226,7 +221,6 @@ export default function PostHero({ post, siteInfo }) {
                         )}
                       </button>
 
-                      {/* 进度条 */}
                       <div
                         className={`flex-1 h-1 rounded-full overflow-hidden relative bg-white/15 ${
                           isLoading ? 'loading-stripe' : ''
@@ -247,7 +241,6 @@ export default function PostHero({ post, siteInfo }) {
               </div>
             </div>
 
-            {/* 右侧栏占位 */}
             <div className='hidden lg:block lg:w-80 flex-shrink-0'></div>
           </div>
         </div>
