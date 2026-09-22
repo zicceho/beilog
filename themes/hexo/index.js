@@ -18,7 +18,6 @@ import BlogPostArchive from './components/BlogPostArchive'
 import BlogPostListPage from './components/BlogPostListPage'
 import BlogPostListScroll from './components/BlogPostListScroll'
 import ButtonJumpToComment from './components/ButtonJumpToComment'
-import ButtonRandomPostMini from './components/ButtonRandomPostMini'
 import Card from './components/Card'
 import Footer from './components/Footer'
 import Header from './components/Header'
@@ -33,6 +32,7 @@ import TocDrawer from './components/TocDrawer'
 import TocDrawerButton from './components/TocDrawerButton'
 import ArticleSwitchPlaceholder from './components/ArticleSwitchPlaceholder'
 import NotionAudioEnhancer from './components/NotionAudioEnhancer'
+import GlobalAudioPlayer from './components/GlobalAudioPlayer'
 import CONFIG from './config'
 import { Style } from './style'
 
@@ -48,7 +48,6 @@ const LayoutBase = props => {
   const { post, children, slotTop, className } = props
   const { onLoading, fullWidth } = useGlobal()
   const router = useRouter()
-  const showRandomButton = siteConfig('HEXO_MENU_RANDOM', false, CONFIG)
   const isArticleSlugPage = router.pathname === '/[prefix]/[slug]'
   const hexoArticleRouteLoading = siteConfig(
     'HEXO_ARTICLE_ROUTE_LOADING',
@@ -80,7 +79,6 @@ const LayoutBase = props => {
         </div>
       )}
       {post && <ButtonJumpToComment />}
-      {showRandomButton && <ButtonRandomPostMini {...props} />}
     </>
   )
 
@@ -146,6 +144,7 @@ const LayoutBase = props => {
         </div>
         <RightFloatArea floatSlot={floatSlot} />
         <AlgoliaSearchModal cRef={searchModal} {...props} />
+        <GlobalAudioPlayer />
         <Footer title={siteConfig('TITLE')} />
       </div>
     </ThemeGlobalHexo.Provider>
@@ -248,7 +247,6 @@ const LayoutSlug = props => {
     }
   }, [post])
 
-  // 判断 Audio 字段有没有音频：有的话 Hero 区已经显示了，正文里就不需要再套壳
   let hasAudioField = !!post?.audio
   if (!hasAudioField && post?.ext) {
     const raw = typeof post.ext === 'string' ? post.ext.trim() : ''
@@ -265,14 +263,11 @@ const LayoutSlug = props => {
             <article
               id='article-wrapper'
               className='subpixel-antialiased overflow-y-hidden'>
-              {/* Notion文章主体 */}
               <section className='px-5 justify-center mx-auto max-w-2xl lg:max-w-full'>
-                {/* 正文里的音频块套壳。只有当 Audio 字段没有值时，才启用，避免重复 */}
                 {!hasAudioField && <NotionAudioEnhancer post={post} />}
                 {post && <NotionPage post={post} />}
               </section>
 
-              {/* 分享 */}
               <ShareBar post={post} />
               {post?.type === 'Post' && (
                 <>
@@ -285,7 +280,6 @@ const LayoutSlug = props => {
 
             <div className='pt-4 border-dashed'></div>
 
-            {/* 评论互动 */}
             <div className='duration-200 overflow-x-auto bg-white dark:bg-hexo-black-gray px-3'>
               <Comment frontMatter={post} />
             </div>
