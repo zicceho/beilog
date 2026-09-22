@@ -3,6 +3,7 @@ import { siteConfig } from '@/lib/config'
 import CONFIG from '../config'
 import { BlogPostCardInfo } from './BlogPostCardInfo'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
 
 const parseExt = (ext) => {
   if (!ext) return null
@@ -17,6 +18,7 @@ const parseExt = (ext) => {
 }
 
 const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
+  const router = useRouter()
   const showPreview =
     siteConfig('HEXO_POST_LIST_PREVIEW', null, CONFIG) && post.blockMap
   if (post && !post.pageCoverThumbnail && siteConfig('HEXO_POST_LIST_COVER_DEFAULT', null, CONFIG)) {
@@ -28,6 +30,7 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
     !showPreview
 
   const audioUrl = post?.audio || parseExt(post.ext)
+  const hasAudio = !!audioUrl
   const [isPlaying, setIsPlaying] = useState(false)
 
   useEffect(() => {
@@ -43,20 +46,20 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
   const handleCoverClick = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    if (!audioUrl) {
-      alert('暂无音频节目，请点击标题查看文稿')
-      return
+    if (hasAudio) {
+      window.dispatchEvent(
+        new CustomEvent('toggle-global-audio', {
+          detail: {
+            src: audioUrl,
+            cover: post.pageCoverThumbnail || post.pageCover,
+            title: post.title,
+            href: post.href
+          }
+        })
+      )
+    } else {
+      router.push(post?.href)
     }
-    window.dispatchEvent(
-      new CustomEvent('toggle-global-audio', {
-        detail: {
-          src: audioUrl,
-          cover: post.pageCoverThumbnail || post.pageCover,
-          title: post.title,
-          href: post.href
-        }
-      })
-    )
   }
 
   return (
@@ -83,11 +86,13 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
               src={post?.pageCoverThumbnail}
               className='h-56 w-full object-cover object-center group-hover:scale-110 duration-500'
             />
-            <div className='absolute bottom-2 right-2 z-10 pointer-events-none'>
-              <i
-                className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-2xl text-white/70 drop-shadow-lg transition-colors`}
-              />
-            </div>
+            {hasAudio && (
+              <div className='absolute bottom-2 right-2 z-10 pointer-events-none'>
+                <i
+                  className={`fa-solid ${isPlaying ? 'fa-circle-pause' : 'fa-circle-play'} text-2xl text-white/70 drop-shadow-lg transition-colors`}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
