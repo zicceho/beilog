@@ -2,12 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import ButtonDarkModeFloat from './ButtonFloatDarkMode'
 import ButtonJumpToTop from './ButtonJumpToTop'
 
-const PlayIcon = ({ size = 16 }) => (
+const PlayIcon = ({ size = 14 }) => (
   <svg viewBox='0 0 24 24' width={size} height={size} fill='currentColor' style={{ marginLeft: '1px' }}>
     <path d='M8 5v14l11-7z' />
   </svg>
 )
-const PauseIcon = ({ size = 16 }) => (
+const PauseIcon = ({ size = 14 }) => (
   <svg viewBox='0 0 24 24' width={size} height={size} fill='currentColor'>
     <rect x='6' y='5' width='4' height='14' rx='1' />
     <rect x='14' y='5' width='4' height='14' rx='1' />
@@ -102,9 +102,9 @@ export default function RightFloatArea({ floatSlot, posts }) {
         {!locked && (
           <div
             onClick={handleClick}
-            className='w-10 h-10 flex justify-center items-center hover:bg-black/20 transition-colors'
+            className='justify-center items-center w-7 h-7 text-center transform hover:scale-105 duration-200'
             title='展开/收起播放器'>
-            {isPlaying ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
+            {isPlaying ? <PauseIcon size={14} /> : <PlayIcon size={14} />}
           </div>
         )}
         <ButtonDarkModeFloat />
