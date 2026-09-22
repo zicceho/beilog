@@ -73,7 +73,6 @@ export default function PostHero({ post, siteInfo }) {
       } else {
         setIsCurrentSrc(false)
         setIsPlaying(false)
-        // 不重置 progress，避免暂停时进度条闪烁
       }
     }
     window.addEventListener('global-audio-state', onState)
@@ -135,127 +134,130 @@ export default function PostHero({ post, siteInfo }) {
       <header
         id='article-header-cover'
         className='bg-black bg-opacity-70 absolute top-0 w-full h-full flex items-center'>
-        {/* 外层复刻 main 的左右 padding */}
+        
+        {/* 完美复刻正文的外层结构，带上右侧栏占位 */}
         <div className='w-full md:px-8 lg:px-24'>
-          {/* 与正文容器对齐：max-w-4xl + md:px-5 + px-5 */}
-          <div className='w-full mx-auto max-w-4xl md:px-5'>
-            <div className='px-5'>
-              {/* 第一行：标题 */}
-              <div className='leading-snug font-bold text-3xl sm:text-4xl md:leading-snug shadow-text-md text-white mb-4'>
-                {siteConfig('POST_TITLE_ICON') && (
-                  <NotionIcon
-                    icon={post.pageIcon}
-                    className='text-3xl sm:text-4xl mr-1 inline-block'
-                  />
-                )}
-                {post.title}
-              </div>
+          <div className='w-full mx-auto lg:flex lg:space-x-4 justify-center'>
+            
+            {/* 内容区 */}
+            <div className='w-full max-w-4xl'>
+              <div className='px-5'>
+                {/* 第一行：标题 */}
+                <div className='leading-snug font-bold text-3xl sm:text-4xl md:leading-snug shadow-text-md text-white mb-4'>
+                  {siteConfig('POST_TITLE_ICON') && (
+                    <NotionIcon
+                      icon={post.pageIcon}
+                      className='text-3xl sm:text-4xl mr-1 inline-block'
+                    />
+                  )}
+                  {post.title}
+                </div>
 
-              {/* 第二行：分类 / 日期 / 嘉宾 */}
-              <div className='flex flex-wrap items-center gap-x-3 gap-y-1 mb-6 text-sm font-light text-white/70'>
-                {post.category && (
-                  <SmartLink
-                    href={`/category/${post.category}`}
-                    passHref
-                    legacyBehavior>
-                    <span className='cursor-pointer hover:text-white transition-colors font-bold'>
-                      {post.category}
-                    </span>
-                  </SmartLink>
-                )}
-                {post?.type !== 'Page' && (
-                  <>
-                    <span className='text-white/30'>/</span>
+                {/* 第二行：分类 / 日期 / 嘉宾 */}
+                <div className='flex flex-wrap items-center gap-x-3 gap-y-1 mb-6 text-sm font-light text-white/70'>
+                  {post.category && (
                     <SmartLink
-                      href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
-                      passHref>
-                      <span className='cursor-pointer hover:text-white transition-colors'>
-                        {post?.publishDay || post.date}
+                      href={`/category/${post.category}`}
+                      passHref
+                      legacyBehavior>
+                      <span className='cursor-pointer hover:text-white transition-colors font-bold'>
+                        {post.category}
                       </span>
                     </SmartLink>
-                  </>
-                )}
-                {post.tagItems && post.tagItems.length > 0 && (
-                  <>
-                    <span className='text-white/30'>/</span>
-                    <div className='flex flex-wrap items-center gap-x-2 gap-y-1'>
-                      {post.tagItems.map(tag => (
-                        <SmartLink
-                          key={tag.name}
-                          href={`/tag/${encodeURIComponent(tag.name)}`}
-                          passHref
-                          legacyBehavior>
-                          <span className='cursor-pointer hover:text-white transition-colors whitespace-nowrap'>
-                            {tag.name}
-                          </span>
-                        </SmartLink>
-                      ))}
+                  )}
+                  {post?.type !== 'Page' && (
+                    <>
+                      <span className='text-white/30'>/</span>
+                      <SmartLink
+                        href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
+                        passHref>
+                        <span className='cursor-pointer hover:text-white transition-colors'>
+                          {post?.publishDay || post.date}
+                        </span>
+                      </SmartLink>
+                    </>
+                  )}
+                  {post.tagItems && post.tagItems.length > 0 && (
+                    <>
+                      <span className='text-white/30'>/</span>
+                      <div className='flex flex-wrap items-center gap-x-2 gap-y-1'>
+                        {post.tagItems.map(tag => (
+                          <SmartLink
+                            key={tag.name}
+                            href={`/tag/${encodeURIComponent(tag.name)}`}
+                            passHref
+                            legacyBehavior>
+                            <span className='cursor-pointer hover:text-white transition-colors whitespace-nowrap'>
+                              {tag.name}
+                            </span>
+                          </SmartLink>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* 第三行：播放器 */}
+                {audioUrl && (
+                  <div className='w-full'>
+                    <audio
+                      ref={localAudioRef}
+                      src={audioUrl}
+                      preload='metadata'
+                      onLoadedMetadata={handleMetadata}
+                      onWaiting={handleWaiting}
+                      onCanPlay={handleCanPlay}
+                      onPlaying={handlePlaying}
+                      style={{ display: 'none' }}
+                    />
+                    <div className='flex items-center gap-3 w-full'>
+                      <button
+                        onClick={handlePlayClick}
+                        className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105 text-white'
+                        style={{
+                          background:
+                            isCurrentSrc && isPlaying
+                              ? 'linear-gradient(135deg, #7B8BC4 0%, #3A4A7A 100%)'
+                              : 'rgba(255,255,255,0.15)',
+                          backdropFilter: 'blur(10px)'
+                        }}>
+                        {isCurrentSrc && isPlaying ? (
+                          <PauseIcon size={14} />
+                        ) : (
+                          <PlayIcon size={14} />
+                        )}
+                      </button>
+
+                      <div
+                        className={`flex-1 h-1 rounded-full overflow-hidden relative bg-white/15 ${
+                          isLoading ? 'loading-stripe' : ''
+                        }`}
+                        style={{ backdropFilter: 'blur(10px)' }}>
+                        <div
+                          className='h-full rounded-full transition-all duration-300'
+                          style={playedBarStyle}
+                        />
+                      </div>
+
+                      <span className='flex-shrink-0 text-xs text-white/70 tabular-nums whitespace-nowrap'>
+                        {formatRemaining(remaining)}
+                      </span>
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
-
-              {/* 第三行：播放器，宽度占满整块内容区 */}
-              {audioUrl && (
-                <div className='w-full'>
-                  <audio
-                    ref={localAudioRef}
-                    src={audioUrl}
-                    preload='metadata'
-                    onLoadedMetadata={handleMetadata}
-                    onWaiting={handleWaiting}
-                    onCanPlay={handleCanPlay}
-                    onPlaying={handlePlaying}
-                    style={{ display: 'none' }}
-                  />
-                  <div className='flex items-center gap-3 w-full'>
-                    <button
-                      onClick={handlePlayClick}
-                      className='flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105 text-white'
-                      style={{
-                        background:
-                          isCurrentSrc && isPlaying
-                            ? 'linear-gradient(135deg, #7B8BC4 0%, #3A4A7A 100%)'
-                            : 'rgba(255,255,255,0.15)',
-                        backdropFilter: 'blur(10px)'
-                      }}>
-                      {isCurrentSrc && isPlaying ? (
-                        <PauseIcon size={14} />
-                      ) : (
-                        <PlayIcon size={14} />
-                      )}
-                    </button>
-
-                    <div
-                      className={`flex-1 h-1 rounded-full overflow-hidden relative bg-white/15 ${
-                        isLoading ? 'loading-stripe' : ''
-                      }`}
-                      style={{ backdropFilter: 'blur(10px)' }}>
-                      <div
-                        className='h-full rounded-full transition-all duration-300'
-                        style={playedBarStyle}
-                      />
-                    </div>
-
-                    <span className='flex-shrink-0 text-xs text-white/70 tabular-nums whitespace-nowrap'>
-                      {formatRemaining(remaining)}
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
+
+            {/* ⚠️ 关键：右侧栏占位，只有桌面端显示，宽度和正文侧边栏完全一致 */}
+            <div className='hidden lg:block lg:w-80 flex-shrink-0'></div>
           </div>
         </div>
       </header>
 
       <style jsx>{`
         @keyframes stripe-move {
-          0% {
-            background-position: 0 0;
-          }
-          100% {
-            background-position: 32px 0;
-          }
+          0% { background-position: 0 0; }
+          100% { background-position: 32px 0; }
         }
         .loading-stripe {
           background: repeating-linear-gradient(
