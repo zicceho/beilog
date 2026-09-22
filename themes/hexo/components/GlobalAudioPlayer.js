@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import SmartLink from '@/components/SmartLink'
+import { siteConfig } from '@/lib/config'
 
 const formatTime = (s) => {
   if (!Number.isFinite(s) || s < 0) return '0:00'
@@ -43,6 +44,9 @@ export default function GlobalAudioPlayer() {
   const [titleOverflow, setTitleOverflow] = useState(false)
   const [locked, setLocked] = useState(false)
   const [showMore, setShowMore] = useState(false)
+
+  const bannerDefault = siteConfig('HOME_BANNER_IMAGE') || ''
+  const coverSrc = audioData?.cover || bannerDefault
 
   useEffect(() => {
     if (audioData?.title) {
@@ -89,11 +93,12 @@ export default function GlobalAudioPlayer() {
           playing,
           currentTime,
           duration,
-          hasAudio: !!audioData?.src
+          hasAudio: !!audioData?.src,
+          locked
         }
       })
     )
-  }, [playing, audioData?.src, currentTime, duration])
+  }, [playing, audioData?.src, currentTime, duration, locked])
 
   useEffect(() => {
     const onToggle = (e) => {
@@ -208,8 +213,8 @@ export default function GlobalAudioPlayer() {
         <div className='relative bg-white/50 dark:bg-gray-900/50 backdrop-blur-3xl border border-white/40 dark:border-gray-700/40 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] px-3 py-2.5 flex items-center gap-3'>
 
           <div className='relative flex-shrink-0 w-11 h-11 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm'>
-            {audioData?.cover ? (
-              <img src={audioData.cover} alt='封面' className='w-full h-full object-cover' />
+            {coverSrc ? (
+              <img src={coverSrc} alt='封面' className='w-full h-full object-cover' />
             ) : (
               <div className='w-full h-full bg-gradient-to-br from-[#5A6A9A] to-[#3A4A7A]' />
             )}
@@ -313,7 +318,8 @@ export default function GlobalAudioPlayer() {
                 onMouseLeave={() => setShowVolume(false)}>
                 <button
                   onClick={toggleMute}
-                  className='w-8 h-8 flex items-center justify-center text-gray-500 hover:text-[#3A4A7A] transition-colors'>
+                  className='w-8 h-8 flex items-center justify-center text-gray-500 hover:text-[#3A4A7A] transition-colors'
+                  title='音量'>
                   <i
                     className={`fa-solid ${
                       muted ? 'fa-volume-xmark' : 'fa-volume-high'
@@ -358,35 +364,41 @@ export default function GlobalAudioPlayer() {
               className={`w-8 h-8 flex items-center justify-center transition-colors flex-shrink-0 ${
                 locked ? 'text-[#3A4A7A]' : 'text-gray-400 hover:text-[#3A4A7A]'
               }`}
-              title={locked ? '已固定，滑动不会隐藏' : '点击固定，滑动不隐藏'}>
+              title={locked ? '已固定，点击解锁' : '点击固定播放器，滑动页面不隐藏'}>
               <i className={`fa-solid ${locked ? 'fa-lock' : 'fa-lock-open'} text-xs`} />
             </button>
 
-            <button
-              onClick={() => setMinimized(true)}
-              className='w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#3A4A7A] transition-colors flex-shrink-0'>
-              <i className='fa-solid fa-chevron-down text-xs' />
-            </button>
+            {!locked && (
+              <button
+                onClick={() => setMinimized(true)}
+                className='w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#3A4A7A] transition-colors flex-shrink-0'
+                title='隐藏播放器'>
+                <i className='fa-solid fa-chevron-down text-xs' />
+              </button>
+            )}
           </div>
 
           {showMore && hasAudio && (
-            <div className='absolute bottom-full left-0 right-0 mb-2 sm:hidden'>
-              <div className='bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-xl shadow-xl border border-white/40 dark:border-gray-700/40 p-3 flex items-center justify-around gap-2'>
+            <div className='absolute bottom-full left-1/2 -translate-x-1/2 mb-2 sm:hidden'>
+              <div className='bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-xl shadow-xl border border-white/40 dark:border-gray-700/40 px-4 py-2.5 flex items-center gap-4'>
                 <button
                   onClick={() => skip(-5)}
-                  className='flex flex-col items-center gap-1 text-gray-600 hover:text-[#3A4A7A] transition-colors'>
-                  <i className='fa-solid fa-rotate-left' />
+                  className='flex flex-col items-center gap-0.5 text-gray-600 hover:text-[#3A4A7A] transition-colors'
+                  title='后退5秒'>
+                  <i className='fa-solid fa-rotate-left text-sm' />
                   <span className='text-[10px]'>退5s</span>
                 </button>
                 <button
                   onClick={() => skip(5)}
-                  className='flex flex-col items-center gap-1 text-gray-600 hover:text-[#3A4A7A] transition-colors'>
-                  <i className='fa-solid fa-rotate-right' />
+                  className='flex flex-col items-center gap-0.5 text-gray-600 hover:text-[#3A4A7A] transition-colors'
+                  title='前进5秒'>
+                  <i className='fa-solid fa-rotate-right text-sm' />
                   <span className='text-[10px]'>进5s</span>
                 </button>
                 <button
                   onClick={cycleSpeed}
-                  className='flex flex-col items-center gap-1 text-gray-600 hover:text-[#3A4A7A] transition-colors'>
+                  className='flex flex-col items-center gap-0.5 text-gray-600 hover:text-[#3A4A7A] transition-colors'
+                  title='切换倍速'>
                   <span className='text-xs font-bold'>{SPEEDS[speedIndex]}x</span>
                   <span className='text-[10px]'>倍速</span>
                 </button>
