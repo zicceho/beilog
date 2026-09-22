@@ -30,6 +30,7 @@ export default function RightFloatArea({ floatSlot, posts }) {
   const [showFloatButton, switchShow] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [hasAudio, setHasAudio] = useState(false)
+  const [locked, setLocked] = useState(false)
 
   const scrollListener = useCallback(() => {
     const targetRef = document.getElementById('wrapper') || document.documentElement
@@ -55,18 +56,17 @@ export default function RightFloatArea({ floatSlot, posts }) {
     const onState = (e) => {
       setIsPlaying(e.detail.playing)
       setHasAudio(!!e.detail.hasAudio)
+      setLocked(!!e.detail.locked)
     }
     window.addEventListener('global-audio-state', onState)
     return () => window.removeEventListener('global-audio-state', onState)
   }, [])
 
   const handleClick = () => {
-    // 已经有音频实例：只切换面板显示/隐藏
     if (hasAudio) {
       window.dispatchEvent(new CustomEvent('toggle-player-visibility'))
       return
     }
-    // 没有音频实例：从 posts 里找第一个有音频的，直接播放
     const list = posts || []
     for (let i = 0; i < list.length; i++) {
       const p = list[i]
@@ -85,7 +85,6 @@ export default function RightFloatArea({ floatSlot, posts }) {
         return
       }
     }
-    // 全都没音频：弹出提示
     window.dispatchEvent(
       new CustomEvent('show-no-audio-hint', {
         detail: { message: '当前暂无音频节目，请点击节目页面或标题播放' }
@@ -100,13 +99,14 @@ export default function RightFloatArea({ floatSlot, posts }) {
         ' duration-300 transition-all bottom-12 right-1 fixed z-20 text-white bg-[#3A4A7A] dark:bg-hexo-black-gray rounded-sm'
       }>
       <div className='justify-center flex flex-col items-center cursor-pointer'>
-        {/* 播放器折叠按钮，上边留白减 1px */}
-        <div
-          onClick={handleClick}
-          className='w-10 h-8 flex justify-center items-center hover:bg-black/20 transition-colors -mt-1'
-          title='展开/收起播放器'>
-          {isPlaying ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
-        </div>
+        {!locked && (
+          <div
+            onClick={handleClick}
+            className='w-10 h-10 flex justify-center items-center hover:bg-black/20 transition-colors'
+            title='展开/收起播放器'>
+            {isPlaying ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
+          </div>
+        )}
         <ButtonDarkModeFloat />
         {floatSlot}
         <ButtonJumpToTop />
