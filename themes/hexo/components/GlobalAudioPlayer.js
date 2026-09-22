@@ -11,11 +11,23 @@ const formatTime = (s) => {
 const SPEEDS = [1, 1.25, 1.5, 2, 0.75]
 const TITLE_MAX_LENGTH = 18
 
+const PlayIcon = ({ size = 18 }) => (
+  <svg viewBox='0 0 24 24' width={size} height={size} fill='currentColor' style={{ marginLeft: '2px' }}>
+    <path d='M8 5v14l11-7z' />
+  </svg>
+)
+const PauseIcon = ({ size = 18 }) => (
+  <svg viewBox='0 0 24 24' width={size} height={size} fill='currentColor'>
+    <rect x='6' y='5' width='4' height='14' rx='1' />
+    <rect x='14' y='5' width='4' height='14' rx='1' />
+  </svg>
+)
+
 export default function GlobalAudioPlayer() {
   const audioRef = useRef(null)
   const progressRef = useRef(null)
-  const autoTimer = useRef(null)
   const titleRef = useRef(null)
+  const scrollTimer = useRef(null)
 
   const [audioData, setAudioData] = useState(null)
   const [playing, setPlaying] = useState(false)
@@ -27,20 +39,21 @@ export default function GlobalAudioPlayer() {
   const [speedIndex, setSpeedIndex] = useState(0)
   const [visible, setVisible] = useState(false)
   const [minimized, setMinimized] = useState(true)
-  const [manuallyExpanded, setManuallyExpanded] = useState(false)
   const [noAudioMessage, setNoAudioMessage] = useState('')
   const [titleOverflow, setTitleOverflow] = useState(false)
+  const [locked, setLocked] = useState(false)
+  const [showMore, setShowMore] = useState(false)
 
-  // 检查标题是否超出，超出才滚动
+  // 标题过长才滚动
   useEffect(() => {
-    if (titleRef.current && audioData?.title) {
+    if (audioData?.title) {
       setTitleOverflow(audioData.title.length > TITLE_MAX_LENGTH)
     } else {
       setTitleOverflow(false)
     }
   }, [audioData?.title, visible])
 
-  // 音频事件绑定
+  // 音频事件
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
@@ -70,7 +83,7 @@ export default function GlobalAudioPlayer() {
     }
   }, [volume, muted])
 
-  // 广播状态给封面和文章内播放器
+  // 广播状态
   useEffect(() => {
     window.dispatchEvent(
       new CustomEvent('global-audio-state', {
@@ -85,7 +98,7 @@ export default function GlobalAudioPlayer() {
     )
   }, [playing, audioData?.src, currentTime, duration])
 
-  // 监听指令
+  // 指令监听
   useEffect(() => {
     const onToggle = (e) => {
       const { src, cover, title, href } = e.detail || {}
@@ -95,11 +108,9 @@ export default function GlobalAudioPlayer() {
 
       const isSame = audioData?.src === src
       if (isSame) {
-        // 同一首：暂停/继续，保留进度
         if (audio.paused) audio.play().catch(() => {})
         else audio.pause()
       } else {
-        // 新的一首：替换音源从头播放
         audio.src = src
         audio.currentTime = 0
         audio.play().catch(() => {})
@@ -110,27 +121,19 @@ export default function GlobalAudioPlayer() {
       setNoAudioMessage('')
       setVisible(true)
       setMinimized(false)
-      setManuallyExpanded(true)
     }
 
     const onToggleVisibility = () => {
       setVisible(true)
-      if (minimized) {
-        setMinimized(false)
-        setManuallyExpanded(true)
-      } else {
-        setMinimized(true)
-      }
+      setMinimized((m) => !m)
     }
 
     const onShowNoAudio = (e) => {
-      const msg =
-        e.detail?.message || '本期暂无音频节目，请点击标题查看详情'
+      const msg = e.detail?.message || '本期暂无音频节目，请点击标题查看详情'
       setNoAudioMessage(msg)
       setAudioData(null)
       setVisible(true)
       setMinimized(false)
-      setManuallyExpanded(false)
     }
 
     window.addEventListener('toggle-global-audio', onToggle)
@@ -141,33 +144,23 @@ export default function GlobalAudioPlayer() {
       window.removeEventListener('toggle-player-visibility', onToggleVisibility)
       window.removeEventListener('show-no-audio-hint', onShowNoAudio)
     }
-  }, [audioData, minimized, visible])
+  }, [audioData])
 
-  // 自动隐藏规则：首次播放 10 秒后自动折叠；手动展开后不自动折叠
+  // 滚动页面 → 停止滚动 2 秒后自动折叠（锁住时不折叠）
   useEffect(() => {
-    if (autoTimer.current) clearTimeout(autoTimer.current)
-    if (visible && !minimized && !manuallyExpanded) {
-      autoTimer.current = setTimeout(() => setMinimized(true), 10000)
-    }
-    return () => {
-      if (autoTimer.current) clearTimeout(autoTimer.current)
-    }
-  }, [visible, minimized, manuallyExpanded, playing])
-
-  // 滚动页面时自动折叠
-  useEffect(() => {
-    if (!visible || minimized) return
-    let lastY = window.pageYOffset
+    if (!visible || minimized || locked) return
     const onScroll = () => {
-      const y = window.pageYOffset
-      if (Math.abs(y - lastY) > 50) {
+      if (scrollTimer.current) clearTimeout(scrollTimer.current)
+      scrollTimer.current = setTimeout(() => {
         setMinimized(true)
-      }
-      lastY = y
+      }, 2000)
     }
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [visible, minimized])
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (scrollTimer.current) clearTimeout(scrollTimer.current)
+    }
+  }, [visible, minimized, locked])
 
   const togglePlay = () => {
     const audio = audioRef.current
@@ -179,10 +172,7 @@ export default function GlobalAudioPlayer() {
   const skip = (s) => {
     const audio = audioRef.current
     if (!audio) return
-    audio.currentTime = Math.max(
-      0,
-      Math.min(audio.duration || 0, audio.currentTime + s)
-    )
+    audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + s))
   }
 
   const cycleSpeed = () => {
@@ -217,41 +207,34 @@ export default function GlobalAudioPlayer() {
       <audio ref={audioRef} preload='metadata' />
 
       <div
-        className={`fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-2xl z-[9999] transition-all duration-500 ease-out transform ${
+        className={`fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] sm:w-[90%] max-w-xl z-[9999] transition-all duration-500 ease-out transform ${
           shouldRender
             ? 'translate-y-0 opacity-100'
             : 'translate-y-full opacity-0 pointer-events-none'
         }`}>
-        <div className='bg-white/60 dark:bg-gray-900/60 backdrop-blur-2xl border border-white/40 dark:border-gray-700/40 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] px-4 py-3 flex items-center gap-3'>
+        <div className='relative bg-white/60 dark:bg-gray-900/60 backdrop-blur-2xl border border-white/40 dark:border-gray-700/40 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] px-3 py-2.5 flex items-center gap-3'>
 
-          {/* 封面 + 播放/暂停按钮（居中） */}
-          <div className='relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm'>
+          {/* 封面 + 播放/暂停 */}
+          <div className='relative flex-shrink-0 w-11 h-11 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm'>
             {audioData?.cover ? (
-              <img
-                src={audioData.cover}
-                alt='封面'
-                className='w-full h-full object-cover'
-              />
+              <img src={audioData.cover} alt='封面' className='w-full h-full object-cover' />
             ) : (
               <div className='w-full h-full bg-gradient-to-br from-[#5A6A9A] to-[#3A4A7A] flex items-center justify-center text-white'>
-                <i className='fa-solid fa-music text-lg' />
+                <i className='fa-solid fa-music text-base' />
               </div>
             )}
             {hasAudio && (
               <button
                 onClick={togglePlay}
-                className='absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-colors'>
-                <i
-                  className={`fa-solid ${
-                    playing ? 'fa-circle-pause' : 'fa-circle-play'
-                  } text-2xl text-white/90 drop-shadow`}
-                />
+                className='absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-colors text-white'>
+                {playing ? <PauseIcon size={20} /> : <PlayIcon size={20} />}
               </button>
             )}
           </div>
 
           {/* 中间：标题 + 进度条 */}
           <div className='flex-1 min-w-0 flex flex-col justify-center gap-1.5'>
+            {/* 标题 */}
             <div className='font-bold text-xs text-gray-800 dark:text-gray-100 w-full overflow-hidden'>
               {noAudioMessage ? (
                 <span className='truncate block text-gray-500 dark:text-gray-400'>
@@ -278,9 +261,11 @@ export default function GlobalAudioPlayer() {
               )}
             </div>
 
+            {/* 进度条行 */}
             {hasAudio && (
               <div className='flex items-center gap-1.5'>
-                <span className='text-[10px] text-gray-500 tabular-nums w-8 text-right'>
+                {/* 时间，左端与标题左端对齐 */}
+                <span className='text-[10px] text-gray-500 tabular-nums text-left'>
                   {formatTime(currentTime)}
                 </span>
                 <div
@@ -289,46 +274,58 @@ export default function GlobalAudioPlayer() {
                     e.preventDefault()
                     seekFromEvent(e)
                   }}
-                  className='flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer relative group max-w-xs'>
+                  className='flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer relative min-w-[60px]'>
                   <div
                     className='h-full rounded-full'
                     style={{
                       width: `${progress}%`,
                       background:
-                        'linear-gradient(90deg, #7B8BC4 0%, #4A5A8A 50%, #3A4A7A 100%)'
+                        'linear-gradient(90deg, #8B9BD4 0%, #4A5A8A 50%, #3A4A7A 100%)'
                     }}
                   />
                 </div>
-                <span className='text-[10px] text-gray-500 tabular-nums w-8'>
+                <span className='text-[10px] text-gray-500 tabular-nums'>
                   {formatTime(duration)}
                 </span>
+
+                {/* 桌面端：快退/快进/倍速 直接展开 */}
+                <div className='hidden sm:flex items-center gap-1'>
+                  <button
+                    onClick={() => skip(-5)}
+                    className='text-gray-500 hover:text-[#3A4A7A] transition-colors'
+                    title='后退5秒'>
+                    <i className='fa-solid fa-rotate-left text-xs' />
+                  </button>
+                  <button
+                    onClick={() => skip(5)}
+                    className='text-gray-500 hover:text-[#3A4A7A] transition-colors'
+                    title='前进5秒'>
+                    <i className='fa-solid fa-rotate-right text-xs' />
+                  </button>
+                  <button
+                    onClick={cycleSpeed}
+                    className='w-9 h-5 rounded text-[10px] font-bold text-gray-500 hover:text-[#3A4A7A] border border-gray-300 dark:border-gray-600 transition-colors flex items-center justify-center'
+                    title='切换倍速'>
+                    {SPEEDS[speedIndex]}x
+                  </button>
+                </div>
+
+                {/* 手机端：更多按钮 */}
                 <button
-                  onClick={() => skip(-5)}
-                  className='text-gray-500 hover:text-[#3A4A7A] transition-colors'
-                  title='后退5秒'>
-                  <i className='fa-solid fa-rotate-left text-xs' />
-                </button>
-                <button
-                  onClick={() => skip(5)}
-                  className='text-gray-500 hover:text-[#3A4A7A] transition-colors'
-                  title='前进5秒'>
-                  <i className='fa-solid fa-rotate-right text-xs' />
-                </button>
-                <button
-                  onClick={cycleSpeed}
-                  className='w-9 h-5 rounded text-[10px] font-bold text-gray-500 hover:text-[#3A4A7A] border border-gray-300 dark:border-gray-600 transition-colors flex items-center justify-center'
-                  title='切换倍速'>
-                  {SPEEDS[speedIndex]}x
+                  onClick={() => setShowMore((v) => !v)}
+                  className='sm:hidden text-gray-500 hover:text-[#3A4A7A] transition-colors'
+                  title='更多'>
+                  <i className='fa-solid fa-ellipsis-vertical text-xs' />
                 </button>
               </div>
             )}
           </div>
 
-          {/* 右侧：音量 + 折叠 */}
+          {/* 右侧：音量（桌面端）+ 锁 + 折叠 */}
           <div className='flex items-center justify-end gap-1 flex-shrink-0'>
             {hasAudio && (
               <div
-                className='relative flex items-center'
+                className='relative hidden sm:flex items-center'
                 onMouseEnter={() => setShowVolume(true)}
                 onMouseLeave={() => setShowVolume(false)}>
                 <button
@@ -372,12 +369,50 @@ export default function GlobalAudioPlayer() {
                 )}
               </div>
             )}
+
+            {/* 锁按钮：锁住后滚动不折叠 */}
+            <button
+              onClick={() => setLocked((v) => !v)}
+              className={`w-8 h-8 flex items-center justify-center transition-colors flex-shrink-0 ${
+                locked ? 'text-[#3A4A7A]' : 'text-gray-400 hover:text-[#3A4A7A]'
+              }`}
+              title={locked ? '已固定，滑动不会隐藏' : '点击固定，滑动不隐藏'}>
+              <i className={`fa-solid ${locked ? 'fa-lock' : 'fa-lock-open'} text-xs`} />
+            </button>
+
+            {/* 折叠 */}
             <button
               onClick={() => setMinimized(true)}
               className='w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#3A4A7A] transition-colors flex-shrink-0'>
               <i className='fa-solid fa-chevron-down text-xs' />
             </button>
           </div>
+
+          {/* 手机端“更多”抽屉 */}
+          {showMore && hasAudio && (
+            <div className='absolute bottom-full left-0 right-0 mb-2 sm:hidden'>
+              <div className='bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-xl shadow-xl border border-white/40 dark:border-gray-700/40 p-3 flex items-center justify-around gap-2'>
+                <button
+                  onClick={() => skip(-5)}
+                  className='flex flex-col items-center gap-1 text-gray-600 hover:text-[#3A4A7A] transition-colors'>
+                  <i className='fa-solid fa-rotate-left' />
+                  <span className='text-[10px]'>退5s</span>
+                </button>
+                <button
+                  onClick={() => skip(5)}
+                  className='flex flex-col items-center gap-1 text-gray-600 hover:text-[#3A4A7A] transition-colors'>
+                  <i className='fa-solid fa-rotate-right' />
+                  <span className='text-[10px]'>进5s</span>
+                </button>
+                <button
+                  onClick={cycleSpeed}
+                  className='flex flex-col items-center gap-1 text-gray-600 hover:text-[#3A4A7A] transition-colors'>
+                  <span className='text-xs font-bold'>{SPEEDS[speedIndex]}x</span>
+                  <span className='text-[10px]'>倍速</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
