@@ -102,7 +102,7 @@ export default function RightFloatArea({ floatSlot, posts }) {
         {!locked && (
           <div
             onClick={handleClick}
-            className='justify-center items-center w-7 h-7 text-center transform hover:scale-105 duration-200'
+            className='flex justify-center items-center w-7 h-7 hover:bg-black/20 transition-colors'
             title='展开/收起播放器'>
             {isPlaying ? <PauseIcon size={14} /> : <PlayIcon size={14} />}
           </div>
