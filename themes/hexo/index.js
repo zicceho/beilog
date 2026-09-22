@@ -206,9 +206,9 @@ const LayoutSlug = props => {
     }
   }, [post])
 
-  // 从 ext 字段解析音频链接：既支持纯链接，也支持 {"audio":"链接"} 格式
-  let extAudio = null
-  if (post?.ext) {
+  // 优先读 post.audio（白名单新增的字段），其次从 ext 字段解析
+  let extAudio = post?.audio || null
+  if (!extAudio && post?.ext) {
     const raw = typeof post.ext === 'string' ? post.ext.trim() : ''
     if (raw) {
       try {
