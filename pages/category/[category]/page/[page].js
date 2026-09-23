@@ -2,6 +2,10 @@ import BLOG from '@/blog.config'
 import { siteConfig } from '@/lib/config'
 import { fetchGlobalAllData } from '@/lib/db/SiteDataApi'
 import { DynamicLayout } from '@/themes/theme'
+import {
+  getCategoryNameFromSlug,
+  getCategorySlug
+} from '@/lib/utils/category'
 
 /**
  * 分类页
@@ -14,9 +18,32 @@ export default function Category(props) {
   return <DynamicLayout theme={theme} layoutName='LayoutPostList' {...props} />
 }
 
-export async function getStaticProps({ params: { category, page } }) {
+export async function getStaticProps({
+  params: { category: categoryParam, page },
+  locale
+}) {
   const from = 'category-page-props'
-  let props = await fetchGlobalAllData({ from })
+  let props = await fetchGlobalAllData({ from, locale })
+
+  const category = getCategoryNameFromSlug(
+    categoryParam,
+    props.NOTION_CONFIG
+  )
+
+  const canonicalSlug = getCategorySlug(category, props.NOTION_CONFIG)
+
+  const incomingSlug = decodeURIComponent(String(categoryParam || ''))
+
+  if (incomingSlug !== canonicalSlug) {
+    return {
+      redirect: {
+        destination: `/category/${encodeURIComponent(
+          canonicalSlug
+        )}/page/${page}`,
+        permanent: true
+      }
+    }
+  }
 
   // 过滤状态类型
   props.posts = props.allPages
@@ -69,7 +96,12 @@ export async function getStaticPaths() {
     )
     if (totalPages > 1) {
       for (let i = 1; i <= totalPages; i++) {
-        paths.push({ params: { category: category.name, page: '' + i } })
+        paths.push({
+          params: {
+            category: getCategorySlug(category.name, NOTION_CONFIG),
+            page: '' + i
+          }
+        })
       }
     }
   })
