@@ -65,6 +65,11 @@ const LayoutBase = props => {
     <Hero {...props} />
   ) : null
 
+  // 首页有 Hero 时，需要给 Hero 底部到内容之间留出间距
+  const isHomeWithHero =
+    router.route === '/' &&
+    siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG)
+
   const drawerRight = useRef(null)
   const tocRef = isBrowser ? document.getElementById('article-wrapper') : null
 
@@ -107,7 +112,7 @@ const LayoutBase = props => {
 
         <main
           id='wrapper'
-          className={`${headerSlot ? 'pt-0' : 'pt-24'} bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
+          className={`${post ? 'pt-0' : isHomeWithHero ? 'pt-8' : 'pt-24'} bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
           <div
             id='container-inner'
             className={
@@ -157,13 +162,8 @@ const LayoutIndex = props => {
 }
 
 const LayoutPostList = props => {
-  const router = useRouter()
-  const isHomeWithHero =
-    router.route === '/' &&
-    siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG)
-
   return (
-    <div className={isHomeWithHero ? 'pt-8' : ''}>
+    <div>
       <SlotBar {...props} />
       {siteConfig('POST_LIST_STYLE') === 'page' ? (
         <BlogPostListPage {...props} />
