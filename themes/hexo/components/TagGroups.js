@@ -11,7 +11,7 @@ const TagGroups = ({ tags, currentTag }) => {
   if (!tags) return <></>
   return (
     <div id='tags-group' className='dark:border-gray-600 space-y-2'>
-      <div className='font-light text-xs ml-2 mb-2'><i className='mr-1 fas fa-tag' />主创</div>
+      <div className='font-light text-xs ml-2 mb-2'><i className='mr-1 fa-solid fa-users' />主创</div>
       <div className='px-4'>
       {
         tags.map(tag => {
