@@ -52,6 +52,10 @@ export default function PostHero({ post, siteInfo }) {
   const [isLoading, setIsLoading] = useState(false)
   const localAudioRef = useRef(null)
 
+  // 主题主色：从 HEXO_COLOR_PRIMARY 读取（环境变量 / Notion Config 均生效）
+  // 兜底值与当前视觉一致，避免环境变量读取异常时颜色突变
+  const primaryColor = siteConfig('HEXO_COLOR_PRIMARY', '#3A4A7A') || '#3A4A7A'
+
   let audioUrl = post?.audio || null
   if (!audioUrl && post?.ext) {
     audioUrl = parseExt(post.ext)
@@ -119,12 +123,15 @@ export default function PostHero({ post, siteInfo }) {
     width: `${progress}%`,
     background:
       progress > 0
-        ? 'linear-gradient(90deg, #8B9BD4 0%, #4A5A8A 50%, #3A4A7A 100%)'
+        ? `linear-gradient(90deg, #8B9BD4 0%, #4A5A8A 50%, ${primaryColor} 100%)`
         : 'transparent'
   }
 
   return (
-    <div id='header' className='w-full h-96 md:h-[80vh] relative md:flex-shrink-0 z-10 mb-8'>
+    <div
+      id='header'
+      className='w-full h-96 md:h-[80vh] relative md:flex-shrink-0 z-10 mb-8'
+      style={{ '--theme-primary': primaryColor }}>
       <LazyImage
         priority={true}
         src={headerImage}
@@ -154,8 +161,7 @@ export default function PostHero({ post, siteInfo }) {
                       href={`/category/${post.category}`}
                       passHref
                       legacyBehavior>
-                      {/* ⚠️ 分类的悬停颜色改成了主色 */}
-                      <span className='cursor-pointer hover:text-[#3A4A7A] transition-colors font-bold'>
+                      <span className='hero-meta-link font-bold'>
                         {post.category}
                       </span>
                     </SmartLink>
@@ -166,7 +172,7 @@ export default function PostHero({ post, siteInfo }) {
                       <SmartLink
                         href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
                         passHref>
-                        <span className='cursor-pointer hover:text-white transition-colors'>
+                        <span className='hero-meta-link'>
                           {post?.publishDay || post.date}
                         </span>
                       </SmartLink>
@@ -182,8 +188,7 @@ export default function PostHero({ post, siteInfo }) {
                             href={`/tag/${encodeURIComponent(tag.name)}`}
                             passHref
                             legacyBehavior>
-                            {/* ⚠️ 嘉宾的悬停颜色改成了主色 */}
-                            <span className='cursor-pointer hover:text-[#3A4A7A] transition-colors whitespace-nowrap'>
+                            <span className='hero-meta-link whitespace-nowrap'>
                               {tag.name}
                             </span>
                           </SmartLink>
@@ -212,7 +217,7 @@ export default function PostHero({ post, siteInfo }) {
                         style={{
                           background:
                             isCurrentSrc && isPlaying
-                              ? 'linear-gradient(135deg, #7B8BC4 0%, #3A4A7A 100%)'
+                              ? `linear-gradient(135deg, #7B8BC4 0%, ${primaryColor} 100%)`
                               : 'rgba(255,255,255,0.15)',
                           backdropFilter: 'blur(10px)'
                         }}>
@@ -249,6 +254,17 @@ export default function PostHero({ post, siteInfo }) {
       </header>
 
       <style jsx>{`
+        /* 元信息链接：分类 / 日期 / 标签 统一悬停色 */
+        .hero-meta-link {
+          color: rgba(255, 255, 255, 0.7);
+          transition: color 0.2s;
+          cursor: pointer;
+        }
+        .hero-meta-link:hover {
+          color: var(--theme-primary);
+        }
+
+        /* 音频加载中的条纹动画（保留） */
         @keyframes stripe-move {
           0% { background-position: 0 0; }
           100% { background-position: 32px 0; }
