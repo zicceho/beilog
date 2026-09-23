@@ -88,22 +88,23 @@ const Style = () => {
         color: var(--hexo-color-text-secondary);
       }
 
-      /*  菜单下划线动画 */
+      /*  菜单下划线动画（已关闭） */
       #theme-hexo .menu-link {
         text-decoration: none;
-        background-image: linear-gradient(
-          var(--theme-color),
-          var(--theme-color)
-        );
-        background-repeat: no-repeat;
-        background-position: bottom center;
-        background-size: 0 2px;
-        transition: background-size 100ms ease-in-out;
       }
 
       #theme-hexo .menu-link:hover {
-        background-size: 100% 2px;
         color: var(--theme-color);
+      }
+
+      /* 全站禁止一切悬停下划线（含 Tailwind hover:underline） */
+      #theme-hexo a:hover,
+      #theme-hexo a:focus,
+      #theme-hexo a:active,
+      #theme-hexo .hover\:underline:hover {
+        text-decoration: none !important;
+        background-image: none !important;
+        background-size: 0 !important;
       }
 
       /* 文章列表中标题行悬浮时的文字颜色 */
