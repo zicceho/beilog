@@ -2,6 +2,8 @@ import NotionIcon from '@/components/NotionIcon'
 import NotionPage from '@/components/NotionPage'
 import TwikooCommentCount from '@/components/TwikooCommentCount'
 import { siteConfig } from '@/lib/config'
+import { useGlobal } from '@/lib/global'
+import { getCategoryUrl } from '@/lib/utils/category'
 import { formatDateFmt } from '@/lib/utils/formatDate'
 import SmartLink from '@/components/SmartLink'
 import TagItemMini from './TagItemMini'
@@ -12,6 +14,8 @@ export const BlogPostCardInfo = ({
   showPageCover,
   showSummary
 }) => {
+  const { NOTION_CONFIG } = useGlobal()
+
   return (
     <article
       className={`flex flex-col justify-between lg:p-6 p-4 lg:px-8 px-6 ${showPageCover && !showPreview ? 'md:w-[62%] w-full md:max-h-60' : 'w-full'}`}>
@@ -37,7 +41,7 @@ export const BlogPostCardInfo = ({
                 showPreview ? 'justify-center' : 'justify-start'
               } flex-wrap dark:text-gray-500 text-gray-400 `}>
               <SmartLink
-                href={`/category/${post.category}`}
+                href={getCategoryUrl(post.category, NOTION_CONFIG)}
                 passHref
                 className='cursor-pointer font-light text-sm menu-link hover:text-indigo-700 dark:hover:text-indigo-400 transform'>
                 <i className='mr-1 far fa-folder' />
