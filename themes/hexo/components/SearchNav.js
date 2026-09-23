@@ -53,8 +53,8 @@ export default function SearchNav(props) {
         {/* 标签 */}
         <Card className="w-full mt-4">
             <div className="dark:text-gray-200 mb-5 ml-4">
-                {/* ⚠️ 图标改成了 user */}
-                <i className="mr-4 fa fa-user" />
+                {/* ⚠️ 图标改成了 users */}
+                <i className="mr-4 fa-solid fa-users" />
                 {locale.COMMON.TAGS}:
             </div>
             <div id="tags-list" className="duration-200 flex ml-8 flex-wrap">
