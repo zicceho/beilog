@@ -154,7 +154,8 @@ export default function PostHero({ post, siteInfo }) {
                       href={`/category/${post.category}`}
                       passHref
                       legacyBehavior>
-                      <span className='cursor-pointer hover:text-white transition-colors font-bold'>
+                      {/* ⚠️ 分类的悬停颜色改成了主色 */}
+                      <span className='cursor-pointer hover:text-[#3A4A7A] transition-colors font-bold'>
                         {post.category}
                       </span>
                     </SmartLink>
@@ -181,7 +182,8 @@ export default function PostHero({ post, siteInfo }) {
                             href={`/tag/${encodeURIComponent(tag.name)}`}
                             passHref
                             legacyBehavior>
-                            <span className='cursor-pointer hover:text-white transition-colors whitespace-nowrap'>
+                            {/* ⚠️ 嘉宾的悬停颜色改成了主色 */}
+                            <span className='cursor-pointer hover:text-[#3A4A7A] transition-colors whitespace-nowrap'>
                               {tag.name}
                             </span>
                           </SmartLink>
