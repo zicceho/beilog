@@ -157,7 +157,7 @@ const LayoutIndex = props => {
 
 const LayoutPostList = props => {
   return (
-    <div className='pt-8'>
+    <div className='pt-16'>
       <SlotBar {...props} />
       {siteConfig('POST_LIST_STYLE') === 'page' ? (
         <BlogPostListPage {...props} />
@@ -187,7 +187,7 @@ const LayoutSearch = props => {
   })
 
   return (
-    <div className='pt-8'>
+    <div className='pt-16'>
       {!currentSearch ? (
         <SearchNav {...props} />
       ) : (
@@ -207,7 +207,7 @@ const LayoutSearch = props => {
 const LayoutArchive = props => {
   const { archivePosts } = props
   return (
-    <div className='pt-8'>
+    <div className='pt-16'>
       <Card className='w-full'>
         <div className='mb-10 pb-20 bg-white md:p-12 p-3 min-h-full dark:bg-hexo-black-gray'>
           {Object.keys(archivePosts).map(archiveTitle => (
@@ -325,10 +325,10 @@ const LayoutCategoryIndex = props => {
   const { categoryOptions } = props
   const { locale } = useGlobal()
   return (
-    <div className='mt-8'>
+    <div className='mt-16'>
       <Card className='w-full min-h-screen'>
         <div className='dark:text-gray-200 mb-5 mx-3'>
-          <i className='mr-4 fas fa-th' /> {locale.COMMON.CATEGORY}:
+          <i className='mr-4 fa-solid fa-layer-group' /> {locale.COMMON.CATEGORY}:
         </div>
         <div id='category-list' className='duration-200 flex flex-wrap mx-8'>
           {categoryOptions?.map(category => {
@@ -358,10 +358,10 @@ const LayoutTagIndex = props => {
   const { tagOptions } = props
   const { locale } = useGlobal()
   return (
-    <div className='mt-8'>
+    <div className='mt-16'>
       <Card className='w-full'>
         <div className='dark:text-gray-200 mb-5 ml-4'>
-          <i className='mr-4 fas fa-tag' /> {locale.COMMON.TAGS}:
+          <i className='mr-4 fa-solid fa-users' /> {locale.COMMON.TAGS}:
         </div>
         <div id='tags-list' className='duration-200 flex flex-wrap ml-8'>
           {tagOptions.map(tag => (
