@@ -5,6 +5,7 @@ import ShareBar from '@/components/ShareBar'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { isBrowser } from '@/lib/utils'
+import { getCategoryUrl } from '@/lib/utils/category'
 import { Transition } from '@headlessui/react'
 import dynamic from 'next/dynamic'
 import SmartLink from '@/components/SmartLink'
@@ -106,7 +107,7 @@ const LayoutBase = props => {
 
         <main
           id='wrapper'
-          className={`${siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? 'pt-0' : 'pt-16'} bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
+          className={`${headerSlot ? 'pt-0' : 'pt-24'} bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
           <div
             id='container-inner'
             className={
@@ -152,12 +153,12 @@ const LayoutBase = props => {
 }
 
 const LayoutIndex = props => {
-  return <LayoutPostList {...props} className='pt-8' />
+  return <LayoutPostList {...props} />
 }
 
 const LayoutPostList = props => {
   return (
-    <div className='pt-20'>
+    <div>
       <SlotBar {...props} />
       {siteConfig('POST_LIST_STYLE') === 'page' ? (
         <BlogPostListPage {...props} />
@@ -187,7 +188,7 @@ const LayoutSearch = props => {
   })
 
   return (
-    <div className='pt-16'>
+    <div>
       {!currentSearch ? (
         <SearchNav {...props} />
       ) : (
@@ -207,7 +208,7 @@ const LayoutSearch = props => {
 const LayoutArchive = props => {
   const { archivePosts } = props
   return (
-    <div className='pt-16'>
+    <div>
       <Card className='w-full'>
         <div className='mb-10 pb-20 bg-white md:p-12 p-3 min-h-full dark:bg-hexo-black-gray'>
           {Object.keys(archivePosts).map(archiveTitle => (
@@ -323,9 +324,9 @@ const Layout404 = props => {
 
 const LayoutCategoryIndex = props => {
   const { categoryOptions } = props
-  const { locale } = useGlobal()
+  const { locale, NOTION_CONFIG } = useGlobal()
   return (
-    <div className='mt-16'>
+    <div>
       <Card className='w-full min-h-screen'>
         <div className='dark:text-gray-200 mb-5 mx-3'>
           <i className='mr-4 fa-solid fa-layer-group' /> {locale.COMMON.CATEGORY}:
@@ -335,7 +336,7 @@ const LayoutCategoryIndex = props => {
             return (
               <SmartLink
                 key={category.name}
-                href={`/category/${category.name}`}
+                href={getCategoryUrl(category.name, NOTION_CONFIG)}
                 passHref
                 legacyBehavior>
                 <div
@@ -358,7 +359,7 @@ const LayoutTagIndex = props => {
   const { tagOptions } = props
   const { locale } = useGlobal()
   return (
-    <div className='mt-16'>
+    <div>
       <Card className='w-full'>
         <div className='dark:text-gray-200 mb-5 ml-4'>
           <i className='mr-4 fa-solid fa-users' /> {locale.COMMON.TAGS}:
