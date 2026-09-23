@@ -64,13 +64,6 @@ const LayoutBase = props => {
     <Hero {...props} />
   ) : null
 
-  // 当前页面是否真的渲染了 Hero / PostHero
-  // 只有文章页（有 post）和开了 Banner 的首页才有；其余列表类页面没有
-  const hasHeader =
-    !!post ||
-    (router.route === '/' &&
-      siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG))
-
   const drawerRight = useRef(null)
   const tocRef = isBrowser ? document.getElementById('article-wrapper') : null
 
@@ -113,7 +106,7 @@ const LayoutBase = props => {
 
         <main
           id='wrapper'
-          className={`${hasHeader ? 'pt-0' : 'pt-16'} bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
+          className={`${siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? 'pt-0' : 'pt-16'} bg-hexo-background-gray dark:bg-black w-full md:px-8 lg:px-24 min-h-screen relative`}>
           <div
             id='container-inner'
             className={
@@ -164,7 +157,7 @@ const LayoutIndex = props => {
 
 const LayoutPostList = props => {
   return (
-    <div className='pt-16'>
+    <div className='pt-20'>
       <SlotBar {...props} />
       {siteConfig('POST_LIST_STYLE') === 'page' ? (
         <BlogPostListPage {...props} />
