@@ -2,7 +2,6 @@ import Live2D from '@/components/Live2D'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import dynamic from 'next/dynamic'
-import { useRouter } from 'next/router'
 import CONFIG from '../config'
 import { AnalyticsCard } from './AnalyticsCard'
 import Announcement from './Announcement'
@@ -48,10 +47,6 @@ export default function SideRight(props) {
   } = props
 
   const { locale } = useGlobal()
-  const router = useRouter()
-
-  // 只有文章详情页保持右侧栏固定，其余页面（首页、分类、归档、搜索）随页面滚动
-  const isArticlePage = router.pathname === '/[prefix]/[slug]'
 
   // 文章全屏处理
   if (post && post?.fullWidth) {
@@ -62,12 +57,7 @@ export default function SideRight(props) {
     <div
       id='sideRight'
       className='lg:w-80 pt-0 lg:pt-0'>
-      <div
-        className={
-          isArticlePage
-            ? 'sticky top-28 space-y-4'
-            : 'relative space-y-4'
-        }>
+      <div className='sticky top-28 space-y-4'>
         {post && post.toc && post.toc.length > 1 && (
           <Card>
             <Catalog toc={post.toc} />
