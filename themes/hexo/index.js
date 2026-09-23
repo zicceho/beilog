@@ -157,8 +157,13 @@ const LayoutIndex = props => {
 }
 
 const LayoutPostList = props => {
+  const router = useRouter()
+  const isHomeWithHero =
+    router.route === '/' &&
+    siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG)
+
   return (
-    <div>
+    <div className={isHomeWithHero ? 'pt-8' : ''}>
       <SlotBar {...props} />
       {siteConfig('POST_LIST_STYLE') === 'page' ? (
         <BlogPostListPage {...props} />
