@@ -14,6 +14,7 @@ import { generateRedirectJson } from '@/lib/utils/redirect'
 import { checkDataFromAlgolia } from '@/lib/plugins/algolia'
 import pLimit from 'p-limit'
 import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
+import { getEpisodeArchivePage } from '@/lib/utils/episodes' // <--- 新增导入
 
 /**
  * 首页布局
@@ -129,6 +130,16 @@ export async function getStaticProps(req) {
     props.posts = cleanPostSummaries(props.posts)
   }
   props.latestPosts = cleanPostSummaries(props.latestPosts)
+
+  // <--- 新增：为首页这 6 期计算页码映射，必须在 delete allPages 之前
+  const homePosts = props.posts || []
+  props.episodePageMap = Object.fromEntries(
+    homePosts.map(post => [
+      post.id,
+      getEpisodeArchivePage(props.allPages, post)
+    ])
+  )
+
   delete props.allPages
 
   return {
