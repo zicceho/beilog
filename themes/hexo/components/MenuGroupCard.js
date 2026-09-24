@@ -15,7 +15,7 @@ const MenuGroupCard = props => {
   const links = [
     {
       name: locale.COMMON.ARTICLE,
-      href: '/archive',
+      href: '/episodes', // <--- 此处已修改，原来为 '/archive'
       slot: archiveSlot,
       show: siteConfig('HEXO_MENU_ARCHIVE', null, CONFIG)
     },
