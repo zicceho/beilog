@@ -4,7 +4,6 @@ import TwikooCommentCount from '@/components/TwikooCommentCount'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { getCategoryUrl } from '@/lib/utils/category'
-import { formatDateFmt } from '@/lib/utils/formatDate'
 import SmartLink from '@/components/SmartLink'
 
 const SUMMARY_MAX = 68
@@ -26,9 +25,7 @@ export const BlogPostCardInfo = ({
   post,
   showPreview,
   showPageCover,
-  showSummary,
-  episodeArchivePage,
-  disableDateLink = false
+  showSummary
 }) => {
   const { NOTION_CONFIG } = useGlobal()
 
@@ -37,11 +34,6 @@ export const BlogPostCardInfo = ({
   const extraCount = guests.length - 3
 
   const episodeNumber = extractEpisodeNumber(post?.slug)
-
-  // 动态拼接精准跳转链接：有页码且大于1时加上 /page/N
-  const episodeArchiveHref = episodeNumber
-    ? `/episodes${episodeArchivePage > 1 ? `/page/${episodeArchivePage}` : ''}#${episodeNumber}`
-    : `/episodes#${formatDateFmt(post?.publishDate, 'yyyy-MM')}` // 极端情况退回月份锚点
 
   return (
     <article
@@ -69,7 +61,7 @@ export const BlogPostCardInfo = ({
             {episodeNumber && (
               <>
                 <SmartLink
-                  href={post?.href} // <--- 恢复为跳转正文页
+                  href={post?.href}
                   passHref
                   className='menu-link cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-400 transform'>
                   E{episodeNumber}
@@ -94,19 +86,10 @@ export const BlogPostCardInfo = ({
               </>
             )}
 
-            {/* 判断是否禁用跳转，如果禁用则显示为纯文本 */}
-            {disableDateLink ? (
-              <span className='font-light'>
-                {post?.publishDay || post.date}
-              </span>
-            ) : (
-              <SmartLink
-                href={episodeArchiveHref}
-                passHref
-                className='font-light menu-link cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-400 transform'>
-                {post?.publishDay || post.date}
-              </SmartLink>
-            )}
+            {/* 纯文本，不跳转，无悬停变色 */}
+            <span className='font-light'>
+              {post?.publishDay || post.date}
+            </span>
 
             {visibleGuests.length > 0 && (
               <>
