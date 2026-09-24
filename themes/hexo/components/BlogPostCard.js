@@ -67,7 +67,7 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
       <div
         key={post.id}
         id='blog-post-card'
-        className='group md:h-56 w-full flex justify-start md:gap-2 md:flex-row-reverse flex-col-reverse shadow-sm overflow-hidden border dark:border-black rounded-xl bg-white dark:bg-hexo-black-gray'>
+        className='group md:h-64 w-full flex justify-start md:gap-2 md:flex-row-reverse flex-col-reverse shadow-sm overflow-hidden border dark:border-black rounded-xl bg-white dark:bg-hexo-black-gray'>
         <BlogPostCardInfo
           index={index}
           post={post}
@@ -78,13 +78,13 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
 
         {showPageCover && (
           <div
-            className='md:w-[38%] h-56 flex-shrink-0 overflow-hidden relative cursor-pointer'
+            className='md:w-[38%] h-64 flex-shrink-0 overflow-hidden relative cursor-pointer'
             onClick={handleCoverClick}>
             <LazyImage
               priority={index === 1}
               alt={post?.title}
               src={post?.pageCoverThumbnail}
-              className='h-56 w-full object-cover object-center group-hover:scale-110 duration-500'
+              className='h-64 w-full object-cover object-center group-hover:scale-110 duration-500'
             />
             {hasAudio && (
               <div className='absolute bottom-2 right-2 z-10 pointer-events-none'>
