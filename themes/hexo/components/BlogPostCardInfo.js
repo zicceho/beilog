@@ -27,8 +27,8 @@ export const BlogPostCardInfo = ({
   showPreview,
   showPageCover,
   showSummary,
-  page,            // <--- 新增：接收当前页码
-  disableDateLink  // <--- 新增：接收是否禁用日期跳转
+  episodeArchivePage,
+  disableDateLink = false
 }) => {
   const { NOTION_CONFIG } = useGlobal()
 
@@ -38,10 +38,10 @@ export const BlogPostCardInfo = ({
 
   const episodeNumber = extractEpisodeNumber(post?.slug)
 
-  // 动态拼接精准跳转链接：如果是第一页，省略 /page/1
+  // 动态拼接精准跳转链接：有页码且大于1时加上 /page/N
   const episodeArchiveHref = episodeNumber
-    ? `/episodes${page && page > 1 ? `/page/${page}` : ''}#${episodeNumber}`
-    : '/episodes'
+    ? `/episodes${episodeArchivePage > 1 ? `/page/${episodeArchivePage}` : ''}#${episodeNumber}`
+    : `/episodes#${formatDateFmt(post?.publishDate, 'yyyy-MM')}` // 极端情况退回月份锚点
 
   return (
     <article
@@ -69,7 +69,7 @@ export const BlogPostCardInfo = ({
             {episodeNumber && (
               <>
                 <SmartLink
-                  href={episodeArchiveHref} // <--- 这里改为精准跳转
+                  href={post?.href} // <--- 恢复为跳转正文页
                   passHref
                   className='menu-link cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-400 transform'>
                   E{episodeNumber}
@@ -101,7 +101,7 @@ export const BlogPostCardInfo = ({
               </span>
             ) : (
               <SmartLink
-                href={episodeArchiveHref} // <--- 这里改为精准跳转
+                href={episodeArchiveHref}
                 passHref
                 className='font-light menu-link cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-400 transform'>
                 {post?.publishDay || post.date}
