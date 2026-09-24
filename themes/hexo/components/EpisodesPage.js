@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { isBrowser } from '@/lib/utils'
 import { siteConfig } from '@/lib/config'
 import CONFIG from '../config'
-import Card from './Card'
 import BlogPostCard from './BlogPostCard'
 import PaginationNumber from './PaginationNumber'
 
@@ -10,7 +9,7 @@ const EpisodesPage = props => {
   const { archivePosts = {}, page = 1, episodesTotalPages = 1, siteInfo, posts = [] } = props
   const showSummary = siteConfig('HEXO_POST_LIST_SUMMARY', null, CONFIG)
 
-  // 统一在这里处理 hash 滚动，/episodes 和 /episodes/page/N 都能生效
+  // 统一在这里处理 hash 滚动
   useEffect(() => {
     if (isBrowser) {
       const anchor = window.location.hash
@@ -26,35 +25,30 @@ const EpisodesPage = props => {
   }, [])
 
   return (
-    <div>
-      <Card className='w-full'>
-        <div className='mb-10 pb-20 bg-white md:p-12 p-3 min-h-full dark:bg-hexo-black-gray'>
-          {Object.keys(archivePosts).map(month => (
-            <section key={month} id={month} className='mb-10'>
-              {/* 月份字号从 text-xl font-bold 改为了 text-2xl font-extrabold */}
-              <div className='text-2xl font-extrabold mb-4 text-gray-700 dark:text-gray-300'>
-                {month}
+    <div className='w-full'>
+      {Object.keys(archivePosts).map(month => (
+        <section key={month} id={month} className='mb-8'>
+          <div className='text-2xl font-extrabold mb-4 text-gray-700 dark:text-gray-300'>
+            {month}
+          </div>
+          <div className='space-y-6'>
+            {archivePosts[month].map(post => (
+              <div key={post.id} id={String(post.slug)} className='scroll-mt-24'>
+                <BlogPostCard
+                  index={posts.indexOf(post) + 1}
+                  post={post}
+                  showSummary={showSummary}
+                  siteInfo={siteInfo}
+                  episodeArchivePage={page} 
+                  disableDateLink={true}     
+                />
               </div>
-              <div className='space-y-6'>
-                {archivePosts[month].map(post => (
-                  <div key={post.id} id={String(post.slug)} className='scroll-mt-24'>
-                    <BlogPostCard
-                      index={posts.indexOf(post) + 1}
-                      post={post}
-                      showSummary={showSummary}
-                      siteInfo={siteInfo}
-                      episodeArchivePage={page} // <--- 传递当前页码作为精准定位依据
-                      disableDateLink={true}     // <--- 节目页禁用日期跳转
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
+            ))}
+          </div>
+        </section>
+      ))}
 
-          <PaginationNumber page={page} totalPage={episodesTotalPages} />
-        </div>
-      </Card>
+      <PaginationNumber page={page} totalPage={episodesTotalPages} />
     </div>
   )
 }
