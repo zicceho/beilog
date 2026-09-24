@@ -22,7 +22,7 @@ export const BlogPostCardInfo = ({
 
   return (
     <article
-      className={`flex flex-col justify-between lg:p-6 p-4 lg:px-8 px-6 ${showPageCover && !showPreview ? 'md:w-[62%] w-full md:max-h-60' : 'w-full'}`}>
+      className={`flex flex-col justify-between lg:p-6 p-4 lg:px-8 px-6 ${showPageCover && !showPreview ? 'md:w-[62%] w-full' : 'w-full'}`}>
       <div>
         <header>
           <h2>
@@ -41,9 +41,9 @@ export const BlogPostCardInfo = ({
 
           {/* 元信息行：栏目 / 日期 / 嘉宾 */}
           <div
-            className={`flex mt-2 items-center ${
+            className={`flex mt-2 mb-1 items-center ${
               showPreview ? 'justify-center' : 'justify-start'
-            } flex-wrap text-sm dark:text-gray-500 text-gray-400`}>
+            } flex-wrap gap-y-1 text-sm dark:text-gray-500 text-gray-400`}>
             {post?.category && (
               <>
                 <SmartLink
@@ -70,10 +70,24 @@ export const BlogPostCardInfo = ({
                 <span className='mx-1.5 text-gray-300 dark:text-gray-700'>
                   /
                 </span>
-                <span className='font-light'>
-                  {visibleGuests.map(t => t.name).join('、')}
-                  {extraCount > 0 ? ` +${extraCount}` : ''}
-                </span>
+                <div className='flex flex-wrap items-center gap-x-2'>
+                  {visibleGuests.map(tag => (
+                    <SmartLink
+                      key={tag.name}
+                      href={`/tag/${encodeURIComponent(tag.name)}`}
+                      passHref
+                      legacyBehavior>
+                      <span className='font-light menu-link cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-400 transform whitespace-nowrap'>
+                        {tag.name}
+                      </span>
+                    </SmartLink>
+                  ))}
+                  {extraCount > 0 && (
+                    <span className='font-light whitespace-nowrap'>
+                      +{extraCount}
+                    </span>
+                  )}
+                </div>
               </>
             )}
 
@@ -85,13 +99,13 @@ export const BlogPostCardInfo = ({
         </header>
 
         {(!showPreview || showSummary) && !post.results && (
-          <main className='line-clamp-2 replace my-3 text-gray-700  dark:text-gray-300 text-md font-normal'>
+          <main className='line-clamp-3 replace my-4 text-gray-700 dark:text-gray-300 text-md font-normal leading-relaxed'>
             {post.summary}
           </main>
         )}
 
         {post.results && (
-          <p className='line-clamp-2 mt-4 text-gray-700 dark:text-gray-300 text-sm font-light'>
+          <p className='line-clamp-3 mt-4 text-gray-700 dark:text-gray-300 text-sm font-light leading-relaxed'>
             {post.results.map((r, index) => (
               <span key={index}>{r}</span>
             ))}
