@@ -188,7 +188,7 @@ const LayoutPostList = props => {
         <div className='mt-8 mb-4 text-center'>
           <SmartLink
             href='/episodes'
-            className='inline-block px-6 py-2 text-sm font-light rounded-full border transition-colors border-[var(--theme-color)] text-[var(--theme-color)] hover:bg-[var(--theme-color)] hover:text-white'>
+            className='inline-block px-6 py-2 text-sm font-semibold rounded-lg border-2 transition-colors border-[var(--theme-color)] text-[var(--theme-color)] hover:bg-[var(--theme-color)] hover:text-white'>
             查看更多节目 ···
           </SmartLink>
         </div>
