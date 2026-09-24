@@ -56,8 +56,9 @@ export const BlogPostCardInfo = ({
             </SmartLink>
           </h2>
 
+          {/* 下面这一行的 mt-4 改为了 mt-2，只有这一处改动 */}
           <div
-            className={`flex mt-4 mb-1 items-center ${
+            className={`flex mt-2 mb-1 items-center ${
               showPreview ? 'justify-center' : 'justify-start'
             } flex-wrap gap-y-1 text-sm dark:text-gray-500 text-gray-400`}>
             {episodeNumber && (
@@ -128,6 +129,7 @@ export const BlogPostCardInfo = ({
           </div>
         </header>
 
+        {/* 下方这部分完全没动，间距保持原样 */}
         {(!showPreview || showSummary) && !post.results && (
           <main className='line-clamp-3 replace my-4 text-gray-700 dark:text-gray-300 text-md font-normal leading-relaxed'>
             {truncateSummary(post.summary)}
