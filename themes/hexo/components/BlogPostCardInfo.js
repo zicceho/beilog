@@ -6,7 +6,6 @@ import { useGlobal } from '@/lib/global'
 import { getCategoryUrl } from '@/lib/utils/category'
 import { formatDateFmt } from '@/lib/utils/formatDate'
 import SmartLink from '@/components/SmartLink'
-import TagItemMini from './TagItemMini'
 
 export const BlogPostCardInfo = ({
   post,
@@ -15,6 +14,11 @@ export const BlogPostCardInfo = ({
   showSummary
 }) => {
   const { NOTION_CONFIG } = useGlobal()
+
+  // 嘉宾（标签）最多显示 3 个，超出用 +N
+  const guests = post?.tagItems || []
+  const visibleGuests = guests.slice(0, 3)
+  const extraCount = guests.length - 3
 
   return (
     <article
@@ -35,25 +39,49 @@ export const BlogPostCardInfo = ({
             </SmartLink>
           </h2>
 
-          {post?.category && (
-            <div
-              className={`flex mt-2 items-center ${
-                showPreview ? 'justify-center' : 'justify-start'
-              } flex-wrap dark:text-gray-500 text-gray-400 `}>
-              <SmartLink
-                href={getCategoryUrl(post.category, NOTION_CONFIG)}
-                passHref
-                className='cursor-pointer font-light text-sm menu-link hover:text-indigo-700 dark:hover:text-indigo-400 transform'>
-                <i className='mr-1 far fa-folder' />
-                {post.category}
-              </SmartLink>
+          {/* 元信息行：栏目 / 日期 / 嘉宾 */}
+          <div
+            className={`flex mt-2 items-center ${
+              showPreview ? 'justify-center' : 'justify-start'
+            } flex-wrap text-sm dark:text-gray-500 text-gray-400`}>
+            {post?.category && (
+              <>
+                <SmartLink
+                  href={getCategoryUrl(post.category, NOTION_CONFIG)}
+                  passHref
+                  className='cursor-pointer font-bold menu-link hover:text-indigo-700 dark:hover:text-indigo-400 transform'>
+                  {post.category}
+                </SmartLink>
+                <span className='mx-1.5 text-gray-300 dark:text-gray-700'>
+                  /
+                </span>
+              </>
+            )}
 
-              <TwikooCommentCount
-                className='text-sm hover:text-indigo-700 dark:hover:text-indigo-400'
-                post={post}
-              />
-            </div>
-          )}
+            <SmartLink
+              href={`/episodes#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
+              passHref
+              className='font-light menu-link cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-400 transform'>
+              {post?.publishDay || post.date}
+            </SmartLink>
+
+            {visibleGuests.length > 0 && (
+              <>
+                <span className='mx-1.5 text-gray-300 dark:text-gray-700'>
+                  /
+                </span>
+                <span className='font-light'>
+                  {visibleGuests.map(t => t.name).join('、')}
+                  {extraCount > 0 ? ` +${extraCount}` : ''}
+                </span>
+              </>
+            )}
+
+            <TwikooCommentCount
+              className='ml-2 hover:text-indigo-700 dark:hover:text-indigo-400'
+              post={post}
+            />
+          </div>
         </header>
 
         {(!showPreview || showSummary) && !post.results && (
@@ -75,25 +103,6 @@ export const BlogPostCardInfo = ({
             <NotionPage post={post} />
           </div>
         )}
-      </div>
-
-      {/* 底部日期与标签区域 */}
-      <div>
-        <div className='text-gray-400 flex items-center'>
-          <SmartLink
-            href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
-            passHref
-            className='font-light menu-link cursor-pointer text-sm leading-4'>
-            <i className='far fa-calendar-alt mr-1' />
-            {post?.publishDay || post.date}
-          </SmartLink>
-
-          <div className='flex flex-wrap items-center ml-2 gap-1'>
-            {post.tagItems?.map(tag => (
-              <TagItemMini key={tag.name} tag={tag} />
-            ))}
-          </div>
-        </div>
       </div>
     </article>
   )
