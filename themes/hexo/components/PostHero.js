@@ -48,7 +48,7 @@ const extractEpisodeNumber = (slug) => {
   return match ? match[1] : ''
 }
 
-export default function PostHero({ post, siteInfo, episodeArchivePage }) { // <--- 接收 episodeArchivePage
+export default function PostHero({ post, siteInfo, episodeArchivePage }) {
   const { fullWidth } = useGlobal()
   const [isPlaying, setIsPlaying] = useState(false)
   const [isCurrentSrc, setIsCurrentSrc] = useState(false)
@@ -169,8 +169,8 @@ export default function PostHero({ post, siteInfo, episodeArchivePage }) { // <-
                 <div className='flex flex-wrap items-center gap-x-3 gap-y-1 mb-6 text-sm font-light text-white/70'>
                   {episodeNumber && (
                     <>
-                      {/* E号改为纯文本，不跳转 */}
-                      <span className='hero-meta-link whitespace-nowrap'>
+                      {/* 修复：去掉了 hero-meta-link 类，变成纯文本，悬停不变色，无手型光标 */}
+                      <span className='whitespace-nowrap text-white/70'>
                         E{episodeNumber}
                       </span>
                       <span className='text-white/30'>·</span>
