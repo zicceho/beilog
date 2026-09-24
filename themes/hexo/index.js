@@ -35,7 +35,7 @@ import TocDrawerButton from './components/TocDrawerButton'
 import ArticleSwitchPlaceholder from './components/ArticleSwitchPlaceholder'
 import NotionAudioEnhancer from './components/NotionAudioEnhancer'
 import GlobalAudioPlayer from './components/GlobalAudioPlayer'
-import EpisodesPage from './components/EpisodesPage' // 新增引入
+import EpisodesPage from './components/EpisodesPage'
 import CONFIG from './config'
 import { Style } from './style'
 
@@ -165,7 +165,8 @@ const LayoutIndex = props => {
 const LayoutPostList = props => {
   const router = useRouter()
   const isHomePage = router.route === '/'
-  const { posts = [], siteInfo } = props
+  // <--- 接收 episodePageMap
+  const { posts = [], siteInfo, episodePageMap = {} } = props
   const showSummary = siteConfig('HEXO_POST_LIST_SUMMARY', null, CONFIG)
   const postsPerPage = siteConfig('POSTS_PER_PAGE', 6, CONFIG)
 
@@ -181,6 +182,7 @@ const LayoutPostList = props => {
               post={post}
               showSummary={showSummary}
               siteInfo={siteInfo}
+              episodeArchivePage={episodePageMap[post.id]} // <--- 传给卡片
             />
           ))}
         </div>
@@ -262,7 +264,6 @@ const LayoutArchive = props => {
   )
 }
 
-// 新增节目页布局
 const LayoutEpisodes = props => {
   return <EpisodesPage {...props} />
 }
@@ -405,7 +406,7 @@ const LayoutTagIndex = props => {
     <div>
       <Card className='w-full'>
         <div className='dark:text-gray-200 mb-5 ml-4'>
-          <i className='mr-4 fa-solid fa-users' /> {locale.COMMON.TAGS}:
+          <i className='mr-4 fas fa-users' /> {locale.COMMON.TAGS}:
         </div>
         <div id='tags-list' className='duration-200 flex flex-wrap ml-8'>
           {tagOptions.map(tag => (
@@ -429,6 +430,6 @@ export {
   LayoutSearch,
   LayoutSlug,
   LayoutTagIndex,
-  LayoutEpisodes, // 新增导出
+  LayoutEpisodes,
   CONFIG as THEME_CONFIG
 }
