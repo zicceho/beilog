@@ -7,12 +7,22 @@ import SmartLink from '@/components/SmartLink'
 import { useEffect, useRef, useState } from 'react'
 
 const PlayIcon = ({ size = 12 }) => (
-  <svg viewBox='0 0 24 24' width={size} height={size} fill='currentColor' style={{ marginLeft: '1px' }}>
+  <svg
+    viewBox='0 0 24 24'
+    width={size}
+    height={size}
+    fill='currentColor'
+    style={{ marginLeft: '1px' }}>
     <path d='M8 5v14l11-7z' />
   </svg>
 )
+
 const PauseIcon = ({ size = 12 }) => (
-  <svg viewBox='0 0 24 24' width={size} height={size} fill='currentColor'>
+  <svg
+    viewBox='0 0 24 24'
+    width={size}
+    height={size}
+    fill='currentColor'>
     <rect x='6' y='5' width='4' height='14' rx='1' />
     <rect x='14' y='5' width='4' height='14' rx='1' />
   </svg>
@@ -22,45 +32,59 @@ const parseExt = (ext) => {
   if (!ext) return null
   const raw = typeof ext === 'string' ? ext.trim() : ''
   if (!raw) return null
+
   try {
     const parsed = JSON.parse(raw)
     if (parsed?.audio) return parsed.audio
   } catch (e) {}
+
   if (raw.startsWith('http')) return raw
+
   return null
 }
 
 const formatRemaining = (seconds) => {
   if (!Number.isFinite(seconds) || seconds < 0) return '-0:00'
+
   const total = Math.floor(seconds)
   const h = Math.floor(total / 3600)
   const m = Math.floor((total % 3600) / 60)
   const s = total % 60
+
   if (h > 0) {
-    return `-${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+    return `-${h}:${m.toString().padStart(2, '0')}:${s
+      .toString()
+      .padStart(2, '0')}`
   }
+
   return `-${m}:${s.toString().padStart(2, '0')}`
 }
 
 const extractEpisodeNumber = (slug) => {
   if (!slug) return ''
+
   const match = String(slug).match(/(\d+)(?!.*\d)/)
+
   return match ? match[1] : ''
 }
 
-export default function PostHero({ post, siteInfo }) { // <--- 恢复原始参数
+export default function PostHero({ post, siteInfo }) {
   const { fullWidth } = useGlobal()
+
   const [isPlaying, setIsPlaying] = useState(false)
   const [isCurrentSrc, setIsCurrentSrc] = useState(false)
   const [progress, setProgress] = useState(0)
   const [remaining, setRemaining] = useState(0)
   const [localDuration, setLocalDuration] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
+
   const localAudioRef = useRef(null)
 
-  const primaryColor = siteConfig('HEXO_COLOR_PRIMARY', '#3A4A7A') || '#3A4A7A'
+  const primaryColor =
+    siteConfig('HEXO_COLOR_PRIMARY', '#3A4A7A') || '#3A4A7A'
 
   let audioUrl = post?.audio || null
+
   if (!audioUrl && post?.ext) {
     audioUrl = parseExt(post.ext)
   }
@@ -70,10 +94,13 @@ export default function PostHero({ post, siteInfo }) { // <--- 恢复原始参�
   useEffect(() => {
     const onState = (e) => {
       const { src, playing, currentTime, duration } = e.detail
+
       if (audioUrl && src === audioUrl) {
         setIsCurrentSrc(true)
         setIsPlaying(playing)
+
         const dur = duration || localDuration
+
         if (dur > 0) {
           setProgress((currentTime / dur) * 100)
           setRemaining(Math.max(0, dur - currentTime))
@@ -83,20 +110,27 @@ export default function PostHero({ post, siteInfo }) { // <--- 恢复原始参�
         setIsPlaying(false)
       }
     }
+
     window.addEventListener('global-audio-state', onState)
-    return () => window.removeEventListener('global-audio-state', onState)
+
+    return () =>
+      window.removeEventListener('global-audio-state', onState)
   }, [audioUrl, localDuration])
 
   const handleMetadata = (e) => {
     const dur = e.target.duration || 0
+
     setLocalDuration(dur)
+
     if (!isCurrentSrc) {
       setRemaining(dur)
     }
   }
 
   const handleWaiting = () => setIsLoading(true)
+
   const handleCanPlay = () => setIsLoading(false)
+
   const handlePlaying = () => {
     setIsLoading(false)
     setIsPlaying(true)
@@ -105,10 +139,17 @@ export default function PostHero({ post, siteInfo }) { // <--- 恢复原始参�
   const handlePlayClick = (e) => {
     e.preventDefault()
     e.stopPropagation()
+
     if (!audioUrl) return
+
     window.dispatchEvent(
       new CustomEvent('toggle-global-audio', {
-        detail: { src: audioUrl, cover: coverUrl, title: post.title, href: post.href }
+        detail: {
+          src: audioUrl,
+          cover: coverUrl,
+          title: post.title,
+          href: post.href
+        }
       })
     )
   }
@@ -121,7 +162,9 @@ export default function PostHero({ post, siteInfo }) { // <--- 恢复原始参�
     return <div className='my-8' />
   }
 
-  const headerImage = post?.pageCover ? post.pageCover : siteInfo?.pageCover
+  const headerImage = post?.pageCover
+    ? post.pageCover
+    : siteInfo?.pageCover
 
   const episodeNumber = extractEpisodeNumber(post?.slug)
 
@@ -147,10 +190,10 @@ export default function PostHero({ post, siteInfo }) { // <--- 恢复原始参�
       <header
         id='article-header-cover'
         className='bg-black bg-opacity-70 absolute top-0 w-full h-full flex items-center'>
-        <div className='w-full md:px-8 lg:px-24'>
+        <div className='w-full px-4 md:px-8 lg:px-24'>
           <div className='w-full mx-auto lg:flex lg:space-x-4 justify-center'>
-            <div className='w-full max-w-4xl md:pl-5 pl-5'>
-              <div className='pl-5'>
+            <div className='w-full max-w-4xl md:pl-5'>
+              <div className='md:pl-5'>
                 <div className='leading-snug font-bold text-3xl sm:text-4xl md:leading-snug shadow-text-md text-white mb-4'>
                   {siteConfig('POST_TITLE_ICON') && (
                     <NotionIcon
@@ -158,6 +201,7 @@ export default function PostHero({ post, siteInfo }) { // <--- 恢复原始参�
                       className='text-3xl sm:text-4xl mr-1 inline-block'
                     />
                   )}
+
                   {post.title}
                 </div>
 
@@ -167,9 +211,11 @@ export default function PostHero({ post, siteInfo }) { // <--- 恢复原始参�
                       <span className='whitespace-nowrap text-white/70'>
                         E{episodeNumber}
                       </span>
+
                       <span className='text-white/30'>·</span>
                     </>
                   )}
+
                   {post.category && (
                     <SmartLink
                       href={`/category/${post.category}`}
@@ -180,23 +226,28 @@ export default function PostHero({ post, siteInfo }) { // <--- 恢复原始参�
                       </span>
                     </SmartLink>
                   )}
+
                   {post?.type !== 'Page' && (
                     <>
                       <span className='text-white/30'>/</span>
-                      {/* 纯文本，不跳转，无悬停 */}
+
                       <span className='text-white/70'>
                         {post?.publishDay || post.date}
                       </span>
                     </>
                   )}
+
                   {post.tagItems && post.tagItems.length > 0 && (
                     <>
                       <span className='text-white/30'>/</span>
+
                       <div className='flex flex-wrap items-center gap-x-2 gap-y-1'>
                         {post.tagItems.map(tag => (
                           <SmartLink
                             key={tag.name}
-                            href={`/tag/${encodeURIComponent(tag.name)}`}
+                            href={`/tag/${encodeURIComponent(
+                              tag.name
+                            )}`}
                             passHref
                             legacyBehavior>
                             <span className='hero-meta-link whitespace-nowrap'>
@@ -221,6 +272,7 @@ export default function PostHero({ post, siteInfo }) { // <--- 恢复原始参�
                       onPlaying={handlePlaying}
                       style={{ display: 'none' }}
                     />
+
                     <div className='flex items-center gap-3 w-full'>
                       <button
                         onClick={handlePlayClick}
@@ -243,7 +295,9 @@ export default function PostHero({ post, siteInfo }) { // <--- 恢复原始参�
                         className={`flex-1 h-1 rounded-full overflow-hidden relative bg-white/15 ${
                           isLoading ? 'loading-stripe' : ''
                         }`}
-                        style={{ backdropFilter: 'blur(10px)' }}>
+                        style={{
+                          backdropFilter: 'blur(10px)'
+                        }}>
                         <div
                           className='h-full rounded-full transition-all duration-300'
                           style={playedBarStyle}
@@ -270,14 +324,21 @@ export default function PostHero({ post, siteInfo }) { // <--- 恢复原始参�
           transition: color 0.2s;
           cursor: pointer;
         }
+
         .hero-meta-link:hover {
           color: var(--theme-primary);
         }
 
         @keyframes stripe-move {
-          0% { background-position: 0 0; }
-          100% { background-position: 32px 0; }
+          0% {
+            background-position: 0 0;
+          }
+
+          100% {
+            background-position: 32px 0;
+          }
         }
+
         .loading-stripe {
           background: repeating-linear-gradient(
             -45deg,
@@ -286,6 +347,7 @@ export default function PostHero({ post, siteInfo }) { // <--- 恢复原始参�
             rgba(255, 255, 255, 0.05) 8px,
             rgba(255, 255, 255, 0.05) 16px
           );
+
           background-size: 32px 100%;
           animation: stripe-move 0.8s linear infinite;
         }
