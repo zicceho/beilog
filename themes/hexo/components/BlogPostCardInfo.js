@@ -15,14 +15,13 @@ export const BlogPostCardInfo = ({
 }) => {
   const { NOTION_CONFIG } = useGlobal()
 
-  // 嘉宾（标签）最多显示 3 个，超出用 +N
   const guests = post?.tagItems || []
   const visibleGuests = guests.slice(0, 3)
   const extraCount = guests.length - 3
 
   return (
     <article
-      className={`flex flex-col justify-between lg:p-6 p-4 lg:px-8 px-6 ${showPageCover && !showPreview ? 'md:w-[62%] w-full' : 'w-full'}`}>
+      className={`flex flex-col justify-between lg:p-6 p-4 lg:px-8 px-6 ${showPageCover && !showPreview ? 'md:w-[62%] w-full md:max-h-60' : 'w-full'}`}>
       <div>
         <header>
           <h2>
@@ -39,7 +38,6 @@ export const BlogPostCardInfo = ({
             </SmartLink>
           </h2>
 
-          {/* 元信息行：栏目 / 日期 / 嘉宾 */}
           <div
             className={`flex mt-2 mb-1 items-center ${
               showPreview ? 'justify-center' : 'justify-start'
