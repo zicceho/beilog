@@ -7,13 +7,20 @@ import { getCategoryUrl } from '@/lib/utils/category'
 import { formatDateFmt } from '@/lib/utils/formatDate'
 import SmartLink from '@/components/SmartLink'
 
-const SUMMARY_MAX = 50
+const SUMMARY_MAX = 68
 
 const truncateSummary = text => {
   if (!text) return ''
   const clean = text.replace(/\s+/g, ' ').trim()
   if (clean.length <= SUMMARY_MAX) return clean
   return clean.slice(0, SUMMARY_MAX).trim() + '...'
+}
+
+// 从 slug 中提取纯数字。支持 "849"、"episode/849"、"episode-849" 等格式
+const extractEpisodeNumber = slug => {
+  if (!slug) return ''
+  const match = String(slug).match(/(\d+)(?!.*\d)/)
+  return match ? match[1] : ''
 }
 
 export const BlogPostCardInfo = ({
@@ -27,6 +34,8 @@ export const BlogPostCardInfo = ({
   const guests = post?.tagItems || []
   const visibleGuests = guests.slice(0, 3)
   const extraCount = guests.length - 3
+
+  const episodeNumber = extractEpisodeNumber(post?.slug)
 
   return (
     <article
@@ -48,16 +57,16 @@ export const BlogPostCardInfo = ({
           </h2>
 
           <div
-            className={`flex mt-2 mb-1 items-center ${
+            className={`flex mt-4 mb-1 items-center ${
               showPreview ? 'justify-center' : 'justify-start'
             } flex-wrap gap-y-1 text-sm dark:text-gray-500 text-gray-400`}>
-            {post?.slug && (
+            {episodeNumber && (
               <>
                 <SmartLink
                   href={post?.href}
                   passHref
                   className='menu-link cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-400 transform'>
-                  E{post.slug}
+                  E{episodeNumber}
                 </SmartLink>
                 <span className='mx-1.5 text-gray-300 dark:text-gray-700'>
                   ·
@@ -120,13 +129,13 @@ export const BlogPostCardInfo = ({
         </header>
 
         {(!showPreview || showSummary) && !post.results && (
-          <main className='line-clamp-2 md:line-clamp-3 replace my-4 text-gray-700 dark:text-gray-300 text-md font-normal leading-relaxed'>
+          <main className='line-clamp-3 replace my-4 text-gray-700 dark:text-gray-300 text-md font-normal leading-relaxed'>
             {truncateSummary(post.summary)}
           </main>
         )}
 
         {post.results && (
-          <p className='line-clamp-2 md:line-clamp-3 mt-4 text-gray-700 dark:text-gray-300 text-sm font-light leading-relaxed'>
+          <p className='line-clamp-3 mt-4 text-gray-700 dark:text-gray-300 text-sm font-light leading-relaxed'>
             {post.results.map((r, index) => (
               <span key={index}>{r}</span>
             ))}
