@@ -42,6 +42,13 @@ const formatRemaining = (seconds) => {
   return `-${m}:${s.toString().padStart(2, '0')}`
 }
 
+// 从 slug 中提取纯数字。支持 "849"、"episode/849"、"episode-849" 等格式
+const extractEpisodeNumber = (slug) => {
+  if (!slug) return ''
+  const match = String(slug).match(/(\d+)(?!.*\d)/)
+  return match ? match[1] : ''
+}
+
 export default function PostHero({ post, siteInfo }) {
   const { fullWidth } = useGlobal()
   const [isPlaying, setIsPlaying] = useState(false)
@@ -119,6 +126,8 @@ export default function PostHero({ post, siteInfo }) {
 
   const headerImage = post?.pageCover ? post.pageCover : siteInfo?.pageCover
 
+  const episodeNumber = extractEpisodeNumber(post?.slug)
+
   const playedBarStyle = {
     width: `${progress}%`,
     background:
@@ -156,6 +165,19 @@ export default function PostHero({ post, siteInfo }) {
                 </div>
 
                 <div className='flex flex-wrap items-center gap-x-3 gap-y-1 mb-6 text-sm font-light text-white/70'>
+                  {episodeNumber && (
+                    <>
+                      <SmartLink
+                        href='/episodes'
+                        passHref
+                        legacyBehavior>
+                        <span className='hero-meta-link whitespace-nowrap'>
+                          E{episodeNumber}
+                        </span>
+                      </SmartLink>
+                      <span className='text-white/30'>·</span>
+                    </>
+                  )}
                   {post.category && (
                     <SmartLink
                       href={`/category/${post.category}`}
