@@ -170,7 +170,7 @@ export default function PostHero({ post, siteInfo }) {
                     <>
                       <span className='text-white/30'>/</span>
                       <SmartLink
-                        href={`/archive#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
+                        href={`/episodes#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
                         passHref>
                         <span className='hero-meta-link'>
                           {post?.publishDay || post.date}
