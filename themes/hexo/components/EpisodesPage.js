@@ -43,8 +43,8 @@ const EpisodesPage = props => {
                       post={post}
                       showSummary={showSummary}
                       siteInfo={siteInfo}
-                      page={page}                 // <--- 传入当前页码
-                      disableDateLink={true}      // <--- 在节目页开启禁用跳转
+                      episodeArchivePage={page} // <--- 传递当前页码作为精准定位依据
+                      disableDateLink={true}     // <--- 节目页禁用日期跳转
                     />
                   </div>
                 ))}
