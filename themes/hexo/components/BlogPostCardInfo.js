@@ -16,7 +16,6 @@ const truncateSummary = text => {
   return clean.slice(0, SUMMARY_MAX).trim() + '...'
 }
 
-// 从 slug 中提取纯数字。支持 "849"、"episode/849"、"episode-849" 等格式
 const extractEpisodeNumber = slug => {
   if (!slug) return ''
   const match = String(slug).match(/(\d+)(?!.*\d)/)
@@ -27,7 +26,9 @@ export const BlogPostCardInfo = ({
   post,
   showPreview,
   showPageCover,
-  showSummary
+  showSummary,
+  page,            // <--- 新增：接收当前页码
+  disableDateLink  // <--- 新增：接收是否禁用日期跳转
 }) => {
   const { NOTION_CONFIG } = useGlobal()
 
@@ -36,6 +37,11 @@ export const BlogPostCardInfo = ({
   const extraCount = guests.length - 3
 
   const episodeNumber = extractEpisodeNumber(post?.slug)
+
+  // 动态拼接精准跳转链接：如果是第一页，省略 /page/1
+  const episodeArchiveHref = episodeNumber
+    ? `/episodes${page && page > 1 ? `/page/${page}` : ''}#${episodeNumber}`
+    : '/episodes'
 
   return (
     <article
@@ -56,7 +62,6 @@ export const BlogPostCardInfo = ({
             </SmartLink>
           </h2>
 
-          {/* 下面这一行的 mt-4 改为了 mt-2，只有这一处改动 */}
           <div
             className={`flex mt-2 mb-1 items-center ${
               showPreview ? 'justify-center' : 'justify-start'
@@ -64,7 +69,7 @@ export const BlogPostCardInfo = ({
             {episodeNumber && (
               <>
                 <SmartLink
-                  href={post?.href}
+                  href={episodeArchiveHref} // <--- 这里改为精准跳转
                   passHref
                   className='menu-link cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-400 transform'>
                   E{episodeNumber}
@@ -89,12 +94,19 @@ export const BlogPostCardInfo = ({
               </>
             )}
 
-            <SmartLink
-              href={`/episodes#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
-              passHref
-              className='font-light menu-link cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-400 transform'>
-              {post?.publishDay || post.date}
-            </SmartLink>
+            {/* 判断是否禁用跳转，如果禁用则显示为纯文本 */}
+            {disableDateLink ? (
+              <span className='font-light'>
+                {post?.publishDay || post.date}
+              </span>
+            ) : (
+              <SmartLink
+                href={episodeArchiveHref} // <--- 这里改为精准跳转
+                passHref
+                className='font-light menu-link cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-400 transform'>
+                {post?.publishDay || post.date}
+              </SmartLink>
+            )}
 
             {visibleGuests.length > 0 && (
               <>
@@ -129,7 +141,6 @@ export const BlogPostCardInfo = ({
           </div>
         </header>
 
-        {/* 下方这部分完全没动，间距保持原样 */}
         {(!showPreview || showSummary) && !post.results && (
           <main className='line-clamp-3 replace my-4 text-gray-700 dark:text-gray-300 text-md font-normal leading-relaxed'>
             {truncateSummary(post.summary)}
