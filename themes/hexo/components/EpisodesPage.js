@@ -39,8 +39,6 @@ const EpisodesPage = props => {
                   post={post}
                   showSummary={showSummary}
                   siteInfo={siteInfo}
-                  episodeArchivePage={page} 
-                  disableDateLink={true}     
                 />
               </div>
             ))}
