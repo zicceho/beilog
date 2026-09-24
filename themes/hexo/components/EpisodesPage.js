@@ -31,7 +31,8 @@ const EpisodesPage = props => {
         <div className='mb-10 pb-20 bg-white md:p-12 p-3 min-h-full dark:bg-hexo-black-gray'>
           {Object.keys(archivePosts).map(month => (
             <section key={month} id={month} className='mb-10'>
-              <div className='text-xl font-bold mb-4 text-gray-700 dark:text-gray-300'>
+              {/* 月份字号从 text-xl font-bold 改为了 text-2xl font-extrabold */}
+              <div className='text-2xl font-extrabold mb-4 text-gray-700 dark:text-gray-300'>
                 {month}
               </div>
               <div className='space-y-6'>
@@ -42,6 +43,8 @@ const EpisodesPage = props => {
                       post={post}
                       showSummary={showSummary}
                       siteInfo={siteInfo}
+                      page={page}                 // <--- 传入当前页码
+                      disableDateLink={true}      // <--- 在节目页开启禁用跳转
                     />
                   </div>
                 ))}
