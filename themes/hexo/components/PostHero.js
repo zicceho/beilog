@@ -49,7 +49,7 @@ const extractEpisodeNumber = (slug) => {
   return match ? match[1] : ''
 }
 
-export default function PostHero({ post, siteInfo }) {
+export default function PostHero({ post, siteInfo, episodeArchivePage }) {
   const { fullWidth } = useGlobal()
   const [isPlaying, setIsPlaying] = useState(false)
   const [isCurrentSrc, setIsCurrentSrc] = useState(false)
@@ -59,8 +59,6 @@ export default function PostHero({ post, siteInfo }) {
   const [isLoading, setIsLoading] = useState(false)
   const localAudioRef = useRef(null)
 
-  // 主题主色：从 HEXO_COLOR_PRIMARY 读取（环境变量 / Notion Config 均生效）
-  // 兜底值与当前视觉一致，避免环境变量读取异常时颜色突变
   const primaryColor = siteConfig('HEXO_COLOR_PRIMARY', '#3A4A7A') || '#3A4A7A'
 
   let audioUrl = post?.audio || null
@@ -128,6 +126,11 @@ export default function PostHero({ post, siteInfo }) {
 
   const episodeNumber = extractEpisodeNumber(post?.slug)
 
+  // 计算精准跳转链接
+  const episodeArchiveHref = episodeNumber
+    ? `/episodes${episodeArchivePage > 1 ? `/page/${episodeArchivePage}` : ''}#${episodeNumber}`
+    : '/episodes'
+
   const playedBarStyle = {
     width: `${progress}%`,
     background:
@@ -168,7 +171,7 @@ export default function PostHero({ post, siteInfo }) {
                   {episodeNumber && (
                     <>
                       <SmartLink
-                        href='/episodes'
+                        href={episodeArchiveHref}
                         passHref
                         legacyBehavior>
                         <span className='hero-meta-link whitespace-nowrap'>
@@ -192,7 +195,7 @@ export default function PostHero({ post, siteInfo }) {
                     <>
                       <span className='text-white/30'>/</span>
                       <SmartLink
-                        href={`/episodes#${formatDateFmt(post?.publishDate, 'yyyy-MM')}`}
+                        href={episodeArchiveHref}
                         passHref>
                         <span className='hero-meta-link'>
                           {post?.publishDay || post.date}
@@ -276,7 +279,6 @@ export default function PostHero({ post, siteInfo }) {
       </header>
 
       <style jsx>{`
-        /* 元信息链接：分类 / 日期 / 标签 统一悬停色 */
         .hero-meta-link {
           color: rgba(255, 255, 255, 0.7);
           transition: color 0.2s;
@@ -286,7 +288,6 @@ export default function PostHero({ post, siteInfo }) {
           color: var(--theme-primary);
         }
 
-        /* 音频加载中的条纹动画（保留） */
         @keyframes stripe-move {
           0% { background-position: 0 0; }
           100% { background-position: 32px 0; }
