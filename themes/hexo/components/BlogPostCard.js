@@ -17,7 +17,7 @@ const parseExt = (ext) => {
   return null
 }
 
-const BlogPostCard = ({ index, post, showSummary, siteInfo, episodeArchivePage, disableDateLink = false }) => {
+const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
   const router = useRouter()
   const showPreview =
     siteConfig('HEXO_POST_LIST_PREVIEW', null, CONFIG) && post.blockMap
@@ -74,8 +74,6 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo, episodeArchivePage, 
           showPageCover={showPageCover}
           showPreview={showPreview}
           showSummary={showSummary}
-          episodeArchivePage={episodeArchivePage}
-          disableDateLink={disableDateLink}
         />
 
         {showPageCover && (
