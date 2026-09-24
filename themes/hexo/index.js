@@ -35,6 +35,7 @@ import TocDrawerButton from './components/TocDrawerButton'
 import ArticleSwitchPlaceholder from './components/ArticleSwitchPlaceholder'
 import NotionAudioEnhancer from './components/NotionAudioEnhancer'
 import GlobalAudioPlayer from './components/GlobalAudioPlayer'
+import EpisodesPage from './components/EpisodesPage' // 新增引入
 import CONFIG from './config'
 import { Style } from './style'
 
@@ -66,7 +67,6 @@ const LayoutBase = props => {
     <Hero {...props} />
   ) : null
 
-  // 首页有 Hero 时，需要给 Hero 底部到内容之间留出间距
   const isHomeWithHero =
     router.route === '/' &&
     siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG)
@@ -169,7 +169,6 @@ const LayoutPostList = props => {
   const showSummary = siteConfig('HEXO_POST_LIST_SUMMARY', null, CONFIG)
   const postsPerPage = siteConfig('POSTS_PER_PAGE', 6, CONFIG)
 
-  // 首页：只展示前 N 条 + 查看更多节目按钮
   if (isHomePage) {
     const homePosts = posts.slice(0, postsPerPage)
     return (
@@ -261,6 +260,11 @@ const LayoutArchive = props => {
       </Card>
     </div>
   )
+}
+
+// 新增节目页布局
+const LayoutEpisodes = props => {
+  return <EpisodesPage {...props} />
 }
 
 const LayoutSlug = props => {
@@ -425,5 +429,6 @@ export {
   LayoutSearch,
   LayoutSlug,
   LayoutTagIndex,
+  LayoutEpisodes, // 新增导出
   CONFIG as THEME_CONFIG
 }
