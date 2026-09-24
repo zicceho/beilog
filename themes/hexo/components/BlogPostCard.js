@@ -17,8 +17,7 @@ const parseExt = (ext) => {
   return null
 }
 
-// <--- 新增 page, disableDateLink 两个参数
-const BlogPostCard = ({ index, post, showSummary, siteInfo, page, disableDateLink }) => {
+const BlogPostCard = ({ index, post, showSummary, siteInfo, episodeArchivePage, disableDateLink = false }) => {
   const router = useRouter()
   const showPreview =
     siteConfig('HEXO_POST_LIST_PREVIEW', null, CONFIG) && post.blockMap
@@ -75,8 +74,8 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo, page, disableDateLin
           showPageCover={showPageCover}
           showPreview={showPreview}
           showSummary={showSummary}
-          page={page}                     // <--- 传下去
-          disableDateLink={disableDateLink} // <--- 传下去
+          episodeArchivePage={episodeArchivePage}
+          disableDateLink={disableDateLink}
         />
 
         {showPageCover && (
