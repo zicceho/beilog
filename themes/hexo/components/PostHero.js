@@ -42,14 +42,13 @@ const formatRemaining = (seconds) => {
   return `-${m}:${s.toString().padStart(2, '0')}`
 }
 
-// 从 slug 中提取纯数字。支持 "849"、"episode/849"、"episode-849" 等格式
 const extractEpisodeNumber = (slug) => {
   if (!slug) return ''
   const match = String(slug).match(/(\d+)(?!.*\d)/)
   return match ? match[1] : ''
 }
 
-export default function PostHero({ post, siteInfo, episodeArchivePage }) {
+export default function PostHero({ post, siteInfo, episodeArchivePage }) { // <--- 接收 episodeArchivePage
   const { fullWidth } = useGlobal()
   const [isPlaying, setIsPlaying] = useState(false)
   const [isCurrentSrc, setIsCurrentSrc] = useState(false)
@@ -170,14 +169,10 @@ export default function PostHero({ post, siteInfo, episodeArchivePage }) {
                 <div className='flex flex-wrap items-center gap-x-3 gap-y-1 mb-6 text-sm font-light text-white/70'>
                   {episodeNumber && (
                     <>
-                      <SmartLink
-                        href={episodeArchiveHref}
-                        passHref
-                        legacyBehavior>
-                        <span className='hero-meta-link whitespace-nowrap'>
-                          E{episodeNumber}
-                        </span>
-                      </SmartLink>
+                      {/* E号改为纯文本，不跳转 */}
+                      <span className='hero-meta-link whitespace-nowrap'>
+                        E{episodeNumber}
+                      </span>
                       <span className='text-white/30'>·</span>
                     </>
                   )}
