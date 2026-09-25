@@ -66,13 +66,31 @@ const Header = props => {
 
       if (scrollInHeader) {
         nav && nav.classList.replace('bg-white', 'bg-none')
-        nav && nav.classList.replace('border', 'border-transparent')
-        nav && nav.classList.replace('drop-shadow-md', 'shadow-none')
+
+        // 头图区域：隐藏底部边线
+        nav && nav.classList.remove('border-gray-200')
+        nav && nav.classList.remove('dark:border-gray-800')
+        nav && nav.classList.add('border-transparent')
+        nav && nav.classList.add('dark:border-transparent')
+
+        // 不显示阴影
+        nav && nav.classList.remove('drop-shadow-md')
+        nav && nav.classList.add('shadow-none')
+
         nav && nav.classList.replace('dark:bg-hexo-black-gray', 'transparent')
       } else {
         nav && nav.classList.replace('bg-none', 'bg-white')
-        nav && nav.classList.replace('border-transparent', 'border')
-        nav && nav.classList.replace('shadow-none', 'drop-shadow-md')
+
+        // 离开头图：只显示底部边线
+        nav && nav.classList.remove('border-transparent')
+        nav && nav.classList.remove('dark:border-transparent')
+        nav && nav.classList.add('border-gray-200')
+        nav && nav.classList.add('dark:border-gray-800')
+
+        // 不显示四周阴影
+        nav && nav.classList.remove('drop-shadow-md')
+        nav && nav.classList.add('shadow-none')
+
         nav && nav.classList.replace('transparent', 'dark:bg-hexo-black-gray')
       }
 
@@ -151,7 +169,7 @@ const Header = props => {
         id='sticky-nav'
         style={{ backdropFilter: 'blur(3px)' }}
         className={
-          'top-0 duration-300 transition-all  shadow-none fixed bg-none dark:bg-hexo-black-gray dark:text-gray-200 text-black w-full z-20 transform border-transparent dark:border-transparent'
+          'top-0 duration-300 transition-all shadow-none fixed bg-none dark:bg-hexo-black-gray dark:text-gray-200 text-black w-full z-20 transform border-0 border-b border-transparent dark:border-transparent'
         }>
         <div className='w-full flex justify-between items-center px-4 py-2'>
           <div className='flex'>
