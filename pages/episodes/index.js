@@ -8,45 +8,97 @@ import {
   groupEpisodesByMonth
 } from '@/lib/utils/episodes'
 
-/**
- * 节目首页 (第 1 页)
- * @param {*} props
- * @returns
- */
+
 const EpisodesIndex = props => {
-  const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
-  return <DynamicLayout theme={theme} layoutName='LayoutEpisodes' {...props} />
+  const theme = siteConfig(
+    'THEME',
+    BLOG.THEME,
+    props.NOTION_CONFIG
+  )
+
+  return (
+    <DynamicLayout
+      theme={theme}
+      layoutName='LayoutEpisodes'
+      {...props}
+    />
+  )
 }
 
+
 export async function getStaticProps({ locale }) {
-  const props = await fetchGlobalAllData({ from: 'episodes-index', locale })
 
-  // 严格过滤：只取已发布的 Post
-  const allPosts = props.allPages?.filter(
-    page => page.type === 'Post' && page.status === 'Published'
-  ) || []
+  const props = await fetchGlobalAllData({
+    from: 'episodes-index',
+    locale
+  })
 
-  // 排序并截取第一页 12 条
+
+  // 找到 Notion Pages 里的 episodes 页面
+  const episodePage = props.allPages?.find(
+    page =>
+      page.type === 'Page' &&
+      (
+        page.slug === 'episodes' ||
+        page.id === 'episodes'
+      )
+  )
+
+
+  // 给 Layout / Hero 使用
+  if (episodePage) {
+    props.post = episodePage
+    props.page = episodePage
+  }
+
+
+  // 只取节目 Post
+  const allPosts =
+    props.allPages?.filter(
+      page =>
+        page.type === 'Post' &&
+        page.status === 'Published'
+    ) || []
+
+
   const sortedPosts = sortEpisodes(allPosts)
-  const pagePosts = sortedPosts.slice(0, EPISODES_PER_PAGE)
+
+  const pagePosts = sortedPosts.slice(
+    0,
+    EPISODES_PER_PAGE
+  )
+
 
   props.posts = pagePosts
-  props.page = 1
-  props.episodesTotalPages = Math.ceil(sortedPosts.length / EPISODES_PER_PAGE)
-  props.archivePosts = groupEpisodesByMonth(pagePosts)
+
+  props.currentPage = 1
+
+  props.episodesTotalPages =
+    Math.ceil(
+      sortedPosts.length / EPISODES_PER_PAGE
+    )
+
+
+  props.archivePosts =
+    groupEpisodesByMonth(pagePosts)
+
 
   delete props.allPages
 
+
   return {
     props,
-    revalidate: process.env.EXPORT
-      ? undefined
-      : siteConfig(
-          'NEXT_REVALIDATE_SECOND',
-          BLOG.NEXT_REVALIDATE_SECOND,
-          props.NOTION_CONFIG
-        )
+
+    revalidate:
+      process.env.EXPORT
+        ? undefined
+        : siteConfig(
+            'NEXT_REVALIDATE_SECOND',
+            BLOG.NEXT_REVALIDATE_SECOND,
+            props.NOTION_CONFIG
+          )
   }
 }
+
 
 export default EpisodesIndex
