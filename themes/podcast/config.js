@@ -1,0 +1,84 @@
+/**
+ * 念安酒馆 Podcast Theme
+ * Visual direction: inspired by the editorial / podcast site structure of theue.me,
+ * implemented as a native NotionNext theme.
+ */
+const CONFIG = {
+  THEME_NAME: 'nianan',
+  THEME_DESCRIPTION: '念安酒馆：简洁、编辑感、播客优先的 NotionNext 主题',
+
+  // Brand / visual
+  NIANAN_LOGO_URL: '',
+  NIANAN_LOGO_ALT: '念安酒馆',
+  NIANAN_ACCENT: '#111111',
+  NIANAN_BACKGROUND: '#ffffff',
+  NIANAN_TEXT: '#222222',
+  NIANAN_MUTED: '#8c8c8c',
+  NIANAN_BORDER: '#e8e8e8',
+  NIANAN_MAX_WIDTH: '1120px',
+
+  // Header
+  NIANAN_MENU_HOME: true,
+  NIANAN_MENU_EPISODES: true,
+  NIANAN_MENU_NOTES: true,
+  NIANAN_MENU_ABOUT: true,
+  NIANAN_MENU_SEARCH: true,
+  NIANAN_EPISODES_PATH: '/archive',
+  NIANAN_NOTES_PATH: '/category/笔记',
+  NIANAN_ABOUT_PATH: '/about',
+
+  // Homepage
+  NIANAN_HOME_SHOW_FEATURED: true,
+  NIANAN_HOME_EPISODES_LIMIT: 8,
+  NIANAN_HOME_NOTES_LIMIT: 6,
+
+  // Audio
+  NIANAN_AUDIO_ENABLE: true,
+  NIANAN_AUDIO_PRELOAD: 'none',
+  NIANAN_AUDIO_AUTOPLAY: false,
+  NIANAN_AUDIO_DEFAULT_RATE: 1,
+  NIANAN_AUDIO_DEFAULT_VOLUME: 1,
+  NIANAN_AUDIO_MOBILE_MORE: true,
+  NIANAN_AUDIO_HIDE_ON_SCROLL: true,
+
+  // Article
+  NIANAN_ARTICLE_COVER: false,
+  NIANAN_ARTICLE_COPYRIGHT: false,
+  NIANAN_ARTICLE_RECOMMEND: false,
+  NIANAN_ARTICLE_ADJACENT: true,
+  NIANAN_ARTICLE_SHARE: true,
+  NIANAN_ARTICLE_COMMENT: true,
+
+  // Sidebar
+  NIANAN_SIDEBAR_ENABLE: true,
+  NIANAN_SIDEBAR_SEARCH: true,
+  NIANAN_SIDEBAR_CATEGORIES: true,
+  NIANAN_SIDEBAR_TAGS: false,
+  NIANAN_SIDEBAR_SUBSCRIBE: true,
+  NIANAN_SIDEBAR_SOCIAL: true,
+
+  // Footer
+  NIANAN_FOOTER_SHOW_POWERED_BY: true,
+
+  // Floating controls
+  NIANAN_FLOAT_ENABLE: true,
+  NIANAN_FLOAT_AUDIO_CONTROL: true,
+
+  // External links shown in sidebar/footer; fill in your own values.
+  NIANAN_SUBSCRIBE_ITUNES: '',
+  NIANAN_SUBSCRIBE_XIAOYUZHOU: '',
+  NIANAN_SUBSCRIBE_SPOTIFY: '',
+  NIANAN_SUBSCRIBE_NETEASE: '',
+  NIANAN_SUBSCRIBE_XIMALAYA: '',
+  NIANAN_SUBSCRIBE_RSS: '',
+  NIANAN_SUBSCRIBE_ANDROID: '',
+  NIANAN_SOCIAL_WEIBO: '',
+  NIANAN_SOCIAL_TWITTER: '',
+  NIANAN_SOCIAL_WECHAT: '',
+  NIANAN_SOCIAL_FACEBOOK: '',
+  NIANAN_SOCIAL_X: '',
+  NIANAN_SOCIAL_GITHUB: '',
+  NIANAN_CONTACT_EMAIL: ''
+}
+
+export default CONFIG
