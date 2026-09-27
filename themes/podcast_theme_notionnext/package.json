@@ -1,0 +1,35 @@
+{
+  "name": "podcast-theme",
+  "version": "1.0.0",
+  "description": "A professional podcast theme for NotionNext",
+  "author": "Your Name",
+  "keywords": ["podcast", "notionnext", "theme"],
+  "theme": {
+    "name": "podcast",
+    "displayName": "Podcast Theme",
+    "description": "A beautiful podcast theme inspired by theue.me",
+    "version": "1.0.0",
+    "author": "Created for NotionNext",
+    "category": "blog,podcast",
+    "components": [
+      "Header",
+      "Footer",
+      "Sidebar",
+      "AudioPlayer",
+      "EpisodeCard",
+      "GlobalPlayer"
+    ],
+    "requiredFields": [
+      "title",
+      "category",
+      "audio"
+    ],
+    "optionalFields": [
+      "summary",
+      "cover",
+      "tags",
+      "author",
+      "duration"
+    ]
+  }
+}
