@@ -671,7 +671,7 @@ const LayoutCategoryIndex = props => {
   } = useGlobal()
 
   return (
-    <div className='px-4 md:px-0'>
+    <div className='mx-2 md:mx-0'>
       <Card className='w-full'>
         <div className='dark:text-gray-200 mb-5 mx-3'>
           <i className='mr-4 fa-solid fa-layer-group' />{' '}
@@ -725,7 +725,7 @@ const LayoutTagIndex = props => {
     useGlobal()
 
   return (
-    <div className='px-4 md:px-0'>
+    <div className='mx-2 md:mx-0'>
       <Card className='w-full'>
         <div className='dark:text-gray-200 mb-5 ml-4'>
           <i className='mr-4 fas fa-users' />{' '}
