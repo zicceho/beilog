@@ -296,6 +296,36 @@ const Style = () => {
         scrollbar-color: var(--theme-color) transparent;
       }
 
+      /* ===== 新增：时间戳按钮样式 ===== */
+      .hexo-timestamp-btn {
+        display: inline;
+        padding: 0 2px;
+        margin: 0 1px;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        font-variant-numeric: tabular-nums;
+        cursor: pointer;
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+        text-decoration-color: currentColor;
+        border-radius: 3px;
+        transition: background-color .18s ease;
+      }
+      .hexo-timestamp-btn:hover {
+        background-color: color-mix(in srgb, var(--theme-color) 12%, transparent);
+      }
+      .hexo-timestamp-btn:active {
+        background-color: color-mix(in srgb, var(--theme-color) 20%, transparent);
+      }
+      .hexo-timestamp-btn:focus-visible {
+        outline: 2px solid color-mix(in srgb, var(--theme-color) 55%, transparent);
+        outline-offset: 2px;
+      }
+      /* ===== 新增结束 ===== */
+
       ${themeConsoleStyle('hexo', CONFIG)}
 
       #theme-hexo #home-nav-button a {
