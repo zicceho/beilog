@@ -2,22 +2,35 @@
 
 import { useEffect } from 'react'
 
-// 自己解析音频 URL，不依赖 AudioPlayer.js
+
 function parseExt(ext) {
   if (!ext) return null
-  if (typeof ext === 'object') return ext
-  if (typeof ext !== 'string') return null
+
+  if (typeof ext === 'object') {
+    return ext
+  }
+
+  if (typeof ext !== 'string') {
+    return null
+  }
+
   const value = ext.trim()
+
   if (!value) return null
+
   try {
     return JSON.parse(value)
   } catch {
-    return value.startsWith('http://') || value.startsWith('https://') ? { audio: value } : null
+    return value.startsWith('http')
+      ? { audio: value }
+      : null
   }
 }
 
+
 function getAudioUrl(post) {
   const ext = parseExt(post?.ext)
+
   return (
     post?.audioUrl ||
     post?.audio ||
@@ -27,101 +40,347 @@ function getAudioUrl(post) {
   )
 }
 
-// 把 01:47 或 1:02:33 解析成秒数
-function parseTimestamp(text) {
-  const match = text.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/)
-  if (!match) return null
-  const a = parseInt(match[1], 10)
-  const b = parseInt(match[2], 10)
-  const c = match[3] ? parseInt(match[3], 10) : null
-  if (c !== null) return a * 3600 + b * 60 + c
-  return a * 60 + b
-}
 
-export default function TimestampLinker({ post }) {
-  useEffect(() => {
-    if (typeof document === 'undefined') return undefined
+// 支持：
+// 01:47
+// 1:02:33
+function timestampToSeconds(value) {
 
-    const root = document.getElementById('notion-article')
-    if (!root) return undefined
+  const parts = value.split(':').map(i => Number(i))
 
-    const audioUrl = getAudioUrl(post)
-    const audioTitle = post?.title || '念安酒馆'
-    const audioCover = post?.pageCoverThumbnail || post?.pageCover || ''
-    const audioHref = post?.href || ''
-    const hasAudio = Boolean(audioUrl)
+  if (parts.length === 2) {
+    return parts[0] * 60 + parts[1]
+  }
 
-    let disposed = false
-    const created = []
-
-    const scan = () => {
-      if (disposed) return
-
-      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null)
-      const textNodes = []
-      let node
-      while ((node = walker.nextNode())) {
-        const text = node.nodeValue?.trim()
-        if (!text) continue
-        if (parseTimestamp(text) !== null) textNodes.push(node)
-      }
-
-      textNodes.forEach(textNode => {
-        const parent = textNode.parentNode
-        if (!parent || parent.dataset?.hexoTs === 'true') return
-
-        const raw = textNode.nodeValue.trim()
-        const seconds = parseTimestamp(raw)
-        if (seconds === null) return
-
-        const btn = document.createElement('button')
-        btn.type = 'button'
-        btn.className = 'hexo-timestamp-btn'
-        btn.dataset.seconds = String(seconds)
-        btn.textContent = raw
-        btn.setAttribute('aria-label', hasAudio ? `跳转到 ${raw}` : `${raw}（本文暂无音频）`)
-
-        btn.addEventListener('click', () => {
-          if (!hasAudio) {
-            window.dispatchEvent(new CustomEvent('show-no-audio-hint', {
-              detail: { message: '这篇文章没有对应的音频节目' }
-            }))
-            return
-          }
-          window.dispatchEvent(new CustomEvent('seek-global-audio', {
-            detail: {
-              seconds,
-              src: audioUrl,
-              title: audioTitle,
-              cover: audioCover,
-              href: audioHref
-            }
-          }))
-        })
-
-        parent.replaceChild(btn, textNode)
-        parent.dataset.hexoTs = 'true'
-        created.push({ parent, btn, originalText: textNode.nodeValue })
-      })
-    }
-
-    scan()
-    const timer = window.setTimeout(scan, 1200)
-    const observer = new MutationObserver(scan)
-    observer.observe(root, { childList: true, subtree: true })
-
-    return () => {
-      disposed = true
-      window.clearTimeout(timer)
-      observer.disconnect()
-      created.forEach(({ parent, btn, originalText }) => {
-        if (parent && btn && btn.parentNode === parent) {
-          parent.replaceChild(document.createTextNode(originalText), btn)
-          delete parent.dataset.hexoTs
-        }
-      })
-    }
-  }, [post?.id])
+  if (parts.length === 3) {
+    return (
+      parts[0] * 3600 +
+      parts[1] * 60 +
+      parts[2]
+    )
+  }
 
   return null
+}
+
+
+export default function TimestampLinker({ post }) {
+
+  useEffect(() => {
+
+    if (
+      typeof window === 'undefined'
+    ) {
+      return
+    }
+
+
+    let root =
+      document.querySelector(
+        '#article-wrapper #notion-article'
+      )
+
+
+    if (!root) {
+      root =
+        document.querySelector(
+          '#article-wrapper'
+        )
+    }
+
+
+    if (!root) {
+      return
+    }
+
+
+    const audioUrl =
+      getAudioUrl(post)
+
+
+    const audioTitle =
+      post?.title ||
+      '念安酒馆'
+
+
+    const audioCover =
+      post?.pageCoverThumbnail ||
+      post?.pageCover ||
+      ''
+
+
+    const audioHref =
+      post?.href ||
+      ''
+
+
+    const processed = new WeakSet()
+
+
+    function createButton(timeText) {
+
+
+      const seconds =
+        timestampToSeconds(timeText)
+
+
+      const button =
+        document.createElement(
+          'button'
+        )
+
+
+      button.type =
+        'button'
+
+
+      button.className =
+        'hexo-timestamp-btn'
+
+
+      button.textContent =
+        timeText
+
+
+      button.onclick = () => {
+
+
+        if (!audioUrl) {
+
+          window.dispatchEvent(
+            new CustomEvent(
+              'show-no-audio-hint',
+              {
+                detail:{
+                  message:
+                  '这篇文章没有对应的音频节目'
+                }
+              }
+            )
+          )
+
+          return
+        }
+
+
+        window.dispatchEvent(
+          new CustomEvent(
+            'seek-global-audio',
+            {
+              detail:{
+                seconds,
+                src:audioUrl,
+                title:audioTitle,
+                cover:audioCover,
+                href:audioHref
+              }
+            }
+          )
+        )
+
+      }
+
+
+      return button
+
+    }
+
+
+
+    function scan(){
+
+
+      const walker =
+        document.createTreeWalker(
+          root,
+          NodeFilter.SHOW_TEXT
+        )
+
+
+      const nodes=[]
+
+
+      let node
+
+
+      while(
+        node = walker.nextNode()
+      ){
+
+        if(
+          !node.nodeValue ||
+          !node.nodeValue.trim()
+        ){
+          continue
+        }
+
+
+        // 已经处理的不再扫描
+
+        if(
+          node.parentElement?.classList
+          ?.contains(
+            'hexo-timestamp-btn'
+          )
+        ){
+          continue
+        }
+
+
+        nodes.push(node)
+
+      }
+
+
+
+      nodes.forEach(
+        textNode=>{
+
+
+          const text =
+            textNode.nodeValue
+
+
+          /*
+            匹配文本开头时间
+
+            例如：
+
+            01:47 汤姆与莎莫的故事
+
+            变成：
+
+            [01:47按钮] 汤姆与莎莫的故事
+          */
+
+
+          const reg =
+            /(^|\s)(\d{1,2}:\d{2}(?::\d{2})?)(?=\s|$)/g
+
+
+          if(
+            !reg.test(text)
+          ){
+            return
+          }
+
+
+          reg.lastIndex=0
+
+
+
+          const fragment =
+            document.createDocumentFragment()
+
+
+          let lastIndex=0
+
+
+          let match
+
+
+
+          while(
+            match = reg.exec(text)
+          ){
+
+
+            const before =
+              text.slice(
+                lastIndex,
+                match.index + match[1].length
+              )
+
+
+            if(before){
+              fragment.appendChild(
+                document.createTextNode(before)
+              )
+            }
+
+
+            fragment.appendChild(
+              createButton(
+                match[2]
+              )
+            )
+
+
+            lastIndex =
+              reg.lastIndex
+
+          }
+
+
+          const after =
+            text.slice(lastIndex)
+
+
+          if(after){
+            fragment.appendChild(
+              document.createTextNode(after)
+            )
+          }
+
+
+          textNode.parentNode
+          ?.replaceChild(
+            fragment,
+            textNode
+          )
+
+
+        }
+      )
+
+    }
+
+
+
+    // 等 Notion 渲染完成
+
+    const timer =
+      setTimeout(
+        scan,
+        800
+      )
+
+
+    scan()
+
+
+
+    const observer =
+      new MutationObserver(
+        scan
+      )
+
+
+    observer.observe(
+      root,
+      {
+        childList:true,
+        subtree:true
+      }
+    )
+
+
+
+    return()=>{
+
+      clearTimeout(timer)
+
+      observer.disconnect()
+
+    }
+
+
+  },[
+    post?.id
+  ])
+
+
+
+  return null
+
 }
