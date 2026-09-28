@@ -37,6 +37,7 @@ import ArticleSwitchPlaceholder from './components/ArticleSwitchPlaceholder'
 import NotionAudioEnhancer from './components/NotionAudioEnhancer'
 import GlobalAudioPlayer from './components/GlobalAudioPlayer'
 import EpisodesPage from './components/EpisodesPage'
+import TimestampLinker from './components/TimestampLinker'
 import CONFIG from './config'
 import { Style } from './style'
 
@@ -582,6 +583,12 @@ const LayoutSlug = props => {
 
                 {post && (
                   <NotionPage
+                    post={post}
+                  />
+                )}
+
+                {post && (
+                  <TimestampLinker
                     post={post}
                   />
                 )}
