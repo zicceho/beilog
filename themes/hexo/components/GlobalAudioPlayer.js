@@ -138,13 +138,68 @@ export default function GlobalAudioPlayer() {
       setMinimized(false)
     }
 
+    /* ===== 新增：时间戳跳转 ===== */
+    const onSeek = (e) => {
+      const { seconds, src, cover, title, href } = e.detail || {}
+      if (!src) return
+      if (!Number.isFinite(seconds) || seconds < 0) return
+      const audio = audioRef.current
+      if (!audio) return
+
+      const isSame = audioData?.src === src
+
+      if (isSame) {
+        // 情况 A：正在播这篇文章的音频，直接跳
+        const doSeek = () => {
+          audio.currentTime = seconds
+          setCurrentTime(seconds)
+          if (audio.paused) audio.play().catch(() => {})
+        }
+        if (audio.readyState >= 1) doSeek()
+        else {
+          const once = () => {
+            audio.removeEventListener('loadedmetadata', once)
+            doSeek()
+          }
+          audio.addEventListener('loadedmetadata', once)
+        }
+      } else {
+        // 情况 B：正在播另一期或什么都没播 → 换源 + 跳转
+        audio.pause()
+        audio.src = src
+        audio.load()
+        setAudioData({ src, cover, title, href })
+        setCurrentTime(0)
+        setDuration(0)
+
+        const once = () => {
+          audio.removeEventListener('loadedmetadata', once)
+          audio.currentTime = seconds
+          setCurrentTime(seconds)
+          audio.play().catch(() => {})
+        }
+        audio.addEventListener('loadedmetadata', once)
+      }
+
+      setNoAudioMessage('')
+      setVisible(true)
+      setMinimized(false)
+    }
+    /* ===== 新增结束 ===== */
+
     window.addEventListener('toggle-global-audio', onToggle)
     window.addEventListener('toggle-player-visibility', onToggleVisibility)
     window.addEventListener('show-no-audio-hint', onShowNoAudio)
+    /* ===== 新增 ===== */
+    window.addEventListener('seek-global-audio', onSeek)
+    /* ===== 新增结束 ===== */
     return () => {
       window.removeEventListener('toggle-global-audio', onToggle)
       window.removeEventListener('toggle-player-visibility', onToggleVisibility)
       window.removeEventListener('show-no-audio-hint', onShowNoAudio)
+      /* ===== 新增 ===== */
+      window.removeEventListener('seek-global-audio', onSeek)
+      /* ===== 新增结束 ===== */
     }
   }, [audioData])
 
