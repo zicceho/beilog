@@ -1,9 +1,33 @@
 // themes/hexo/components/TimestampLinker.js
 
 import { useEffect } from 'react'
-import { getAudioUrl } from './AudioPlayer'
 
-// 把 01:47 或 1:02:33 解析成秒数；不符合就返回 null
+// 自己解析音频 URL，不依赖 AudioPlayer.js
+function parseExt(ext) {
+  if (!ext) return null
+  if (typeof ext === 'object') return ext
+  if (typeof ext !== 'string') return null
+  const value = ext.trim()
+  if (!value) return null
+  try {
+    return JSON.parse(value)
+  } catch {
+    return value.startsWith('http://') || value.startsWith('https://') ? { audio: value } : null
+  }
+}
+
+function getAudioUrl(post) {
+  const ext = parseExt(post?.ext)
+  return (
+    post?.audioUrl ||
+    post?.audio ||
+    ext?.audioUrl ||
+    ext?.audio ||
+    null
+  )
+}
+
+// 把 01:47 或 1:02:33 解析成秒数
 function parseTimestamp(text) {
   const match = text.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/)
   if (!match) return null
@@ -59,7 +83,6 @@ export default function TimestampLinker({ post }) {
 
         btn.addEventListener('click', () => {
           if (!hasAudio) {
-            // 让全局播放器在自己的标题位置显示提示
             window.dispatchEvent(new CustomEvent('show-no-audio-hint', {
               detail: { message: '这篇文章没有对应的音频节目' }
             }))
