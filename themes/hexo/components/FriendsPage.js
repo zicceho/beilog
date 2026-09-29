@@ -15,10 +15,10 @@ const FriendsPage = ({ friends = [] }) => {
   friends.forEach(f => {
     const role = f.role || '其他'
     if (!groupMap[role]) {
-      groupMap[role] = []
-      groups.push({ role, members: [] })
+      groupMap[role] = { role, members: [] }
+      groups.push(groupMap[role])
     }
-    groupMap[role].push(f)
+    groupMap[role].members.push(f)
   })
 
   return (
