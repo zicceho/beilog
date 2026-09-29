@@ -14,6 +14,26 @@ const Friends = props => {
 export async function getStaticProps({ locale }) {
   const props = await fetchGlobalAllData({ from: 'friends', locale })
 
+  // 找 Notion 里对应的 friends Page（兼容多种 slug / title）
+  const friendPage =
+    props.allPages?.find(
+      p =>
+        p.type === 'Page' &&
+        (p.slug === 'friends' ||
+          p.slug === '/friends' ||
+          p.href === '/friends')
+    ) ||
+    props.allPages?.find(
+      p =>
+        p.type === 'Page' &&
+        (String(p.title || '').includes('朋友') ||
+          String(p.title || '').toLowerCase().includes('friend'))
+    )
+
+  if (friendPage) {
+    props.post = friendPage
+  }
+
   let friends = []
   const token = process.env.NOTION_API_TOKEN
 
@@ -30,12 +50,18 @@ export async function getStaticProps({ locale }) {
 
         const name = p['昵称']?.title?.[0]?.plain_text || ''
 
+        // 头像字段：兼容 files / url / rich_text 三种类型
         let avatar = ''
-        const filesArr = p['头像']?.files || []
-        if (filesArr.length > 0) {
-          const f = filesArr[0]
-          avatar =
-            f.type === 'external' ? f.external?.url : f.file?.url
+        const avatarField = p['头像']
+        if (avatarField) {
+          if (avatarField.type === 'files' && avatarField.files?.length > 0) {
+            const f = avatarField.files[0]
+            avatar = f.type === 'external' ? f.external?.url : f.file?.url
+          } else if (avatarField.type === 'url') {
+            avatar = avatarField.url || ''
+          } else if (avatarField.type === 'rich_text') {
+            avatar = avatarField.rich_text?.[0]?.plain_text || ''
+          }
         }
 
         const role = p['身份']?.select?.name || ''
@@ -43,6 +69,9 @@ export async function getStaticProps({ locale }) {
         const status = p['状态']?.select?.name || ''
 
         let weibo = p['微博']?.url || ''
+        if (!weibo && p['微博']?.rich_text?.[0]?.plain_text) {
+          weibo = p['微博'].rich_text[0].plain_text
+        }
         if (weibo && !weibo.startsWith('http')) {
           weibo = 'https://' + weibo
         }
@@ -61,10 +90,7 @@ export async function getStaticProps({ locale }) {
         }
       })
 
-      // 过滤掉隐藏的和没有昵称的
       friends = friends.filter(f => f.status !== '隐藏' && f.name)
-
-      // 按排序字段升序
       friends.sort((a, b) => a.order - b.order)
     } catch (e) {
       console.error('[friends] 获取友链数据失败:', e)
