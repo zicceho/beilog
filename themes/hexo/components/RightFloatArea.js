@@ -13,9 +13,45 @@ const PauseIcon = ({ size = 14 }) => (
     <rect x='14' y='5' width='4' height='14' rx='1' />
   </svg>
 )
-const LoadingIcon = ({ size = 14 }) => (
-  <i className='fa-solid fa-circle-notch fa-spin' style={{ fontSize: size }} />
-)
+
+/**
+ * iOS 风格菊花加载图标：8 个点围成一圈，依次亮起
+ * 不依赖任何外部动画类，完全自写，保证会转
+ */
+const LoadingIcon = ({ size = 14 }) => {
+  const dots = 8
+  const radius = 9
+  const dotR = 1.6
+  return (
+    <svg viewBox='0 0 24 24' width={size} height={size} fill='currentColor'>
+      {Array.from({ length: dots }).map((_, i) => {
+        const angle = (i * 45) * Math.PI / 180
+        const cx = 12 + radius * Math.sin(angle)
+        const cy = 12 - radius * Math.cos(angle)
+        return (
+          <circle
+            key={i}
+            cx={cx}
+            cy={cy}
+            r={dotR}
+            style={{
+              animation: 'ios-dot-fade 1s linear infinite',
+              animationDelay: `${(i * 1) / dots}s`,
+              opacity: 0.15
+            }}
+          />
+        )
+      })}
+      <style jsx>{`
+        @keyframes ios-dot-fade {
+          0% { opacity: 0.15; }
+          50% { opacity: 1; }
+          100% { opacity: 0.15; }
+        }
+      `}</style>
+    </svg>
+  )
+}
 
 export default function RightFloatArea({ floatSlot }) {
   const [showFloatButton, switchShow] = useState(false)
