@@ -10,7 +10,7 @@ const TagItemMini = ({ tag, selected = false }) => {
         mr-2 py-0.5 px-1 text-xs whitespace-nowrap 
          ${selected
         ? 'text-white dark:text-gray-300 bg-black dark:bg-black dark:hover:bg-indigo-900'
-        : `text-black hover:!text-white dark:!text-white dark:hover:!text-white hover:shadow-xl dark:border-gray-400 notion-${tag.color}_background `}` }>
+        : `text-black hover:!text-white hover:shadow-xl dark:border-gray-400 notion-${tag.color}_background `}` }>
 
       <div className='font-light'>{selected && <i className='mr-1 fa-tag'/>} {tag.name + (tag.count ? `(${tag.count})` : '')} </div>
 
