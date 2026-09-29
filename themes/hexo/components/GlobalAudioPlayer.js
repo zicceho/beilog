@@ -11,6 +11,7 @@ const formatTime = (s) => {
 
 const SPEEDS = [1, 1.25, 1.5, 2, 0.75]
 const TITLE_MAX_LENGTH = 18
+const LOADING_MIN_MS = 500
 
 const PlayIcon = ({ size = 18 }) => (
   <svg viewBox='0 0 24 24' width={size} height={size} fill='currentColor' style={{ marginLeft: '2px' }}>
@@ -33,6 +34,8 @@ export default function GlobalAudioPlayer() {
   const titleRef = useRef(null)
   const scrollAccumulator = useRef(0)
   const lastScrollY = useRef(0)
+  const loadingStartRef = useRef(0)
+  const loadingTimerRef = useRef(null)
 
   const [audioData, setAudioData] = useState(null)
   const [playing, setPlaying] = useState(false)
@@ -53,6 +56,43 @@ export default function GlobalAudioPlayer() {
   const bannerDefault = siteConfig('HOME_BANNER_IMAGE') || ''
   const coverSrc = audioData?.cover || bannerDefault
 
+  // 开始加载：立即转圈
+  const startLoading = () => {
+    loadingStartRef.current = Date.now()
+    if (loadingTimerRef.current) {
+      clearTimeout(loadingTimerRef.current)
+      loadingTimerRef.current = null
+    }
+    setLoading(true)
+  }
+
+  // 停止加载：至少显示 LOADING_MIN_MS，避免一闪而过
+  const stopLoading = () => {
+    if (loadingTimerRef.current) {
+      clearTimeout(loadingTimerRef.current)
+      loadingTimerRef.current = null
+    }
+    const elapsed = Date.now() - loadingStartRef.current
+    if (elapsed < LOADING_MIN_MS) {
+      loadingTimerRef.current = setTimeout(() => {
+        setLoading(false)
+        loadingTimerRef.current = null
+      }, LOADING_MIN_MS - elapsed)
+    } else {
+      setLoading(false)
+    }
+  }
+
+  // 组件卸载时清理定时器
+  useEffect(() => {
+    return () => {
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current)
+        loadingTimerRef.current = null
+      }
+    }
+  }, [])
+
   useEffect(() => {
     if (audioData?.title) {
       setTitleOverflow(audioData.title.length > TITLE_MAX_LENGTH)
@@ -71,7 +111,10 @@ export default function GlobalAudioPlayer() {
     const onMeta = () => setDuration(audio.duration || 0)
     const onPlay = () => {
       setPlaying(true)
-      setLoading(false)
+    }
+    const onPlaying = () => {
+      setPlaying(true)
+      stopLoading()
     }
     const onPause = () => {
       setPlaying(false)
@@ -82,26 +125,34 @@ export default function GlobalAudioPlayer() {
       setLoading(false)
       setCurrentTime(audio.duration || 0)
     }
-    const onWaiting = () => setLoading(true)
-    const onCanPlay = () => setLoading(false)
+    const onWaiting = () => {
+      // 音频需要缓冲时，确保 loading 状态
+      if (playing) startLoading()
+    }
+    const onError = () => {
+      setPlaying(false)
+      setLoading(false)
+    }
 
     audio.addEventListener('timeupdate', onTime)
     audio.addEventListener('loadedmetadata', onMeta)
     audio.addEventListener('playing', onPlay)
+    audio.addEventListener('playing', onPlaying)
     audio.addEventListener('pause', onPause)
     audio.addEventListener('ended', onEnd)
     audio.addEventListener('waiting', onWaiting)
-    audio.addEventListener('canplay', onCanPlay)
+    audio.addEventListener('error', onError)
     return () => {
       audio.removeEventListener('timeupdate', onTime)
       audio.removeEventListener('loadedmetadata', onMeta)
       audio.removeEventListener('playing', onPlay)
+      audio.removeEventListener('playing', onPlaying)
       audio.removeEventListener('pause', onPause)
       audio.removeEventListener('ended', onEnd)
       audio.removeEventListener('waiting', onWaiting)
-      audio.removeEventListener('canplay', onCanPlay)
+      audio.removeEventListener('error', onError)
     }
-  }, [volume, muted])
+  }, [volume, muted, playing])
 
   useEffect(() => {
     window.dispatchEvent(
@@ -128,9 +179,17 @@ export default function GlobalAudioPlayer() {
 
       const isSame = audioData?.src === src
       if (isSame) {
-        if (audio.paused) audio.play().catch(() => {})
-        else audio.pause()
+        if (audio.paused) {
+          // 恢复播放：立即转圈
+          startLoading()
+          audio.play().catch(() => {})
+        } else {
+          // 暂停：不转圈
+          audio.pause()
+        }
       } else {
+        // 切换新音频：立即转圈
+        startLoading()
         audio.src = src
         audio.currentTime = 0
         audio.play().catch(() => {})
@@ -156,7 +215,6 @@ export default function GlobalAudioPlayer() {
       setMinimized(false)
     }
 
-    /* ===== 新增：时间戳跳转 ===== */
     const onSeek = (e) => {
       const { seconds, src, cover, title, href } = e.detail || {}
       if (!src) return
@@ -167,7 +225,6 @@ export default function GlobalAudioPlayer() {
       const isSame = audioData?.src === src
 
       if (isSame) {
-        // 情况 A：正在播这篇文章的音频，直接跳
         const doSeek = () => {
           audio.currentTime = seconds
           setCurrentTime(seconds)
@@ -182,7 +239,6 @@ export default function GlobalAudioPlayer() {
           audio.addEventListener('loadedmetadata', once)
         }
       } else {
-        // 情况 B：正在播另一期或什么都没播 → 换源 + 跳转
         audio.pause()
         audio.src = src
         audio.load()
@@ -203,21 +259,16 @@ export default function GlobalAudioPlayer() {
       setVisible(true)
       setMinimized(false)
     }
-    /* ===== 新增结束 ===== */
 
     window.addEventListener('toggle-global-audio', onToggle)
     window.addEventListener('toggle-player-visibility', onToggleVisibility)
     window.addEventListener('show-no-audio-hint', onShowNoAudio)
-    /* ===== 新增 ===== */
     window.addEventListener('seek-global-audio', onSeek)
-    /* ===== 新增结束 ===== */
     return () => {
       window.removeEventListener('toggle-global-audio', onToggle)
       window.removeEventListener('toggle-player-visibility', onToggleVisibility)
       window.removeEventListener('show-no-audio-hint', onShowNoAudio)
-      /* ===== 新增 ===== */
       window.removeEventListener('seek-global-audio', onSeek)
-      /* ===== 新增结束 ===== */
     }
   }, [audioData])
 
@@ -246,8 +297,12 @@ export default function GlobalAudioPlayer() {
   const togglePlay = () => {
     const audio = audioRef.current
     if (!audio || !audio.src) return
-    if (audio.paused) audio.play().catch(() => {})
-    else audio.pause()
+    if (audio.paused) {
+      startLoading()
+      audio.play().catch(() => {})
+    } else {
+      audio.pause()
+    }
   }
 
   const skip = (s) => {
