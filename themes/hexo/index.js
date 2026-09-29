@@ -53,16 +53,13 @@ export const useHexoGlobal = () => useContext(ThemeGlobalHexo)
 
 const LayoutBase = props => {
   const { post, children, slotTop, className } = props
-  const { onLoading, fullWidth } = useGlobal()
+  const { onLoading, fullWidth: globalFullWidth } = useGlobal()
+  const fullWidth = globalFullWidth || props.fullWidth
   const router = useRouter()
 
   const isArticleSlugPage =
     router.pathname === '/[prefix]/[slug]'
 
-  /*
-   * 节目总页 /episodes
-   * 以及分页页 /episodes/page/2
-   */
   const isEpisodesPage =
     router.route === '/episodes' ||
     router.route === '/episodes/page/[page]'
@@ -78,16 +75,6 @@ const LayoutBase = props => {
     isArticleSlugPage &&
     onLoading
 
-  /*
-   * 从 Notion 自定义菜单中寻找 /episodes
-   * 对应的菜单项，用于读取节目页 Hero 标题。
-   *
-   * 例如 Notion 菜单名称为：
-   * “节目”
-   *
-   * Hero 就显示：
-   * “节目”
-   */
   const findEpisodesMenuItem = menus => {
     if (!Array.isArray(menus)) {
       return null
@@ -132,13 +119,6 @@ const LayoutBase = props => {
         )
       : null
 
-  /*
-   * /episodes 没有真实的 Notion Post，
-   * 这里只创建一个供 PageHero 使用的
-   * 虚拟 Page 对象。
-   *
-   * 不会改变节目页本身的数据结构。
-   */
   const episodesHeroPost =
     isEpisodesPage
       ? {
@@ -154,21 +134,6 @@ const LayoutBase = props => {
         }
       : null
 
-  /*
-   * Hero 分三种情况：
-   *
-   * 1. 单期节目 Post
-   *    → 原来的 PostHero
-   *    → 完全保持现状
-   *
-   * 2. 普通 Page
-   *    → 新的半高 PageHero
-   *
-   * 3. /episodes
-   *    → 新的半高 PageHero
-   *
-   * 首页 Hero 继续使用原来的 Hero。
-   */
   const headerSlot =
     post?.type === 'Post' ? (
       <PostHero {...props} />
@@ -225,18 +190,6 @@ const LayoutBase = props => {
 
   const searchModal = useRef(null)
 
-  /*
-   * 有 Hero 的页面：
-   *
-   * - 单期节目 Post
-   * - 普通 Page
-   * - /episodes
-   *
-   * Hero 本身已经承担顶部空间，
-   * 因此正文区域不再额外增加 pt-24。
-   *
-   * 首页的原有 pt-8 保持不动。
-   */
   const hasPageHero =
     !!post || isEpisodesPage
 
