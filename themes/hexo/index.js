@@ -37,6 +37,7 @@ import ArticleSwitchPlaceholder from './components/ArticleSwitchPlaceholder'
 import NotionAudioEnhancer from './components/NotionAudioEnhancer'
 import GlobalAudioPlayer from './components/GlobalAudioPlayer'
 import EpisodesPage from './components/EpisodesPage'
+import FriendsPage from './components/FriendsPage'
 import TimestampLinker from './components/TimestampLinker'
 import CONFIG from './config'
 import { Style } from './style'
@@ -497,6 +498,10 @@ const LayoutEpisodes = props => {
   return <EpisodesPage {...props} />
 }
 
+const LayoutFriends = props => {
+  return <FriendsPage {...props} />
+}
+
 const LayoutSlug = props => {
   const {
     post,
@@ -769,5 +774,6 @@ export {
   LayoutSlug,
   LayoutTagIndex,
   LayoutEpisodes,
+  LayoutFriends,
   CONFIG as THEME_CONFIG
 }
