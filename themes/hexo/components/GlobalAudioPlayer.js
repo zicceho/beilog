@@ -24,9 +24,45 @@ const PauseIcon = ({ size = 18 }) => (
     <rect x='14' y='5' width='4' height='14' rx='1' />
   </svg>
 )
-const LoadingIcon = ({ size = 18 }) => (
-  <i className='fa-solid fa-circle-notch fa-spin' style={{ fontSize: size }} />
-)
+
+/**
+ * iOS 风格菊花加载图标：8 个点围成一圈，依次亮起
+ * 不依赖任何外部动画类，完全自写，保证会转
+ */
+const LoadingIcon = ({ size = 18 }) => {
+  const dots = 8
+  const radius = 9
+  const dotR = 1.6
+  return (
+    <svg viewBox='0 0 24 24' width={size} height={size} fill='currentColor'>
+      {Array.from({ length: dots }).map((_, i) => {
+        const angle = (i * 45) * Math.PI / 180
+        const cx = 12 + radius * Math.sin(angle)
+        const cy = 12 - radius * Math.cos(angle)
+        return (
+          <circle
+            key={i}
+            cx={cx}
+            cy={cy}
+            r={dotR}
+            style={{
+              animation: 'ios-dot-fade 1s linear infinite',
+              animationDelay: `${(i * 1) / dots}s`,
+              opacity: 0.15
+            }}
+          />
+        )
+      })}
+      <style jsx>{`
+        @keyframes ios-dot-fade {
+          0% { opacity: 0.15; }
+          50% { opacity: 1; }
+          100% { opacity: 0.15; }
+        }
+      `}</style>
+    </svg>
+  )
+}
 
 export default function GlobalAudioPlayer() {
   const audioRef = useRef(null)
@@ -56,7 +92,6 @@ export default function GlobalAudioPlayer() {
   const bannerDefault = siteConfig('HOME_BANNER_IMAGE') || ''
   const coverSrc = audioData?.cover || bannerDefault
 
-  // 开始加载：立即转圈
   const startLoading = () => {
     loadingStartRef.current = Date.now()
     if (loadingTimerRef.current) {
@@ -66,7 +101,6 @@ export default function GlobalAudioPlayer() {
     setLoading(true)
   }
 
-  // 停止加载：至少显示 LOADING_MIN_MS，避免一闪而过
   const stopLoading = () => {
     if (loadingTimerRef.current) {
       clearTimeout(loadingTimerRef.current)
@@ -83,7 +117,6 @@ export default function GlobalAudioPlayer() {
     }
   }
 
-  // 组件卸载时清理定时器
   useEffect(() => {
     return () => {
       if (loadingTimerRef.current) {
@@ -126,7 +159,6 @@ export default function GlobalAudioPlayer() {
       setCurrentTime(audio.duration || 0)
     }
     const onWaiting = () => {
-      // 音频需要缓冲时，确保 loading 状态
       if (playing) startLoading()
     }
     const onError = () => {
@@ -180,15 +212,12 @@ export default function GlobalAudioPlayer() {
       const isSame = audioData?.src === src
       if (isSame) {
         if (audio.paused) {
-          // 恢复播放：立即转圈
           startLoading()
           audio.play().catch(() => {})
         } else {
-          // 暂停：不转圈
           audio.pause()
         }
       } else {
-        // 切换新音频：立即转圈
         startLoading()
         audio.src = src
         audio.currentTime = 0
