@@ -14,7 +14,8 @@ const Friends = props => {
 export async function getStaticProps({ locale }) {
   const props = await fetchGlobalAllData({ from: 'friends', locale })
 
-  // 找 Notion 里对应的 friends Page（兼容多种 slug / title）
+  props.fullWidth = true
+
   const friendPage =
     props.allPages?.find(
       p =>
@@ -50,7 +51,6 @@ export async function getStaticProps({ locale }) {
 
         const name = p['昵称']?.title?.[0]?.plain_text || ''
 
-        // 头像字段：兼容 files / url / rich_text 三种类型
         let avatar = ''
         const avatarField = p['头像']
         if (avatarField) {
