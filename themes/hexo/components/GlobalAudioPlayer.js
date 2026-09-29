@@ -23,6 +23,9 @@ const PauseIcon = ({ size = 18 }) => (
     <rect x='14' y='5' width='4' height='14' rx='1' />
   </svg>
 )
+const LoadingIcon = ({ size = 18 }) => (
+  <i className='fa-solid fa-circle-notch fa-spin' style={{ fontSize: size }} />
+)
 
 export default function GlobalAudioPlayer() {
   const audioRef = useRef(null)
@@ -45,6 +48,7 @@ export default function GlobalAudioPlayer() {
   const [titleOverflow, setTitleOverflow] = useState(false)
   const [locked, setLocked] = useState(false)
   const [showMore, setShowMore] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const bannerDefault = siteConfig('HOME_BANNER_IMAGE') || ''
   const coverSrc = audioData?.cover || bannerDefault
@@ -65,24 +69,37 @@ export default function GlobalAudioPlayer() {
 
     const onTime = () => setCurrentTime(audio.currentTime)
     const onMeta = () => setDuration(audio.duration || 0)
-    const onPlay = () => setPlaying(true)
-    const onPause = () => setPlaying(false)
+    const onPlay = () => {
+      setPlaying(true)
+      setLoading(false)
+    }
+    const onPause = () => {
+      setPlaying(false)
+      setLoading(false)
+    }
     const onEnd = () => {
       setPlaying(false)
+      setLoading(false)
       setCurrentTime(audio.duration || 0)
     }
+    const onWaiting = () => setLoading(true)
+    const onCanPlay = () => setLoading(false)
 
     audio.addEventListener('timeupdate', onTime)
     audio.addEventListener('loadedmetadata', onMeta)
     audio.addEventListener('playing', onPlay)
     audio.addEventListener('pause', onPause)
     audio.addEventListener('ended', onEnd)
+    audio.addEventListener('waiting', onWaiting)
+    audio.addEventListener('canplay', onCanPlay)
     return () => {
       audio.removeEventListener('timeupdate', onTime)
       audio.removeEventListener('loadedmetadata', onMeta)
       audio.removeEventListener('playing', onPlay)
       audio.removeEventListener('pause', onPause)
       audio.removeEventListener('ended', onEnd)
+      audio.removeEventListener('waiting', onWaiting)
+      audio.removeEventListener('canplay', onCanPlay)
     }
   }, [volume, muted])
 
@@ -95,11 +112,12 @@ export default function GlobalAudioPlayer() {
           currentTime,
           duration,
           hasAudio: !!audioData?.src,
-          locked
+          locked,
+          loading
         }
       })
     )
-  }, [playing, audioData?.src, currentTime, duration, locked])
+  }, [playing, audioData?.src, currentTime, duration, locked, loading])
 
   useEffect(() => {
     const onToggle = (e) => {
@@ -287,7 +305,13 @@ export default function GlobalAudioPlayer() {
               <button
                 onClick={togglePlay}
                 className='absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-colors text-white'>
-                {playing ? <PauseIcon size={20} /> : <PlayIcon size={20} />}
+                {loading ? (
+                  <LoadingIcon size={20} />
+                ) : playing ? (
+                  <PauseIcon size={20} />
+                ) : (
+                  <PlayIcon size={20} />
+                )}
               </button>
             )}
           </div>
