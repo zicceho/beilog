@@ -133,15 +133,6 @@ export default function PostHero({ post, siteInfo }) {
     }
   }
 
-  const handleWaiting = () => setIsLoading(true)
-
-  const handleCanPlay = () => setIsLoading(false)
-
-  const handlePlaying = () => {
-    setIsLoading(false)
-    setIsPlaying(true)
-  }
-
   const handlePlayClick = (e) => {
     e.preventDefault()
     e.stopPropagation()
@@ -273,9 +264,6 @@ export default function PostHero({ post, siteInfo }) {
                       src={audioUrl}
                       preload='metadata'
                       onLoadedMetadata={handleMetadata}
-                      onWaiting={handleWaiting}
-                      onCanPlay={handleCanPlay}
-                      onPlaying={handlePlaying}
                       style={{ display: 'none' }}
                     />
 
