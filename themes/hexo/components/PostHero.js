@@ -28,6 +28,10 @@ const PauseIcon = ({ size = 12 }) => (
   </svg>
 )
 
+const LoadingIcon = ({ size = 14 }) => (
+  <i className='fa-solid fa-circle-notch fa-spin' style={{ fontSize: size }} />
+)
+
 const parseExt = (ext) => {
   if (!ext) return null
   const raw = typeof ext === 'string' ? ext.trim() : ''
@@ -93,11 +97,12 @@ export default function PostHero({ post, siteInfo }) {
 
   useEffect(() => {
     const onState = (e) => {
-      const { src, playing, currentTime, duration } = e.detail
+      const { src, playing, currentTime, duration, loading } = e.detail
 
       if (audioUrl && src === audioUrl) {
         setIsCurrentSrc(true)
         setIsPlaying(playing)
+        setIsLoading(!!loading)
 
         const dur = duration || localDuration
 
@@ -108,6 +113,7 @@ export default function PostHero({ post, siteInfo }) {
       } else {
         setIsCurrentSrc(false)
         setIsPlaying(false)
+        setIsLoading(false)
       }
     }
 
@@ -284,7 +290,9 @@ export default function PostHero({ post, siteInfo }) {
                               : 'rgba(255,255,255,0.15)',
                           backdropFilter: 'blur(10px)'
                         }}>
-                        {isCurrentSrc && isPlaying ? (
+                        {isCurrentSrc && isLoading ? (
+                          <LoadingIcon size={14} />
+                        ) : isCurrentSrc && isPlaying ? (
                           <PauseIcon size={14} />
                         ) : (
                           <PlayIcon size={14} />
@@ -292,9 +300,7 @@ export default function PostHero({ post, siteInfo }) {
                       </button>
 
                       <div
-                        className={`flex-1 h-1 rounded-full overflow-hidden relative bg-white/15 ${
-                          isLoading ? 'loading-stripe' : ''
-                        }`}
+                        className='flex-1 h-1 rounded-full overflow-hidden relative bg-white/15'
                         style={{
                           backdropFilter: 'blur(10px)'
                         }}>
@@ -327,29 +333,6 @@ export default function PostHero({ post, siteInfo }) {
 
         .hero-meta-link:hover {
           color: var(--theme-primary);
-        }
-
-        @keyframes stripe-move {
-          0% {
-            background-position: 0 0;
-          }
-
-          100% {
-            background-position: 32px 0;
-          }
-        }
-
-        .loading-stripe {
-          background: repeating-linear-gradient(
-            -45deg,
-            rgba(255, 255, 255, 0.25) 0px,
-            rgba(255, 255, 255, 0.25) 8px,
-            rgba(255, 255, 255, 0.05) 8px,
-            rgba(255, 255, 255, 0.05) 16px
-          );
-
-          background-size: 32px 100%;
-          animation: stripe-move 0.8s linear infinite;
         }
       `}</style>
     </div>
