@@ -5,7 +5,6 @@ import FriendCard from './FriendCard'
 const ROLE_ORDER = ['守夜人', '夜谈人', '酿酒人', '调酒人']
 
 const FriendsPage = ({ post, friends = [] }) => {
-  // 按身份分组
   const groups = []
   const groupMap = {}
   ;(friends || []).forEach(f => {
@@ -17,7 +16,6 @@ const FriendsPage = ({ post, friends = [] }) => {
     groupMap[role].members.push(f)
   })
 
-  // 按固定顺序排序
   groups.sort((a, b) => {
     const ia = ROLE_ORDER.indexOf(a.role)
     const ib = ROLE_ORDER.indexOf(b.role)
@@ -27,7 +25,7 @@ const FriendsPage = ({ post, friends = [] }) => {
   return (
     <div className='w-full lg:hover:shadow lg:border rounded-t-xl lg:rounded-xl lg:px-2 lg:py-4 bg-white dark:bg-hexo-black-gray dark:border-black article'>
       <div className='w-full md:px-5 px-2'>
-        {/* Notion 正文 */}
+        {/* Notion 正文：页面里写的所有文字、图片、引用都会照常显示 */}
         {post && (
           <div className='friends-notion-content'>
             <NotionPage post={post} />
@@ -38,14 +36,14 @@ const FriendsPage = ({ post, friends = [] }) => {
         {groups.length > 0 && (
           <div className='mt-8'>
             {groups.map(group => (
-              <section key={group.role} className='mb-12 last:mb-0'>
-                <div className='mb-6'>
+              <section key={group.role} className='mb-10 last:mb-0'>
+                <div className='mb-5'>
                   <h2 className='text-xl font-bold text-gray-800 dark:text-gray-100'>
                     {group.role}
                   </h2>
                 </div>
 
-                <div className='grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6'>
+                <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4'>
                   {group.members.map(member => (
                     <FriendCard key={member.id} member={member} />
                   ))}
@@ -55,14 +53,14 @@ const FriendsPage = ({ post, friends = [] }) => {
           </div>
         )}
 
-        {/* 评论 */}
+        {/* 评论区 */}
         {post && (
           <div className='mt-10 duration-200 overflow-x-auto px-3'>
             <Comment frontMatter={post} />
           </div>
         )}
 
-        {/* 隐藏 Notion 原生数据库表格 */}
+        {/* 只隐藏 Notion 原生数据库表格，其他内容一律不隐藏 */}
         <style jsx global>{`
           .friends-notion-content .notion-collection,
           .friends-notion-content .notion-collection-view,
