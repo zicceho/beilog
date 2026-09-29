@@ -13,12 +13,16 @@ const PauseIcon = ({ size = 14 }) => (
     <rect x='14' y='5' width='4' height='14' rx='1' />
   </svg>
 )
+const LoadingIcon = ({ size = 14 }) => (
+  <i className='fa-solid fa-circle-notch fa-spin' style={{ fontSize: size }} />
+)
 
 export default function RightFloatArea({ floatSlot }) {
   const [showFloatButton, switchShow] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [hasAudio, setHasAudio] = useState(false)
   const [locked, setLocked] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const scrollListener = useCallback(() => {
     const targetRef = document.getElementById('wrapper') || document.documentElement
@@ -45,6 +49,7 @@ export default function RightFloatArea({ floatSlot }) {
       setIsPlaying(e.detail.playing)
       setHasAudio(!!e.detail.hasAudio)
       setLocked(!!e.detail.locked)
+      setLoading(!!e.detail.loading)
     }
     window.addEventListener('global-audio-state', onState)
     return () => window.removeEventListener('global-audio-state', onState)
@@ -66,7 +71,13 @@ export default function RightFloatArea({ floatSlot }) {
             onClick={handleClick}
             className='flex justify-center items-center w-7 h-7 hover:bg-black/20 transition-colors'
             title='展开/收起播放器'>
-            {isPlaying ? <PauseIcon size={14} /> : <PlayIcon size={14} />}
+            {loading ? (
+              <LoadingIcon size={14} />
+            ) : isPlaying ? (
+              <PauseIcon size={14} />
+            ) : (
+              <PlayIcon size={14} />
+            )}
           </div>
         )}
         <ButtonDarkModeFloat />
