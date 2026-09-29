@@ -1,6 +1,8 @@
 import NotionPage from '@/components/NotionPage'
+import Comment from '@/components/Comment'
 import FriendCard from './FriendCard'
-import Card from './Card'
+
+const ROLE_ORDER = ['守夜人', '夜谈人', '酿酒人', '调酒人']
 
 const FriendsPage = ({ post, friends = [] }) => {
   // 按身份分组
@@ -15,9 +17,16 @@ const FriendsPage = ({ post, friends = [] }) => {
     groupMap[role].members.push(f)
   })
 
+  // 按固定顺序排序
+  groups.sort((a, b) => {
+    const ia = ROLE_ORDER.indexOf(a.role)
+    const ib = ROLE_ORDER.indexOf(b.role)
+    return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib)
+  })
+
   return (
-    <Card className='w-full'>
-      <div className='w-full md:p-8 p-4'>
+    <div className='w-full lg:hover:shadow lg:border rounded-t-xl lg:rounded-xl lg:px-2 lg:py-4 bg-white dark:bg-hexo-black-gray dark:border-black article'>
+      <div className='w-full md:px-5 px-2'>
         {/* Notion 正文 */}
         {post && (
           <div className='friends-notion-content'>
@@ -34,16 +43,22 @@ const FriendsPage = ({ post, friends = [] }) => {
                   <h2 className='text-xl font-bold text-gray-800 dark:text-gray-100'>
                     {group.role}
                   </h2>
-                  <div className='mt-3 border-b border-dotted border-gray-300 dark:border-gray-600' />
                 </div>
 
-                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                <div className='grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6'>
                   {group.members.map(member => (
                     <FriendCard key={member.id} member={member} />
                   ))}
                 </div>
               </section>
             ))}
+          </div>
+        )}
+
+        {/* 评论 */}
+        {post && (
+          <div className='mt-10 duration-200 overflow-x-auto px-3'>
+            <Comment frontMatter={post} />
           </div>
         )}
 
@@ -63,7 +78,7 @@ const FriendsPage = ({ post, friends = [] }) => {
           }
         `}</style>
       </div>
-    </Card>
+    </div>
   )
 }
 
