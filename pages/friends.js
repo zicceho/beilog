@@ -3,6 +3,11 @@ import { siteConfig } from '@/lib/config'
 import { fetchGlobalAllData } from '@/lib/db/SiteDataApi'
 import { DynamicLayout } from '@/themes/theme'
 import { Client } from '@notionhq/client'
+import {
+  fetchNotionPageBlocks,
+  formatNotionBlock
+} from '@/lib/db/notion/getPostBlocks'
+import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
 
 const FRIENDS_DB_ID = '3e91137a265a80d19b7bca7ee29ae8a1'
 
@@ -32,6 +37,25 @@ export async function getStaticProps({ locale }) {
     )
 
   if (friendPage) {
+    // 主动拉取 blockMap，让 NotionPage 能渲染正文内容
+    if (!friendPage.blockMap) {
+      try {
+        const rawBlockMap = await fetchNotionPageBlocks(
+          friendPage.id,
+          'friends',
+          { cacheVersion: friendPage.lastEditedDate }
+        )
+        if (rawBlockMap) {
+          const adapted = adapterNotionBlockMap(rawBlockMap)
+          friendPage.blockMap = {
+            ...adapted,
+            block: formatNotionBlock(adapted.block)
+          }
+        }
+      } catch (e) {
+        console.warn('[friends] fetch blockMap failed:', e)
+      }
+    }
     props.post = friendPage
   }
 
