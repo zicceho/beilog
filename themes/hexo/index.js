@@ -55,6 +55,7 @@ const LayoutBase = props => {
   const { post, children, slotTop, className } = props
   const { onLoading, fullWidth: globalFullWidth } = useGlobal()
   const fullWidth = globalFullWidth || props.fullWidth
+  const hideSidebar = !!props.hideSidebar
   const router = useRouter()
 
   const isArticleSlugPage =
@@ -269,7 +270,7 @@ const LayoutBase = props => {
               )}
             </div>
 
-            <SideRight {...props} />
+            {!hideSidebar && <SideRight {...props} />}
           </div>
         </main>
 
