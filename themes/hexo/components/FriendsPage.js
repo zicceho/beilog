@@ -36,11 +36,12 @@ const FriendsPage = ({ post, friends = [] }) => {
         {groups.length > 0 && (
           <div className='mt-8'>
             {groups.map(group => (
-              <section key={group.role} className='mb-10 last:mb-0'>
-                <div className='mb-5'>
+              <section key={group.role} className='mb-16 last:mb-0'>
+                <div className='mb-6 text-center'>
                   <h2 className='text-2xl font-bold text-gray-800 dark:text-gray-100'>
                     {group.role}
                   </h2>
+                  <div className='mt-2 border-b border-dotted border-gray-200 dark:border-gray-700' />
                 </div>
 
                 <div className='grid grid-cols-3 lg:grid-cols-6 gap-2'>
@@ -60,7 +61,7 @@ const FriendsPage = ({ post, friends = [] }) => {
           </div>
         )}
 
-        {/* 只隐藏 Notion 原生数据库表格 */}
+        {/* 隐藏 Notion 原生数据库表格（包括它的外层容器） */}
         <style jsx global>{`
           .friends-notion-content .notion-collection,
           .friends-notion-content .notion-collection-view,
@@ -72,6 +73,14 @@ const FriendsPage = ({ post, friends = [] }) => {
           .friends-notion-content [class*='notion-table'],
           .friends-notion-content [class*='notion-board'],
           .friends-notion-content [class*='notion-gallery'] {
+            display: none !important;
+          }
+
+          /* 把"包含数据库表格的外层容器"也一起隐藏，消除空隙 */
+          .friends-notion-content .notion-page-content > *:has([class*='notion-collection']),
+          .friends-notion-content .notion-page-content > *:has(.notion-table),
+          .friends-notion-content .notion-page-content > *:has(.notion-board),
+          .friends-notion-content .notion-page-content > *:has(.notion-gallery) {
             display: none !important;
           }
         `}</style>
