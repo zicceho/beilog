@@ -36,12 +36,11 @@ const FriendsPage = ({ post, friends = [] }) => {
         {groups.length > 0 && (
           <div className='mt-8'>
             {groups.map(group => (
-              <section key={group.role} className='mb-16 last:mb-0'>
-                <div className='mb-6 text-center'>
+              <section key={group.role} className='mb-10 last:mb-0'>
+                <div className='mb-5'>
                   <h2 className='text-2xl font-bold text-gray-800 dark:text-gray-100'>
                     {group.role}
                   </h2>
-                  <div className='mt-2 border-b border-dotted border-gray-200 dark:border-gray-700' />
                 </div>
 
                 <div className='grid grid-cols-3 lg:grid-cols-6 gap-2'>
