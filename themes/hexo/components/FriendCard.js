@@ -11,8 +11,8 @@ const FriendCard = ({ member }) => {
   const showImage = avatarSrc && !imgFailed
 
   return (
-    <div className='group flex flex-col items-center p-2 rounded-xl bg-[var(--hexo-color-card)] transition-all duration-200 hover:shadow-md'>
-      {/* 头像 + 状态点（点击头像跳转标签页） */}
+    <div className='flex flex-col items-center p-2 rounded-xl bg-[var(--hexo-color-card)] transition-all duration-200 hover:shadow-md'>
+      {/* 头像 + 状态点 */}
       <SmartLink
         href={`/tag/${encodeURIComponent(member.name)}`}
         className='relative mb-2 cursor-pointer block'>
@@ -53,13 +53,13 @@ const FriendCard = ({ member }) => {
         </div>
       )}
 
-      {/* 关注按钮：默认隐藏，悬停卡片时显示 */}
+      {/* 关注按钮：默认显示 */}
       {member.weibo && (
         <a
           href={member.weibo}
           target='_blank'
           rel='noopener noreferrer'
-          className='mt-1 px-3 py-0.5 text-sm rounded-full border border-[var(--theme-color)] text-[var(--theme-color)] hover:bg-[var(--theme-color)] hover:text-white transition-all duration-200 opacity-0 group-hover:opacity-100'>
+          className='mt-1 px-3 py-0.5 text-sm rounded-full border border-[var(--theme-color)] text-[var(--theme-color)] hover:bg-[var(--theme-color)] hover:text-white transition-colors'>
           +关注
         </a>
       )}
