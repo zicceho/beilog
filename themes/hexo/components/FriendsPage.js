@@ -34,13 +34,17 @@ const FriendsPage = ({ post, friends = [] }) => {
 
         {/* 卡片分组 */}
         {groups.length > 0 && (
-          <div className='mt-8'>
+          <div className='mt-4'>
             {groups.map(group => (
-              <section key={group.role} className='mb-10 last:mb-0'>
-                <div className='mb-5'>
-                  <h2 className='text-2xl font-bold text-gray-800 dark:text-gray-100'>
+              <section key={group.role} className='mb-16 last:mb-0'>
+                <div className='mb-6 text-center'>
+                  <h2 className='text-2xl font-bold text-gray-800 dark:text-gray-100 text-center'>
                     {group.role}
                   </h2>
+                  <div
+                    className='mt-3 border-b border-dotted'
+                    style={{ borderColor: 'var(--hexo-color-border)' }}
+                  />
                 </div>
 
                 <div className='grid grid-cols-3 lg:grid-cols-6 gap-2'>
@@ -60,11 +64,13 @@ const FriendsPage = ({ post, friends = [] }) => {
           </div>
         )}
 
-        {/* 隐藏 Notion 原生数据库表格（包括它的外层容器） */}
+        {/* 隐藏 Notion 数据库块 + 清除它所有占位 */}
         <style jsx global>{`
+          /* 1. 直接隐藏数据库块本身 */
           .friends-notion-content .notion-collection,
           .friends-notion-content .notion-collection-view,
           .friends-notion-content .notion-collection-view-tabs-content,
+          .friends-notion-content .notion-collection_view-block,
           .friends-notion-content .notion-table,
           .friends-notion-content .notion-board,
           .friends-notion-content .notion-gallery,
@@ -75,12 +81,29 @@ const FriendsPage = ({ post, friends = [] }) => {
             display: none !important;
           }
 
-          /* 把"包含数据库表格的外层容器"也一起隐藏，消除空隙 */
+          /* 2. 隐藏"包含数据库块的外层容器"，并清除它的所有占位 */
           .friends-notion-content .notion-page-content > *:has([class*='notion-collection']),
-          .friends-notion-content .notion-page-content > *:has(.notion-table),
-          .friends-notion-content .notion-page-content > *:has(.notion-board),
-          .friends-notion-content .notion-page-content > *:has(.notion-gallery) {
+          .friends-notion-content .notion-page-content > *:has([class*='notion-table']),
+          .friends-notion-content .notion-page-content > *:has([class*='notion-board']),
+          .friends-notion-content .notion-page-content > *:has([class*='notion-gallery']) {
             display: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+          }
+
+          /* 3. Notion 正文最后一块的下边距清掉，防止留尾 */
+          .friends-notion-content .notion-page-content > *:last-child {
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+          }
+
+          /* 4. NotionPage 外层容器本身的下边距清掉 */
+          .friends-notion-content > div,
+          .friends-notion-content .notion-page {
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
           }
         `}</style>
       </div>
