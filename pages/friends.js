@@ -20,6 +20,7 @@ export async function getStaticProps({ locale }) {
   const props = await fetchGlobalAllData({ from: 'friends', locale })
 
   props.fullWidth = true
+  props.hideSidebar = true
 
   const friendPage =
     props.allPages?.find(
@@ -37,7 +38,6 @@ export async function getStaticProps({ locale }) {
     )
 
   if (friendPage) {
-    // 主动拉取 blockMap，让 NotionPage 能渲染正文内容
     if (!friendPage.blockMap) {
       try {
         const rawBlockMap = await fetchNotionPageBlocks(
