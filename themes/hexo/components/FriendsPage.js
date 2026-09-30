@@ -25,7 +25,7 @@ const FriendsPage = ({ post, friends = [] }) => {
   return (
     <div className='w-full lg:hover:shadow lg:border rounded-t-xl lg:rounded-xl lg:px-2 lg:py-4 bg-white dark:bg-hexo-black-gray dark:border-black article'>
       <div className='w-full md:px-5 px-2'>
-        {/* Notion 正文：页面里写的所有文字、图片、引用都会照常显示 */}
+        {/* Notion 正文 */}
         {post && (
           <div className='friends-notion-content'>
             <NotionPage post={post} />
@@ -38,12 +38,12 @@ const FriendsPage = ({ post, friends = [] }) => {
             {groups.map(group => (
               <section key={group.role} className='mb-10 last:mb-0'>
                 <div className='mb-5'>
-                  <h2 className='text-xl font-bold text-gray-800 dark:text-gray-100'>
+                  <h2 className='text-2xl font-bold text-gray-800 dark:text-gray-100'>
                     {group.role}
                   </h2>
                 </div>
 
-                <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4'>
+                <div className='grid grid-cols-3 lg:grid-cols-6 gap-2'>
                   {group.members.map(member => (
                     <FriendCard key={member.id} member={member} />
                   ))}
@@ -60,7 +60,7 @@ const FriendsPage = ({ post, friends = [] }) => {
           </div>
         )}
 
-        {/* 只隐藏 Notion 原生数据库表格，其他内容一律不隐藏 */}
+        {/* 只隐藏 Notion 原生数据库表格 */}
         <style jsx global>{`
           .friends-notion-content .notion-collection,
           .friends-notion-content .notion-collection-view,
